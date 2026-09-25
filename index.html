@@ -503,8 +503,8 @@ details.bacaan-tinjau .teks{padding:4px 14px 12px;font-size:14.5px}
    ================================================================== */
 const CONFIG = {
   API: 'https://script.google.com/macros/s/AKfycbynEA4Vp0QjStA7zrABCG7eMiKrF_LngCK5D4CPbW52kGE0dCXTQmSMCDElcXCQLaElfg/exec',
-  intervalSimpan: 20000,      // autosave jawaban (ms)
-  intervalLog: 20000,         // kirim log pelanggaran (ms)
+  intervalSimpan: 30000,      // simpan otomatis bila ada perubahan (ms, diberi acak ±7 detik)
+  jedaKirimMaks: 12000,       // saat waktu habis, kiriman diacak 0–12 detik agar tidak serentak
   peringatanDetik: [300, 60]  // peringatan sisa waktu
 };
 
@@ -518,24 +518,47 @@ const namaSingkat = id => SINGKAT[id] || (SINGKAT[Object.keys(SINGKAT).filter(k 
 const singkat = p => namaSingkat(p.subtes_id);
 const urutkan = (a, b) => (a.urutan || 999) - (b.urutan || 999);
 
-async function api(action, payload) {
-  let r;
-  try {
-    r = await fetch(CONFIG.API, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(Object.assign({ action }, payload || {})),
-      redirect: 'follow'
-    });
-  } catch (e) {
-    throw new Error('Koneksi ke server terputus. Periksa jaringan lalu coba lagi.');
+/**
+ * Permintaan ke server dengan batas waktu dan percobaan ulang otomatis.
+ * Galat sementara (jaringan, server ramai, halaman galat Google) dicoba lagi dengan jeda bertambah.
+ * Galat biasa (mis. kode akses salah) langsung ditampilkan.
+ */
+async function api(action, payload, opsi) {
+  opsi = opsi || {};
+  const berat = ['submit', 'start', 'akhiriTO', 'exportReport', 'exportReportTO', 'rekapTO', 'login'].indexOf(action) >= 0;
+  const maks = opsi.coba !== undefined ? opsi.coba : (action === 'submit' || action === 'akhiriTO' ? 8 : 5);
+  const batas = opsi.batasMs || (berat ? 60000 : 30000);
+  let galat = null;
+  for (let i = 0; i < maks; i++) {
+    if (i > 0) {
+      if (!opsi.diam) kabar('Server sedang ramai. Mencoba lagi otomatis…');
+      await tidur(Math.min(15000, 1500 * Math.pow(2, i - 1)) + Math.random() * 1500);
+    }
+    const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const hBatas = setTimeout(() => ctrl && ctrl.abort(), batas);
+    const hPelan = setTimeout(() => { if (!opsi.diam) kabar('Sedang diproses, mohon tunggu…'); }, 9000);
+    try {
+      const r = await fetch(CONFIG.API, {
+        method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(Object.assign({ action }, payload || {})), redirect: 'follow',
+        signal: ctrl ? ctrl.signal : undefined
+      });
+      const mentah = await r.text();
+      let data;
+      try { data = JSON.parse(mentah); }
+      catch (e) { galat = new Error('Server sedang penuh.'); continue; }      // halaman galat Google → coba lagi
+      if (data.ok) return data;
+      galat = new Error(data.error || 'Permintaan gagal.');
+      galat.kode = data.kode || '';
+      if (galat.kode !== 'SIBUK') { galat.akhir = true; throw galat; }
+    } catch (e) {
+      if (e.akhir) throw e;
+      if (!galat || galat !== e) galat = e.name === 'AbortError' ? new Error('Server terlalu lama merespons.') : (e.kode ? e : new Error('Koneksi ke server terputus.'));
+    } finally { clearTimeout(hBatas); clearTimeout(hPelan); }
   }
-  const mentah = await r.text();
-  let data;
-  try { data = JSON.parse(mentah); }
-  catch (e) { throw new Error('Balasan server tidak dikenali. Hubungi panitia.'); }
-  if (!data.ok) { const g = new Error(data.error || 'Permintaan gagal.'); g.kode = data.kode || ''; throw g; }
-  return data;
+  const akhir = new Error((galat && galat.message ? galat.message + ' ' : '') + 'Periksa jaringan lalu coba lagi.');
+  akhir.kode = galat && galat.kode;
+  throw akhir;
 }
 
 const LAYAR = ['layarMasuk', 'layarProfil', 'layarDasbor', 'layarUjian', 'layarJeda', 'layarHasil', 'layarRekap'];
@@ -638,7 +661,7 @@ let siswa = null, daftarPaket = [], riwayat = [], berjalan = [];
 let aturan = { wajibBerurutan: true, pembahasanSetelah: 'SEMUA', jedaDetik: 10 };
 let sesi = null, paketAktif = null, toAktif = null, soal = [], passages = {}, jawaban = {}, ragu = {}, idx = 0;
 let deadline = 0, timer = null, peringatanTerpakai = {}, pengawas = null, jedaDetik = 10;
-let jedaSimpan = null, simpanBerkala = null, sedangSimpan = false, sedangKirim = false;
+let jedaSimpan = null, simpanBerkala = null, sedangSimpan = false, sedangKirim = false, berubah = false, terakhirSimpan = 0, waktuHabisLokal = false;
 let bacaanTerlipat = false, hitungJeda = null, hasilAktif = null;
 
 function terimaLogin(d) {
@@ -862,6 +885,12 @@ function siapkanUjian(d) {
   clearInterval(hitungJeda);
   sesi = d.sesiId; paketAktif = d.paket; toAktif = d.to;
   soal = d.soal || []; passages = d.passages || {}; jawaban = d.jawaban || {}; ragu = d.ragu || {};
+  berubah = false; terakhirSimpan = Date.now(); waktuHabisLokal = false;
+  $('panelSoal').style.pointerEvents = '';
+  try {   // cadangan di perangkat ini selalu paling baru untuk sesi yang sama
+    const lokal = JSON.parse(localStorage.getItem('to_jw_' + d.sesiId) || 'null');
+    if (lokal && lokal.jawaban) { jawaban = lokal.jawaban; ragu = lokal.ragu || {}; berubah = true; }
+  } catch (e) { }
   idx = 0; jedaDetik = d.jedaDetik || aturan.jedaDetik || 10;
   deadline = Date.now() + d.sisaDetik * 1000; peringatanTerpakai = {}; sedangKirim = false;
   sessionStorage.setItem('to_ujian', JSON.stringify({ paketId: paketAktif.paket_id, subtesId: paketAktif.subtes_id }));
@@ -891,8 +920,16 @@ function siapkanUjian(d) {
 function mulaiPengawasan() {
   jalankanTimer();
   pasangPengawas();
-  clearInterval(simpanBerkala);
-  simpanBerkala = setInterval(simpanJawaban, CONFIG.intervalSimpan);
+  jadwalSimpan();
+}
+
+function jadwalSimpan() {
+  clearTimeout(simpanBerkala);
+  simpanBerkala = setTimeout(async function () {
+    // kirim bila ada perubahan/log, atau tiap 2 menit untuk menyamakan jam dengan server
+    if (berubah || bufferLog.length || Date.now() - terakhirSimpan > 120000) await simpanJawaban();
+    if (sesi && !sedangKirim) jadwalSimpan();
+  }, CONFIG.intervalSimpan - 7000 + Math.random() * 14000);
 }
 
 function jalankanTimer() {
@@ -907,7 +944,13 @@ function jalankanTimer() {
         kabar('Sisa waktu ' + (p >= 60 ? Math.round(p / 60) + ' menit' : p + ' detik') + ' untuk ' + paketAktif.subtes_nama + '.');
       }
     });
-    if (sisa <= 0) { clearInterval(timer); kirimUjian(true); }
+    if (sisa <= 0 && !waktuHabisLokal) {
+      clearInterval(timer); waktuHabisLokal = true;
+      $('panelSoal').style.pointerEvents = 'none';
+      $('statusSimpan').textContent = 'Waktu habis. Mengirim jawaban…';
+      kabar('Waktu habis. Jawaban sedang dikirim…');
+      setTimeout(() => kirimUjian(true), Math.random() * CONFIG.jedaKirimMaks);
+    }
   };
   detak();
   timer = setInterval(detak, 1000);
@@ -1006,20 +1049,26 @@ $('kotakSoal').addEventListener('input', e => {
   const v = e.target.value.replace(/[^0-9.,\-\/]/g, '').slice(0, 20);
   if (v !== e.target.value) e.target.value = v;
   if (v.trim()) jawaban[s.no] = v.trim(); else delete jawaban[s.no];
-  gambarKisi(); tundaSimpan();
+  gambarKisi(); simpanLokal(); tundaSimpan();
 });
 
-function setelahJawab(gambarUlang) { if (gambarUlang) gambarSoal(); gambarKisi(); tundaSimpan(); }
+function simpanLokal() {
+  berubah = true;
+  try { localStorage.setItem('to_jw_' + sesi, JSON.stringify({ jawaban, ragu, t: Date.now() })); } catch (e) { }
+}
+function setelahJawab(gambarUlang) { if (gambarUlang) gambarSoal(); gambarKisi(); simpanLokal(); tundaSimpan(); }
 
-function tundaSimpan() { clearTimeout(jedaSimpan); jedaSimpan = setTimeout(simpanJawaban, 2500); }
+function tundaSimpan() { clearTimeout(jedaSimpan); jedaSimpan = setTimeout(simpanJawaban, 6000 + Math.random() * 4000); }
 
 async function simpanJawaban() {
-  if (!sesi || sedangKirim || sedangSimpan) return;
+  if (!sesi || sedangKirim || sedangSimpan || waktuHabisLokal) return;
   sedangSimpan = true;
-  const sesiIni = sesi;
+  const sesiIni = sesi, log = bufferLog.splice(0, bufferLog.length), adaUbah = berubah;
+  berubah = false;
   $('statusSimpan').textContent = 'Menyimpan…';
   try {
-    const d = await api('autosave', { sesiId: sesiIni, jawaban, ragu });
+    const d = await api('autosave', { sesiId: sesiIni, jawaban, ragu, log }, { coba: 2, diam: true, batasMs: 25000 });
+    terakhirSimpan = Date.now();
     if (sesiIni !== sesi) return;
     if (d.sudahSelesai || d.waktuHabis) { kirimUjian(true); return; }
     if (typeof d.sisaDetik === 'number') {
@@ -1029,7 +1078,9 @@ async function simpanJawaban() {
     const w = new Date();
     $('statusSimpan').textContent = 'Tersimpan pukul ' + String(w.getHours()).padStart(2, '0') + '.' + String(w.getMinutes()).padStart(2, '0') + '.';
   } catch (e) {
-    $('statusSimpan').textContent = 'Menunggu koneksi… lanjutkan saja mengerjakan.';
+    if (adaUbah) berubah = true;
+    bufferLog = log.concat(bufferLog);
+    $('statusSimpan').textContent = 'Jawaban tersimpan di perangkat; dikirim ulang otomatis.';
   } finally { sedangSimpan = false; }
 }
 
@@ -1070,32 +1121,28 @@ $('btnSelesai').onclick = async () => {
 };
 
 function hentikanUjian() {
-  clearInterval(timer); clearInterval(simpanBerkala); clearTimeout(jedaSimpan);
+  clearInterval(timer); clearTimeout(simpanBerkala); clearTimeout(jedaSimpan);
 }
 
 async function kirimUjian(otomatis) {
   if (sedangKirim || !sesi) return;
   sedangKirim = true;
   hentikanUjian();
-  await kirimLog(true);
-  lepasPengawas();
+  const sesiIni = sesi;
+  for (let t = 0; sedangSimpan && t < 40; t++) await tidur(250);   // tunggu simpan yang sedang berjalan
+  const log = bufferLog.splice(0, bufferLog.length);
   $('btnSelesai').disabled = true; $('btnSelesai').textContent = 'Mengirim…';
-  for (let coba = 1; coba <= 3; coba++) {
-    try {
-      const d = await api('submit', { sesiId: sesi, jawaban });
-      sessionStorage.removeItem('to_ujian');
-      setelahKirim(d, otomatis);
-      return;
-    } catch (e) {
-      if (coba === 3) {
-        sedangKirim = false;
-        $('btnSelesai').disabled = false; $('btnSelesai').textContent = 'Kirim ulang jawaban';
-        info('Pengiriman belum berhasil', e.message + '\n\nJawaban terakhir yang tersimpan tetap aman di server. Tekan "Kirim ulang jawaban" setelah jaringan pulih.');
-        return;
-      }
-      $('btnSelesai').textContent = 'Mencoba lagi…';
-      await tidur(2500 * coba);
-    }
+  try {
+    const d = await api('submit', { sesiId: sesiIni, jawaban, log });
+    lepasPengawas();
+    sessionStorage.removeItem('to_ujian');
+    try { localStorage.removeItem('to_jw_' + sesiIni); } catch (e) { }
+    setelahKirim(d, otomatis);
+  } catch (e) {
+    bufferLog = log.concat(bufferLog);
+    sedangKirim = false;
+    $('btnSelesai').disabled = false; $('btnSelesai').textContent = 'Kirim ulang jawaban';
+    info('Pengiriman belum berhasil', e.message + '\n\nJawaban Anda tetap tersimpan di perangkat ini dan di server. Tekan "Kirim ulang jawaban" setelah jaringan pulih.');
   }
 }
 
@@ -1124,9 +1171,15 @@ function tampilkanJeda(b, otomatis) {
   let n = Math.max(3, Number(jedaDetik) || 10);
   $('jHitung').textContent = n;
   clearInterval(hitungJeda);
-  const mulai = () => { clearInterval(hitungJeda); mulaiUjian(b.paket_id, b.subtes_id, $('btnMulaiBerikut'), { tanpaKonfirmasi: true }); };
-  hitungJeda = setInterval(() => { n--; $('jHitung').textContent = Math.max(0, n); if (n <= 0) mulai(); }, 1000);
-  $('btnMulaiBerikut').onclick = mulai;
+  let sudah = false;
+  const mulai = otomatisJeda => {
+    if (sudah) return; sudah = true;
+    clearInterval(hitungJeda);
+    setTimeout(() => mulaiUjian(b.paket_id, b.subtes_id, $('btnMulaiBerikut'), { tanpaKonfirmasi: true })
+      .finally(() => { sudah = false; }), otomatisJeda ? Math.random() * 2500 : 0);
+  };
+  hitungJeda = setInterval(() => { n--; $('jHitung').textContent = Math.max(0, n); if (n <= 0) mulai(true); }, 1000);
+  $('btnMulaiBerikut').onclick = () => mulai(false);
 }
 $('btnTunda').onclick = async () => {
   clearInterval(hitungJeda);
@@ -1145,10 +1198,11 @@ $('btnAkhiri').onclick = async () => {
   if (!ok) return;
   sedangKirim = true;
   hentikanUjian();
-  await kirimLog(true);
-  lepasPengawas();
+  const log = bufferLog.splice(0, bufferLog.length);
   try {
-    const d = await api('akhiriTO', Object.assign({ paketId: paketAktif.paket_id, sesiId: sesi, jawaban }, kred));
+    const d = await api('akhiriTO', Object.assign({ paketId: paketAktif.paket_id, sesiId: sesi, jawaban, log }, kred));
+    lepasPengawas();
+    try { localStorage.removeItem('to_jw_' + sesi); } catch (e) { }
     sesi = null;
     sessionStorage.removeItem('to_ujian');
     try { await segarkanLogin(); } catch (e) { }
@@ -1161,20 +1215,11 @@ $('btnAkhiri').onclick = async () => {
 };
 
 /* ============ PENGAWASAN SENYAP (tanpa mengganggu siswa) ========= */
-let bufferLog = [], kirimBerkala = null;
+let bufferLog = [];
 
 function catat(jenis, detail) {
-  if (!sesi) return;
+  if (!sesi || bufferLog.length > 300) return;
   bufferLog.push({ waktu: new Date().toISOString(), jenis, detail: detail || '' });
-  if (bufferLog.length >= 25) kirimLog();
-}
-
-async function kirimLog(paksa) {
-  if (!sesi || (!bufferLog.length && !paksa)) return;
-  const kirim = bufferLog.splice(0, bufferLog.length);
-  if (!kirim.length) return;
-  try { await api('logViolation', { sesiId: sesi, items: kirim }); }
-  catch (e) { bufferLog = kirim.concat(bufferLog); }
 }
 
 function pasangPengawas() {
@@ -1208,8 +1253,6 @@ function pasangPengawas() {
   document.addEventListener('contextmenu', pengawas.klikKanan);
   document.addEventListener('keydown', pengawas.tombol);
   window.addEventListener('beforeunload', pengawas.tutup);
-  clearInterval(kirimBerkala);
-  kirimBerkala = setInterval(kirimLog, CONFIG.intervalLog);
 }
 
 function lepasPengawas() {
@@ -1222,7 +1265,6 @@ function lepasPengawas() {
   document.removeEventListener('contextmenu', pengawas.klikKanan);
   document.removeEventListener('keydown', pengawas.tombol);
   window.removeEventListener('beforeunload', pengawas.tutup);
-  clearInterval(kirimBerkala);
   pengawas = null;
 }
 
