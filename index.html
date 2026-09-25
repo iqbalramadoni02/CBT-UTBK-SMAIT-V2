@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Try Out UTBK-SNBT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tinta:#14202E; --tinta-2:#43556B; --tinta-3:#6F8196;
+  --kertas:#FFFFFF; --kertas-2:#F4F6F9; --garis:#DCE3EC;
+  --biru:#0F4C81; --biru-muda:#E7EEF7;
+  --kosong:#E4E9F0; --terjawab:#1D5FA8; --ragu:#D99A15; --benar:#1B7A55; --salah:#B4302B;
+  --r:10px; --maks:1180px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Plus Jakarta Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  color:var(--tinta); background:var(--kertas-2); font-size:15px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;font-size:inherit;cursor:pointer}
+input,select{font-family:inherit;font-size:inherit}
+.sembunyi{display:none !important}
+
+/* ---------- komponen dasar ---------- */
+.tombol{
+  border:1px solid var(--biru); background:var(--biru); color:#fff;
+  padding:11px 20px; border-radius:var(--r); font-weight:600; transition:background .15s;
+}
+.tombol:hover{background:#0c3e69}
+.tombol:disabled{opacity:.5;cursor:not-allowed}
+.tombol.sekunder{background:#fff;color:var(--biru)}
+.tombol.sekunder:hover{background:var(--biru-muda)}
+.tombol.netral{background:#fff;color:var(--tinta-2);border-color:var(--garis)}
+.tombol.netral:hover{background:var(--kertas-2)}
+.tombol.bahaya{background:#fff;color:var(--salah);border-color:#E7BEBB}
+.tombol.bahaya:hover{background:#FDF3F2}
+.tombol.kecil{padding:6px 12px;font-size:13px}
+.kartu{background:#fff;border:1px solid var(--garis);border-radius:var(--r)}
+:focus-visible{outline:3px solid #8FB7DE;outline-offset:2px}
+
+/* ---------- masuk & profil ---------- */
+.masuk{min-height:100dvh;display:grid;place-items:center;padding:24px}
+.masuk-kotak{width:100%;max-width:430px;background:#fff;border:1px solid var(--garis);border-radius:14px;padding:32px}
+.lencana{display:inline-block;background:var(--biru-muda);color:var(--biru);font-size:12.5px;
+  font-weight:600;padding:5px 11px;border-radius:99px;margin-bottom:16px}
+.masuk h1{font-size:25px;line-height:1.2;margin:0 0 6px}
+.masuk p.sub{color:var(--tinta-3);margin:0 0 20px;font-size:14px}
+.tab-masuk{display:flex;gap:6px;background:var(--kertas-2);padding:4px;border-radius:10px;margin-bottom:6px}
+.tab-masuk button{flex:1;border:0;background:transparent;padding:8px 10px;border-radius:8px;font-weight:600;color:var(--tinta-2)}
+.tab-masuk button.aktif{background:#fff;color:var(--biru);box-shadow:0 1px 2px rgba(20,32,46,.12)}
+label{display:block;font-size:13.5px;font-weight:600;margin:14px 0 6px;color:var(--tinta-2)}
+input[type=text],input[type=password],select{
+  width:100%;padding:11px 13px;border:1px solid var(--garis);border-radius:var(--r);background:#fff;color:var(--tinta)
+}
+input:focus,select:focus{border-color:var(--biru);outline:none;box-shadow:0 0 0 3px var(--biru-muda)}
+.pilih-dua{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pilih-dua label.opsi-jurusan{margin:0;display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--garis);
+  border-radius:var(--r);cursor:pointer;font-weight:500;color:var(--tinta)}
+.opsi-jurusan b{display:block;font-size:14.5px}
+.opsi-jurusan span{font-size:12.5px;color:var(--tinta-3)}
+.opsi-jurusan:has(input:checked){border-color:var(--biru);background:var(--biru-muda)}
+.opsi-jurusan input{margin-top:3px;accent-color:var(--biru)}
+.pesan{margin-top:14px;padding:11px 13px;border-radius:var(--r);font-size:13.5px;display:none}
+.pesan.galat{display:block;background:#FDECEA;color:var(--salah);border:1px solid #F3C6C3}
+.pesan.info{display:block;background:var(--biru-muda);color:var(--biru);border:1px solid #C9DBEE}
+
+/* ---------- dasbor ---------- */
+.bar{background:#fff;border-bottom:1px solid var(--garis)}
+.bar-isi{max-width:var(--maks);margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px;justify-content:space-between}
+.identitas b{display:block;font-size:15px}
+.identitas span{font-size:13px;color:var(--tinta-3)}
+.bar .aksi{display:flex;gap:8px;flex-wrap:wrap}
+.wadah{max-width:var(--maks);margin:0 auto;padding:28px 20px 60px}
+.judul-bagian{font-size:18px;margin:0 0 4px}
+.ket{color:var(--tinta-3);font-size:14px;margin:0 0 20px}
+.daftar-paket{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(290px,1fr))}
+.paket{padding:20px;display:flex;flex-direction:column;gap:12px}
+.paket h3{margin:0;font-size:16.5px}
+.paket .meta{font-size:13.5px;color:var(--tinta-3)}
+.paket .kaki{display:flex;gap:10px;align-items:center;margin-top:auto;padding-top:6px}
+.chip{font-size:12px;font-weight:600;padding:4px 9px;border-radius:6px;background:var(--kertas-2);color:var(--tinta-2);white-space:nowrap}
+.chip.selesai{background:#E6F4EE;color:var(--benar)}
+.chip.berjalan{background:#FCF3DF;color:#8A6110}
+
+/* kartu try out penuh */
+.to{padding:0;margin-bottom:26px;overflow:hidden}
+.to-kepala{padding:22px 24px 18px;display:flex;gap:20px;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;border-bottom:1px solid var(--garis)}
+.to-kepala h3{margin:0 0 4px;font-size:20px}
+.to-kepala p{margin:0;color:var(--tinta-3);font-size:14px}
+.to-ringkas{display:flex;gap:22px}
+.to-ringkas div{text-align:right}
+.to-ringkas b{display:block;font-size:22px;line-height:1.1;font-variant-numeric:tabular-nums}
+.to-ringkas span{font-size:12.5px;color:var(--tinta-3)}
+.jalur{list-style:none;margin:0;padding:6px 0}
+.jalur li{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:14px;align-items:center;padding:11px 24px}
+.jalur li+li{border-top:1px solid var(--kertas-2)}
+.jalur .no{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;
+  border:2px solid var(--garis);color:var(--tinta-3);background:#fff}
+.jalur li.selesai .no{background:var(--benar);border-color:var(--benar);color:#fff}
+.jalur li.berjalan .no{border-color:var(--ragu);color:#8A6110}
+.jalur li.berikut .no{border-color:var(--biru);color:var(--biru)}
+.jalur .nm b{display:block;font-size:14.5px;font-weight:600}
+.jalur .nm span{font-size:12.5px;color:var(--tinta-3)}
+.jalur .skor-kecil{font-variant-numeric:tabular-nums;font-weight:700;min-width:44px;text-align:right}
+.to-kaki{padding:16px 24px 20px;background:var(--kertas-2);display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.to-kaki .ket{margin:0;font-size:13.5px}
+.to-kaki .tombol:first-child{margin-right:auto}
+
+/* ---------- ruang ujian ---------- */
+.ujian-bar{position:sticky;top:0;z-index:30;background:var(--tinta);color:#fff}
+.ujian-bar-isi{max-width:1400px;margin:0 auto;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.ujian-bar .subtes{font-weight:600;font-size:14.5px}
+.ujian-bar .kecil{font-size:12.5px;color:#9FB2C6}
+.langkah{display:flex;gap:4px;flex:1;justify-content:center;min-width:0}
+.langkah span{font-size:11.5px;font-weight:600;padding:4px 8px;border-radius:6px;background:rgba(255,255,255,.08);color:#9FB2C6;white-space:nowrap}
+.langkah span.selesai{background:rgba(27,122,85,.35);color:#CFEBDD}
+.langkah span.aktif{background:#fff;color:var(--tinta)}
+.jam{font-variant-numeric:tabular-nums;font-size:22px;font-weight:700;letter-spacing:.5px;
+  background:rgba(255,255,255,.1);padding:5px 14px;border-radius:8px}
+.jam.mendesak{background:#7A2420;animation:denyut 1.1s ease-in-out infinite}
+@keyframes denyut{50%{background:#B4302B}}
+@media (prefers-reduced-motion:reduce){.jam.mendesak{animation:none}}
+
+.ruang{max-width:1400px;margin:0 auto;padding:18px;display:grid;gap:18px;
+  grid-template-columns:minmax(0,1fr) 300px;align-items:start}
+.panel-soal{display:grid;gap:18px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
+.panel-soal.tanpa-bacaan{grid-template-columns:minmax(0,1fr)}
+.bacaan{background:#fff;border:1px solid var(--garis);border-radius:var(--r);padding:20px 24px;
+  max-height:calc(100dvh - 150px);overflow:auto}
+.bacaan-kepala{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.bacaan h4{margin:0 0 2px;font-size:14px;color:var(--biru)}
+.bacaan .sumber{font-size:12.5px;color:var(--tinta-3);margin:0 0 14px}
+.lipat{display:none;border:1px solid var(--garis);background:#fff;border-radius:8px;padding:4px 10px;font-size:12.5px;color:var(--tinta-2)}
+.teks{font-family:'Lora',Georgia,serif;font-size:15.5px;line-height:1.75}
+.teks .para{white-space:pre-wrap;margin:0 0 .6em}
+.tabel-gulir{overflow-x:auto;margin:6px 0 14px}
+table.tabel-data{border-collapse:collapse;font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-size:13.5px;line-height:1.4;min-width:100%}
+table.tabel-data th,table.tabel-data td{border:1px solid var(--garis);padding:7px 10px;text-align:left}
+table.tabel-data td{white-space:nowrap}
+table.tabel-data th{vertical-align:bottom;font-size:12.5px}
+table.tabel-data th{background:var(--kertas-2)}
+table.tabel-data td.angka{text-align:right;font-variant-numeric:tabular-nums}
+.soal{background:#fff;border:1px solid var(--garis);border-radius:var(--r);padding:22px 24px}
+.soal-kepala{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px}
+.nomor{font-weight:700;font-size:15px}
+.pertanyaan{margin:0 0 16px}
+.pertanyaan .para{white-space:pre-wrap;margin:0 0 .5em}
+.opsi{display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border:1px solid var(--garis);
+  border-radius:var(--r);margin:0 0 9px;cursor:pointer;font-weight:400;font-size:15px;color:var(--tinta)}
+.opsi:hover{border-color:#B7C8DA;background:#FAFCFF}
+.opsi.pilih{border-color:var(--terjawab);background:var(--biru-muda)}
+.opsi input{margin-top:3px;accent-color:var(--terjawab);flex:none}
+.opsi .abjad{font-weight:700;flex:none;width:18px}
+.isian-wadah{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.isian{max-width:240px;font-size:18px !important;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.tabel-kategori{width:100%;border-collapse:collapse;margin-top:6px}
+.tabel-kategori th,.tabel-kategori td{border:1px solid var(--garis);padding:10px;text-align:left;vertical-align:middle}
+.tabel-kategori th{background:var(--kertas-2);font-size:13.5px}
+.tabel-kategori select{padding:8px 10px}
+.petunjuk-tipe{font-size:13px;color:var(--tinta-3);margin:0 0 12px}
+.navigasi{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.navigasi .kanan{margin-left:auto;display:flex;gap:10px}
+
+.sisi{background:#fff;border:1px solid var(--garis);border-radius:var(--r);padding:18px;
+  position:sticky;top:76px;max-height:calc(100dvh - 96px);overflow:auto}
+.sisi h4{margin:0 0 12px;font-size:14px}
+.kisi-nomor{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}
+.kisi-nomor button{border:1px solid var(--kosong);background:var(--kosong);color:var(--tinta-2);
+  border-radius:8px;padding:9px 0;font-weight:600;font-size:13.5px}
+.kisi-nomor button.terjawab{background:var(--terjawab);border-color:var(--terjawab);color:#fff}
+.kisi-nomor button.ragu{background:var(--ragu);border-color:var(--ragu);color:#fff}
+.kisi-nomor button.aktif{box-shadow:0 0 0 3px #A9C8E8}
+.legenda{display:grid;gap:7px;margin-top:14px;font-size:12.5px;color:var(--tinta-2)}
+.legenda i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+.sisi .tombol{width:100%;margin-top:16px}
+.sisi .akhiri{margin-top:10px;background:none;border:0;color:var(--salah);font-size:13px;font-weight:600;padding:6px 0;width:100%;text-decoration:underline}
+
+/* ---------- jeda antarsubtes ---------- */
+.jeda{min-height:100dvh;display:grid;place-items:center;padding:24px;background:var(--tinta);color:#fff}
+.jeda-kotak{width:100%;max-width:560px}
+.jeda h2{font-size:26px;line-height:1.25;margin:0 0 8px}
+.jeda p{color:#B8C7D8;margin:0 0 22px}
+.jeda-berikut{background:#fff;color:var(--tinta);border-radius:14px;padding:22px 24px;margin-bottom:18px}
+.jeda-berikut small{display:block;color:var(--tinta-3);font-size:13px;margin-bottom:4px}
+.jeda-berikut b{display:block;font-size:20px;margin-bottom:6px}
+.jeda-berikut .isi{display:flex;gap:18px;color:var(--tinta-2);font-size:14px;flex-wrap:wrap}
+.hitung{font-variant-numeric:tabular-nums;font-weight:700}
+.jeda .tombol{width:100%;padding:14px}
+.jeda .jalur-mini{display:flex;gap:6px;margin-bottom:26px;flex-wrap:wrap}
+.jeda .jalur-mini span{font-size:12px;font-weight:600;padding:4px 9px;border-radius:6px;background:rgba(255,255,255,.1);color:#B8C7D8}
+.jeda .jalur-mini span.selesai{background:rgba(27,122,85,.45);color:#E1F3EA}
+
+/* ---------- modal ---------- */
+.tirai{position:fixed;inset:0;background:rgba(20,32,46,.55);display:grid;place-items:center;padding:20px;z-index:60}
+.modal{background:#fff;border-radius:14px;padding:26px;max-width:440px;width:100%}
+.modal h3{margin:0 0 8px;font-size:18px}
+.modal p{margin:0 0 18px;color:var(--tinta-2);font-size:14.5px;white-space:pre-line}
+.modal .aksi{display:flex;gap:10px;justify-content:flex-end}
+
+/* ---------- hasil ---------- */
+.skor-panel{background:var(--tinta);color:#fff;border-radius:14px;padding:30px;display:grid;
+  grid-template-columns:auto 1fr;gap:34px;align-items:center}
+.skor-angka{font-size:70px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.skor-panel .label{font-size:13px;color:#9FB2C6;margin-bottom:6px}
+.skor-detail{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:18px}
+.skor-detail b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.skor-detail span{font-size:12.5px;color:#9FB2C6}
+.grid-hasil{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));margin-top:20px}
+.blok{padding:22px}
+.blok h3{margin:0 0 14px;font-size:16px}
+.diag{margin-bottom:15px}
+.diag .atas{display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:5px;gap:10px}
+.rel{height:7px;background:var(--kertas-2);border-radius:99px;overflow:hidden}
+.rel i{display:block;height:100%;border-radius:99px}
+.diag small{display:block;color:var(--tinta-3);font-size:12.5px;margin-top:5px}
+.tinjau{padding:20px 22px;margin-bottom:12px}
+.tinjau .kepala{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.tanda{font-size:12px;font-weight:700;padding:3px 9px;border-radius:6px}
+.tanda.benar{background:#E6F4EE;color:var(--benar)}
+.tanda.salah{background:#FDECEA;color:var(--salah)}
+.tanda.sebagian{background:#FCF3DF;color:#8A6110}
+.tanda.kosong{background:var(--kertas-2);color:var(--tinta-3)}
+.tinjau .opsi-hasil{padding:9px 12px;border:1px solid var(--garis);border-radius:8px;margin-bottom:7px;font-size:14px;display:flex;gap:10px}
+.tinjau .opsi-hasil.kunci{border-color:var(--benar);background:#F1F9F5}
+.tinjau .opsi-hasil.pilihan-salah{border-color:var(--salah);background:#FDF3F2}
+.tinjau .opsi-hasil .ket-opsi{display:block;font-size:12.5px;color:var(--tinta-3);margin-top:3px}
+.isian-hasil{display:grid;grid-template-columns:repeat(2,minmax(0,200px));gap:10px}
+.isian-hasil div{border:1px solid var(--garis);border-radius:8px;padding:10px 12px}
+.isian-hasil small{display:block;color:var(--tinta-3);font-size:12px}
+.isian-hasil b{font-size:17px;font-variant-numeric:tabular-nums}
+.pembahasan{background:var(--biru-muda);border-left:3px solid var(--biru);padding:13px 15px;border-radius:0 8px 8px 0;margin-top:12px;font-size:14px;white-space:pre-line}
+.pembahasan b{display:block;font-size:12.5px;color:var(--biru);margin-bottom:4px}
+.alasan{background:#FDF3F2;border-left:3px solid var(--salah);padding:13px 15px;border-radius:0 8px 8px 0;margin-top:10px;font-size:14px}
+.alasan b{display:block;font-size:12.5px;color:var(--salah);margin-bottom:4px}
+.terkunci{background:#fff;border:1px dashed #B7C8DA;border-radius:var(--r);padding:22px;text-align:center;color:var(--tinta-2)}
+.terkunci b{display:block;color:var(--tinta);font-size:16px;margin-bottom:4px}
+.rekap-log{display:grid;gap:8px;font-size:14px}
+.rekap-log div{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--garis)}
+table.pg{width:100%;border-collapse:collapse;font-size:13.5px}
+table.pg th,table.pg td{padding:8px;border-bottom:1px solid var(--garis);text-align:left}
+.unduh{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+
+/* rekap try out */
+.papan{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0;border-radius:14px;overflow:hidden;background:var(--tinta);color:#fff}
+.papan .utama{padding:30px}
+.papan .utama .label{font-size:13px;color:#9FB2C6}
+.papan .utama .skor-angka{margin:8px 0 10px}
+.papan .kelompok{padding:30px;background:rgba(255,255,255,.06);display:grid;gap:18px;align-content:center}
+.papan .kelompok b{display:block;font-size:30px;font-variant-numeric:tabular-nums;line-height:1.1}
+.papan .kelompok span{font-size:12.5px;color:#9FB2C6}
+.baris-subtes{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,2fr) 60px auto;gap:16px;align-items:center;padding:14px 20px}
+.baris-subtes+.baris-subtes{border-top:1px solid var(--kertas-2)}
+.baris-subtes .nm b{display:block;font-size:14.5px}
+.baris-subtes .nm span{font-size:12.5px;color:var(--tinta-3)}
+.baris-subtes .skala{height:10px;background:var(--kertas-2);border-radius:99px;position:relative}
+.baris-subtes .skala i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--biru)}
+.baris-subtes .skala em{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--tinta-3);font-style:normal}
+.baris-subtes .nilai{font-weight:700;font-size:18px;text-align:right;font-variant-numeric:tabular-nums}
+.catatan-kecil{font-size:12.5px;color:var(--tinta-3);margin:10px 0 0}
+
+
+/* kabar singkat (peringatan waktu) */
+.kabar{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--tinta);color:#fff;
+  padding:12px 18px;border-radius:10px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s;z-index:70;box-shadow:0 8px 24px rgba(20,32,46,.25)}
+.kabar.tampil{opacity:1;transform:translate(-50%,0)}
+.kategori-grid td.pilih-sel,.kategori-grid th.pilih-sel{text-align:center;width:92px}
+.kategori-grid input{width:18px;height:18px;accent-color:var(--terjawab);cursor:pointer}
+details.bacaan-tinjau{border:1px solid var(--garis);border-radius:8px;margin:0 0 12px;background:#FBFCFE}
+details.bacaan-tinjau summary{cursor:pointer;padding:9px 12px;font-size:13.5px;font-weight:600;color:var(--biru)}
+details.bacaan-tinjau .teks{padding:4px 14px 12px;font-size:14.5px}
+.saring{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap}
+.saring button{border:1px solid var(--garis);background:#fff;border-radius:99px;padding:6px 13px;font-size:13px;font-weight:600;color:var(--tinta-2)}
+.saring button.aktif{background:var(--tinta);border-color:var(--tinta);color:#fff}
+.tabel-hasil{width:100%;border-collapse:collapse;font-size:14px}
+.tabel-hasil th,.tabel-hasil td{border:1px solid var(--garis);padding:8px 10px;text-align:left;vertical-align:top}
+.tabel-hasil th{background:var(--kertas-2);font-size:13px}
+.tabel-hasil .ok{color:var(--benar);font-weight:700}
+.tabel-hasil .no{color:var(--salah);font-weight:700}
+.pengumuman{margin-top:18px;padding:16px 20px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;border-left:4px solid var(--ragu)}
+.pengumuman p{margin:0;color:var(--tinta-2);font-size:14px}
+
+@media(max-width:1020px){
+  .ruang{grid-template-columns:1fr}
+  .sisi{position:static;max-height:none}
+  .kisi-nomor{grid-template-columns:repeat(10,1fr)}
+  .langkah{display:none}
+}
+@media(max-width:760px){
+  .navigasi .tombol{flex:1}
+  .navigasi .kanan{flex-basis:100%;margin-left:0}
+  .panel-soal{grid-template-columns:1fr}
+  .bacaan{max-height:340px;padding:16px 18px}
+  .lipat{display:inline-block}
+  .bacaan.terlipat{max-height:none}
+  .bacaan.terlipat .isi-bacaan{display:none}
+  .skor-panel{grid-template-columns:1fr;gap:20px;padding:24px}
+  .skor-angka{font-size:56px}
+  .kisi-nomor{grid-template-columns:repeat(6,1fr)}
+  .jalur li{grid-template-columns:30px minmax(0,1fr) auto;padding:11px 16px}
+  .jalur li .aksi-baris{grid-column:2 / -1}
+  .to-kepala,.to-kaki{padding-left:16px;padding-right:16px}
+  .to-ringkas div{text-align:left}
+  .papan{grid-template-columns:1fr}
+  .baris-subtes{grid-template-columns:minmax(0,1fr) 56px;row-gap:8px}
+  .baris-subtes .skala{grid-column:1 / -1;order:3}
+  .baris-subtes .aksi-baris{grid-column:1 / -1;order:4}
+  .bar-isi{flex-wrap:wrap}
+}
+@media print{
+  .bar,.unduh,.sisi,.ujian-bar{display:none}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 1. MASUK ============ -->
+<section id="layarMasuk" class="masuk">
+  <div class="masuk-kotak">
+    <span class="lencana" id="lencanaLembaga">Try Out UTBK-SNBT</span>
+    <h1>Masuk ruang ujian</h1>
+    <p class="sub">Gunakan nomor peserta dan kode akses yang dibagikan panitia.</p>
+
+    <div class="tab-masuk sembunyi" id="tabMasuk" role="tablist">
+      <button class="aktif" data-tab="masuk" role="tab">Sudah punya nomor</button>
+      <button data-tab="daftar" role="tab">Daftar baru</button>
+    </div>
+
+    <div id="formMasuk">
+      <label for="inNisn">Nomor peserta / NISN</label>
+      <input id="inNisn" type="text" autocomplete="off" placeholder="Contoh: 0071234567">
+      <label for="inKode">Kode akses</label>
+      <input id="inKode" type="text" autocomplete="off" placeholder="Contoh: TO2026">
+      <div id="barisPin" class="sembunyi">
+        <label for="inPin">PIN pribadi</label>
+        <input id="inPin" type="password" autocomplete="off" inputmode="numeric" placeholder="PIN dari panitia">
+      </div>
+      <div id="pesanMasuk" class="pesan"></div>
+      <button id="btnMasuk" class="tombol" style="width:100%;margin-top:20px">Masuk</button>
+    </div>
+
+    <div id="formDaftar" class="sembunyi">
+      <label for="dNamaBaru">Nama lengkap</label>
+      <input id="dNamaBaru" type="text" autocomplete="name" maxlength="80" placeholder="Sesuai rapor">
+      <label for="dTingkat">Kelas</label>
+      <select id="dTingkat">
+        <option value="">— pilih kelas —</option>
+        <option>XI</option><option>XII</option><option>Alumni</option><option>General</option>
+      </select>
+      <label>Kelompok jurusan target</label>
+      <div class="pilih-dua">
+        <label class="opsi-jurusan"><input type="radio" name="dJurusan" value="Saintek"><span><b>Saintek</b><span>Sains dan teknologi</span></span></label>
+        <label class="opsi-jurusan"><input type="radio" name="dJurusan" value="Soshum"><span><b>Soshum</b><span>Sosial dan humaniora</span></span></label>
+      </div>
+      <label for="dKode">Kode akses</label>
+      <input id="dKode" type="text" autocomplete="off" placeholder="Contoh: TO2026">
+      <div id="pesanDaftar" class="pesan"></div>
+      <button id="btnDaftar" class="tombol" style="width:100%;margin-top:20px">Daftar dan masuk</button>
+    </div>
+
+    <p class="ket" style="text-align:center;margin:14px 0 0;font-size:13.5px">
+      Baru pertama kali? <a href="panduan.html" style="color:var(--biru)">Baca panduan peserta</a>
+    </p>
+  </div>
+</section>
+
+<!-- ============ 1b. PROFIL ============ -->
+<section id="layarProfil" class="masuk sembunyi">
+  <div class="masuk-kotak">
+    <span class="lencana">Data peserta</span>
+    <h1 id="pNama">—</h1>
+    <p class="sub">Lengkapi kelas dan kelompok jurusan target. Data ini dipakai untuk rekap dan perkiraan peluang program studi.</p>
+    <label for="pTingkat">Kelas</label>
+    <select id="pTingkat">
+      <option value="">— pilih kelas —</option>
+      <option>XI</option><option>XII</option><option>Alumni</option><option>General</option>
+    </select>
+    <label>Kelompok jurusan target</label>
+    <div class="pilih-dua">
+      <label class="opsi-jurusan"><input type="radio" name="pJurusan" value="Saintek"><span><b>Saintek</b><span>Sains dan teknologi</span></span></label>
+      <label class="opsi-jurusan"><input type="radio" name="pJurusan" value="Soshum"><span><b>Soshum</b><span>Sosial dan humaniora</span></span></label>
+    </div>
+    <p class="catatan-kecil">Kedua kelompok mengerjakan tujuh subtes yang sama, seperti UTBK-SNBT resmi.</p>
+    <div id="pesanProfil" class="pesan"></div>
+    <button id="btnProfil" class="tombol" style="width:100%;margin-top:20px">Simpan dan lanjutkan</button>
+  </div>
+</section>
+
+<!-- ============ 2. DASBOR ============ -->
+<section id="layarDasbor" class="sembunyi">
+  <div class="bar"><div class="bar-isi">
+    <div class="identitas"><b id="dNama">—</b><span id="dInfo">—</span></div>
+    <div class="aksi">
+      <button id="btnUbahProfil" class="tombol netral">Ubah kelas/jurusan</button>
+      <button id="btnKeluar" class="tombol netral">Keluar</button>
+    </div>
+  </div></div>
+  <div class="wadah">
+    <div id="daftarTO"></div>
+    <div id="bagianLain">
+      <h2 class="judul-bagian">Latihan per subtes</h2>
+      <p class="ket">Setiap subtes hanya dapat dikerjakan satu kali. Waktu berjalan di server, jadi tetap berjalan meski halaman tertutup.</p>
+      <div id="daftarPaket" class="daftar-paket"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. UJIAN ============ -->
+<section id="layarUjian" class="sembunyi">
+  <div class="ujian-bar"><div class="ujian-bar-isi">
+    <div>
+      <div class="subtes" id="uSubtes">—</div>
+      <div class="kecil" id="uPeserta">—</div>
+    </div>
+    <div class="langkah" id="uLangkah"></div>
+    <div class="jam" id="uJam" aria-live="off">--:--</div>
+  </div></div>
+
+  <div class="ruang">
+    <div>
+      <div class="panel-soal" id="panelSoal">
+        <div class="bacaan" id="kotakBacaan"></div>
+        <div class="soal" id="kotakSoal"></div>
+      </div>
+      <div class="navigasi">
+        <button class="tombol netral" id="btnSebelum">Sebelumnya</button>
+        <button class="tombol netral" id="btnRagu">Tandai ragu-ragu</button>
+        <div class="kanan"><button class="tombol" id="btnLanjut">Selanjutnya</button></div>
+      </div>
+    </div>
+
+    <aside class="sisi">
+      <h4>Nomor soal</h4>
+      <div class="kisi-nomor" id="kisiNomor"></div>
+      <div class="legenda">
+        <span><i style="background:var(--kosong)"></i>Belum dijawab</span>
+        <span><i style="background:var(--terjawab)"></i>Sudah dijawab</span>
+        <span><i style="background:var(--ragu)"></i>Ragu-ragu</span>
+      </div>
+      <button class="tombol" id="btnSelesai">Selesaikan subtes</button>
+      <p class="ket" style="margin:10px 0 0;font-size:12.5px" id="statusSimpan">Jawaban tersimpan otomatis.</p>
+      <button class="akhiri sembunyi" id="btnAkhiri">Akhiri seluruh try out</button>
+    </aside>
+  </div>
+</section>
+
+<!-- ============ 3b. JEDA ANTARSUBTES ============ -->
+<section id="layarJeda" class="jeda sembunyi">
+  <div class="jeda-kotak">
+    <div class="jalur-mini" id="jJalur"></div>
+    <h2 id="jJudul">Subtes selesai</h2>
+    <p id="jKet">Jawaban sudah terkirim. Subtes berikutnya dimulai otomatis.</p>
+    <div class="jeda-berikut">
+      <small>Subtes berikutnya</small>
+      <b id="jNama">—</b>
+      <div class="isi"><span id="jSoal">—</span><span id="jMenit">—</span></div>
+    </div>
+    <button class="tombol" id="btnMulaiBerikut">Mulai sekarang</button>
+    <p style="margin:14px 0 0;font-size:13.5px;text-align:center">Dimulai otomatis dalam <span class="hitung" id="jHitung">10</span> detik.
+      <button id="btnTunda" style="background:none;border:0;color:#CFE0F1;text-decoration:underline;font-size:13.5px;padding:0 0 0 6px">Tunda</button></p>
+  </div>
+</section>
+
+<!-- ============ 4. HASIL SUBTES ============ -->
+<section id="layarHasil" class="sembunyi">
+  <div class="bar"><div class="bar-isi">
+    <div class="identitas"><b id="hNama">—</b><span id="hInfo">—</span></div>
+    <button id="btnKembali" class="tombol netral">Kembali ke beranda</button>
+  </div></div>
+  <div class="wadah" id="isiHasil"></div>
+</section>
+
+<!-- ============ 5. REKAP TRY OUT ============ -->
+<section id="layarRekap" class="sembunyi">
+  <div class="bar"><div class="bar-isi">
+    <div class="identitas"><b id="rNama">—</b><span id="rInfo">—</span></div>
+    <button id="btnKembaliRekap" class="tombol netral">Kembali ke beranda</button>
+  </div></div>
+  <div class="wadah" id="isiRekap"></div>
+</section>
+
+<!-- ============ MODAL ============ -->
+<div id="tirai" class="tirai sembunyi" role="dialog" aria-modal="true" aria-labelledby="mJudul">
+  <div class="modal">
+    <h3 id="mJudul">Judul</h3>
+    <p id="mPesan">Pesan</p>
+    <div class="aksi">
+      <button class="tombol netral" id="mBatal">Batal</button>
+      <button class="tombol" id="mOke">Ya</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ==================================================================
+   KONFIGURASI — ganti dengan URL web app Apps Script Anda (/exec)
+   ================================================================== */
+const CONFIG = {
+  API: 'https://script.google.com/macros/s/AKfycbxM2ooVJpRL4GrGIj51Lk55gIXJIyqpSaik9XjLvG2wFInpCZC68MZzXqoaNTeTwcPo/exec',
+  intervalSimpan: 20000,      // autosave jawaban (ms)
+  intervalLog: 20000,         // kirim log pelanggaran (ms)
+  peringatanDetik: [300, 60]  // peringatan sisa waktu
+};
+
+/* ======================= PEMBANTU UMUM ============================ */
+const $ = id => document.getElementById(id);
+const teks = s => String(s === undefined || s === null ? '' : s)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const tidur = ms => new Promise(r => setTimeout(r, ms));
+const SINGKAT = { PU: 'PU', PPU: 'PPU', PBM: 'PBM', PK: 'PK', LIT_INDO: 'Lit. Indonesia', LIT_ING: 'Lit. Inggris', PM: 'PM' };
+const namaSingkat = id => SINGKAT[id] || (SINGKAT[Object.keys(SINGKAT).filter(k => String(id).indexOf(k + '_') === 0)[0]]) || id;
+const singkat = p => namaSingkat(p.subtes_id);
+const urutkan = (a, b) => (a.urutan || 999) - (b.urutan || 999);
+
+async function api(action, payload) {
+  let r;
+  try {
+    r = await fetch(CONFIG.API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({ action }, payload || {})),
+      redirect: 'follow'
+    });
+  } catch (e) {
+    throw new Error('Koneksi ke server terputus. Periksa jaringan lalu coba lagi.');
+  }
+  const mentah = await r.text();
+  let data;
+  try { data = JSON.parse(mentah); }
+  catch (e) { throw new Error('Balasan server tidak dikenali. Hubungi panitia.'); }
+  if (!data.ok) { const g = new Error(data.error || 'Permintaan gagal.'); g.kode = data.kode || ''; throw g; }
+  return data;
+}
+
+const LAYAR = ['layarMasuk', 'layarProfil', 'layarDasbor', 'layarUjian', 'layarJeda', 'layarHasil', 'layarRekap'];
+function layar(id) {
+  LAYAR.forEach(x => $(x).classList.toggle('sembunyi', x !== id));
+  window.scrollTo(0, 0);
+}
+
+function konfirmasi(judul, pesan, tombolYa) {
+  return new Promise(res => {
+    $('mJudul').textContent = judul;
+    $('mPesan').textContent = pesan;
+    $('mOke').textContent = tombolYa || 'Ya';
+    $('mBatal').style.display = '';
+    $('tirai').classList.remove('sembunyi');
+    const tutup = v => { $('tirai').classList.add('sembunyi'); res(v); };
+    $('mOke').onclick = () => tutup(true);
+    $('mBatal').onclick = () => tutup(false);
+    $('mOke').focus();
+  });
+}
+
+function info(judul, pesan) {
+  return new Promise(res => {
+    $('mJudul').textContent = judul;
+    $('mPesan').textContent = pesan;
+    $('mOke').textContent = 'Mengerti';
+    $('mBatal').style.display = 'none';
+    $('tirai').classList.remove('sembunyi');
+    $('mOke').onclick = () => { $('tirai').classList.add('sembunyi'); $('mBatal').style.display = ''; res(); };
+    $('mOke').focus();
+  });
+}
+
+function kabar(pesan) {
+  let t = $('kabar');
+  if (!t) { t = document.createElement('div'); t.id = 'kabar'; t.className = 'kabar'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+  t.textContent = pesan;
+  t.classList.add('tampil');
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove('tampil'), 5000);
+}
+
+function unduhBase64(b64, nama, mime) {
+  const bin = atob(b64), buf = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+  const url = URL.createObjectURL(new Blob([buf], { type: mime }));
+  const a = document.createElement('a');
+  a.href = url; a.download = nama; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+async function denganTombol(tombol, labelProses, kerja) {
+  const asli = tombol ? tombol.textContent : '';
+  if (tombol) { tombol.disabled = true; tombol.textContent = labelProses; }
+  try { return await kerja(); }
+  finally { if (tombol && document.body.contains(tombol)) { tombol.disabled = false; tombol.textContent = asli; } }
+}
+
+/** Teks bacaan/soal: baris diawali "|" menjadi tabel, sisanya paragraf. */
+function renderTeks(s) {
+  const baris = String(s === undefined || s === null ? '' : s).replace(/\r\n?/g, '\n').split('\n');
+  let html = '', para = [], tabel = [];
+  const tutupPara = () => {
+    const t = para.join('\n').replace(/^\n+|\n+$/g, '');
+    if (t.trim()) html += '<div class="para">' + teks(t) + '</div>';
+    para = [];
+  };
+  const tutupTabel = () => { if (tabel.length) html += tabelHTML(tabel); tabel = []; };
+  baris.forEach(b => {
+    if (/^\s*\|/.test(b)) { tutupPara(); tabel.push(b); }
+    else { tutupTabel(); para.push(b); }
+  });
+  tutupPara(); tutupTabel();
+  return html;
+}
+function tabelHTML(rows) {
+  const sel = rows.map(r => {
+    const c = r.trim().replace(/^\|/, '').split('|').map(x => x.trim());
+    if (c.length && c[c.length - 1] === '') c.pop();
+    return c;
+  }).filter(r => !r.every(c => /^:?-{2,}:?$/.test(c)));
+  const kepala = sel[0] || [], isi = sel.slice(1);
+  const angka = c => /^[−\-]?(Rp)?\s?[\d.,]+\s?%?$/.test(c);
+  return '<div class="tabel-gulir"><table class="tabel-data"><thead><tr>' +
+    kepala.map(c => '<th>' + teks(c) + '</th>').join('') + '</tr></thead><tbody>' +
+    isi.map(r => '<tr>' + r.map(c => '<td' + (angka(c) ? ' class="angka"' : '') + '>' + teks(c) + '</td>').join('') + '</tr>').join('') +
+    '</tbody></table></div>';
+}
+
+function formatJam(detik) {
+  const h = Math.floor(detik / 3600), m = Math.floor((detik % 3600) / 60), d = detik % 60;
+  const dua = n => String(n).padStart(2, '0');
+  return (h ? h + ':' + dua(m) : dua(m)) + ':' + dua(d);
+}
+
+/* ========================== STATE ================================ */
+let kred = null;                     // { nisn, kode, pin }
+let siswa = null, daftarPaket = [], riwayat = [], berjalan = [];
+let aturan = { wajibBerurutan: true, pembahasanSetelah: 'SEMUA', jedaDetik: 10 };
+let sesi = null, paketAktif = null, toAktif = null, soal = [], passages = {}, jawaban = {}, ragu = {}, idx = 0;
+let deadline = 0, timer = null, peringatanTerpakai = {}, pengawas = null, jedaDetik = 10;
+let jedaSimpan = null, simpanBerkala = null, sedangSimpan = false, sedangKirim = false;
+let bacaanTerlipat = false, hitungJeda = null, hasilAktif = null;
+
+function terimaLogin(d) {
+  siswa = d.siswa; daftarPaket = d.paket || []; riwayat = d.riwayat || []; berjalan = d.berjalan || [];
+  if (d.aturan) aturan = d.aturan;
+}
+async function segarkanLogin() { terimaLogin(await api('login', kred)); }
+function simpanKred() { sessionStorage.setItem('to_login', JSON.stringify(kred)); }
+function lanjutSetelahMasuk() {
+  if (!siswa.tingkat || !siswa.jurusan) tampilkanProfil(true);
+  else tampilkanDasbor();
+}
+
+/* ======================= 1. MASUK & DAFTAR ======================= */
+document.querySelectorAll('#tabMasuk button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#tabMasuk button').forEach(x => x.classList.toggle('aktif', x === b));
+  $('formMasuk').classList.toggle('sembunyi', b.dataset.tab !== 'masuk');
+  $('formDaftar').classList.toggle('sembunyi', b.dataset.tab !== 'daftar');
+});
+
+$('btnMasuk').onclick = async () => {
+  const p = $('pesanMasuk');
+  p.className = 'pesan';
+  const nisn = $('inNisn').value.trim(), kode = $('inKode').value.trim(), pin = $('inPin').value.trim();
+  if (!nisn || !kode) { p.className = 'pesan galat'; p.textContent = 'Nomor peserta dan kode akses wajib diisi.'; return; }
+  try {
+    await denganTombol($('btnMasuk'), 'Memeriksa…', async () => {
+      const d = await api('login', { nisn, kode, pin });
+      kred = { nisn: String(d.siswa.nisn), kode, pin };
+      simpanKred(); terimaLogin(d); lanjutSetelahMasuk();
+    });
+  } catch (e) {
+    if (e.kode === 'PIN') { $('barisPin').classList.remove('sembunyi'); $('inPin').focus(); }
+    p.className = 'pesan galat'; p.textContent = e.message;
+  }
+};
+$('inNisn').addEventListener('keydown', e => { if (e.key === 'Enter') $('inKode').focus(); });
+$('inKode').addEventListener('keydown', e => { if (e.key === 'Enter') $('btnMasuk').click(); });
+$('inPin').addEventListener('keydown', e => { if (e.key === 'Enter') $('btnMasuk').click(); });
+
+$('btnDaftar').onclick = async () => {
+  const p = $('pesanDaftar');
+  p.className = 'pesan';
+  const jur = document.querySelector('input[name=dJurusan]:checked');
+  const data = { nama: $('dNamaBaru').value.trim(), tingkat: $('dTingkat').value, jurusan: jur ? jur.value : '', kode: $('dKode').value.trim() };
+  if (data.nama.length < 3 || !data.tingkat || !data.jurusan || !data.kode) {
+    p.className = 'pesan galat'; p.textContent = 'Lengkapi nama, kelas, jurusan, dan kode akses.'; return;
+  }
+  try {
+    await denganTombol($('btnDaftar'), 'Mendaftarkan…', async () => {
+      const d = await api('daftar', data);
+      kred = { nisn: String(d.nomorBaru), kode: data.kode, pin: '' };
+      simpanKred(); terimaLogin(d);
+      $('inNisn').value = d.nomorBaru; $('inKode').value = data.kode;
+      tampilkanDasbor();
+      info('Pendaftaran berhasil', 'Nomor peserta Anda: ' + d.nomorBaru + '\n\nCatat atau foto nomor ini. Nomor inilah yang dipakai untuk masuk kembali dan melanjutkan try out.');
+    });
+  } catch (e) { p.className = 'pesan galat'; p.textContent = e.message; }
+};
+
+/* ======================= 1b. PROFIL ============================== */
+function tampilkanProfil(wajib) {
+  layar('layarProfil');
+  $('pNama').textContent = siswa.nama;
+  $('pTingkat').value = siswa.tingkat || '';
+  document.querySelectorAll('input[name=pJurusan]').forEach(r => r.checked = r.value === siswa.jurusan);
+  $('pesanProfil').className = 'pesan';
+  let batal = $('btnBatalProfil');
+  if (!batal) {
+    batal = document.createElement('button');
+    batal.id = 'btnBatalProfil'; batal.className = 'tombol netral'; batal.textContent = 'Batal';
+    batal.style.cssText = 'width:100%;margin-top:10px';
+    batal.onclick = tampilkanDasbor;
+    $('btnProfil').after(batal);
+  }
+  batal.classList.toggle('sembunyi', !!wajib);
+}
+$('btnProfil').onclick = async () => {
+  const p = $('pesanProfil');
+  const jur = document.querySelector('input[name=pJurusan]:checked');
+  if (!$('pTingkat').value || !jur) { p.className = 'pesan galat'; p.textContent = 'Pilih kelas dan kelompok jurusan.'; return; }
+  try {
+    await denganTombol($('btnProfil'), 'Menyimpan…', async () => {
+      terimaLogin(await api('profil', Object.assign({ tingkat: $('pTingkat').value, jurusan: jur.value }, kred)));
+      tampilkanDasbor();
+    });
+  } catch (e) { p.className = 'pesan galat'; p.textContent = e.message; }
+};
+
+/* ======================= 2. DASBOR =============================== */
+function statusSubtes(p) {
+  const h = riwayat.filter(r => r.paket_id === p.paket_id && r.subtes_id === p.subtes_id)[0];
+  if (h) return { status: 'selesai', hasil: h };
+  const b = berjalan.filter(r => r.paket_id === p.paket_id && r.subtes_id === p.subtes_id)[0];
+  if (b) return { status: 'berjalan', sisa: b.sisaDetik };
+  return { status: 'belum' };
+}
+
+function tampilkanDasbor() {
+  layar('layarDasbor');
+  $('dNama').textContent = siswa.nama;
+  $('dInfo').textContent = [siswa.nisn, siswa.tingkat || siswa.kelas, siswa.jurusan, siswa.sekolah].filter(Boolean).join(' · ');
+  const grup = {}, urutan = [];
+  daftarPaket.forEach(p => { if (!grup[p.paket_id]) { grup[p.paket_id] = []; urutan.push(p.paket_id); } grup[p.paket_id].push(p); });
+  const tos = urutan.filter(id => grup[id].length > 1);
+  const tunggal = urutan.filter(id => grup[id].length === 1).map(id => grup[id][0]);
+  $('daftarTO').innerHTML = tos.map(id => kartuTO(grup[id].slice().sort(urutkan))).join('');
+  $('bagianLain').classList.toggle('sembunyi', !tunggal.length);
+  $('daftarPaket').innerHTML = tunggal.map(kartuPaket).join('');
+}
+
+function kartuTO(list) {
+  const p0 = list[0];
+  const st = list.map(p => Object.assign({ p }, statusSubtes(p)));
+  const selesai = st.filter(x => x.status === 'selesai').length;
+  const totalSoal = list.reduce((a, p) => a + p.jumlah_soal, 0);
+  const totalMenit = list.reduce((a, p) => a + p.durasi_menit, 0);
+  const berikut = st.filter(x => x.status !== 'selesai')[0];
+  const data = p => `data-paket="${teks(p.paket_id)}" data-subtes="${teks(p.subtes_id)}"`;
+
+  const baris = st.map((x, i) => {
+    const kelas = x.status + (x === berikut ? ' berikut' : '');
+    const chip = x.status === 'selesai'
+      ? (x.hasil.catatan === 'DIAKHIRI' ? '<span class="chip">Tidak dikerjakan</span>' : '<span class="chip selesai">Selesai</span>')
+      : x.status === 'berjalan' ? `<span class="chip berjalan">Berjalan · sisa ${Math.ceil(x.sisa / 60)} mnt</span>` : '<span class="chip">Belum</span>';
+    const tombolBaris = (!aturan.wajibBerurutan && x.status !== 'selesai' && x !== berikut)
+      ? `<button class="tombol kecil sekunder" data-mulai="1" ${data(x.p)}>Mulai</button>` : '';
+    return `<li class="${kelas}">
+      <span class="no">${x.status === 'selesai' ? '✓' : i + 1}</span>
+      <span class="nm"><b>${teks(x.p.subtes_nama)}</b><span>${x.p.jumlah_soal} soal · ${x.p.durasi_menit} menit · ${teks(x.p.kelompok === 'TPS' ? 'TPS' : (x.p.kelompok === 'LITERASI' ? 'Literasi' : ''))}</span></span>
+      ${chip}
+      <span class="aksi-baris">${tombolBaris}</span>
+    </li>`;
+  }).join('');
+
+  let utama, catatan;
+  if (!berikut) {
+    utama = `<button class="tombol" data-rekap="${teks(p0.paket_id)}">Lihat hasil dan pembahasan</button>`;
+    catatan = 'Seluruh subtes selesai. Pembahasan lengkap sudah terbuka.';
+  } else {
+    const label = berikut.status === 'berjalan' ? 'Lanjutkan ' + singkat(berikut.p)
+      : (selesai === 0 ? 'Mulai try out' : 'Lanjut ke ' + singkat(berikut.p));
+    utama = `<button class="tombol" data-mulai="1" ${data(berikut.p)}>${teks(label)}</button>`;
+    catatan = aturan.wajibBerurutan ? 'Subtes dikerjakan berurutan dan berpindah otomatis.' : 'Subtes boleh dikerjakan dalam urutan apa pun.';
+  }
+  const rekapSementara = (selesai > 0 && berikut) ? `<button class="tombol netral" data-rekap="${teks(p0.paket_id)}">Rekap sementara</button>` : '';
+
+  return `<article class="kartu to">
+    <div class="to-kepala">
+      <div><h3>${teks(p0.nama_paket)}</h3><p>${list.length} subtes · ${totalSoal} soal · ${totalMenit} menit total</p></div>
+      <div class="to-ringkas"><div><b>${selesai}/${list.length}</b><span>subtes selesai</span></div></div>
+    </div>
+    <ol class="jalur">${baris}</ol>
+    <div class="to-kaki">${utama}${rekapSementara}<p class="ket">${catatan}</p></div>
+  </article>`;
+}
+
+function kartuPaket(p) {
+  const st = statusSubtes(p);
+  const data = `data-paket="${teks(p.paket_id)}" data-subtes="${teks(p.subtes_id)}"`;
+  let tombol, chip;
+  if (st.status === 'selesai') {
+    chip = '<span class="chip selesai">Selesai · skor ' + st.hasil.skor + '</span>';
+    tombol = `<button class="tombol sekunder" data-hasil="${teks(st.hasil.sesi_id)}">Lihat hasil</button>`;
+  } else if (st.status === 'berjalan') {
+    chip = '<span class="chip berjalan">Sedang berjalan</span>';
+    tombol = `<button class="tombol" data-mulai="1" ${data}>Lanjutkan</button>`;
+  } else {
+    chip = '<span class="chip">' + teks(p.jenis || 'Try out') + '</span>';
+    tombol = `<button class="tombol" data-mulai="1" ${data}>Mulai</button>`;
+  }
+  return `<article class="kartu paket">
+    <div><h3>${teks(p.subtes_nama)}</h3><div class="meta">${teks(p.nama_paket)}</div></div>
+    <div class="meta">${p.jumlah_soal} soal · ${p.durasi_menit} menit</div>
+    <div class="kaki">${tombol}${chip}</div>
+  </article>`;
+}
+
+function klikDasbor(e) {
+  const b = e.target.closest('button');
+  if (!b) return;
+  if (b.dataset.rekap) bukaRekap(b.dataset.rekap, b);
+  else if (b.dataset.hasil) bukaHasil(b.dataset.hasil, b);
+  else if (b.dataset.mulai) mulaiUjian(b.dataset.paket, b.dataset.subtes, b);
+}
+$('daftarTO').onclick = klikDasbor;
+$('daftarPaket').onclick = klikDasbor;
+$('btnUbahProfil').onclick = () => tampilkanProfil(false);
+$('btnKeluar').onclick = async () => {
+  if (!await konfirmasi('Keluar?', 'Sesi yang sedang berjalan tetap berjalan di server. Anda bisa masuk lagi kapan saja.', 'Keluar')) return;
+  sessionStorage.clear(); location.reload();
+};
+
+/* ======================= 3. UJIAN ================================ */
+async function mulaiUjian(paketId, subtesId, tombol, opsi) {
+  opsi = opsi || {};
+  const p = daftarPaket.filter(x => x.paket_id === paketId && x.subtes_id === subtesId)[0];
+  if (!p) { info('Paket tidak ditemukan', 'Muat ulang halaman lalu coba lagi.'); return; }
+  const st = statusSubtes(p);
+  if (!opsi.tanpaKonfirmasi && st.status === 'belum') {
+    const semua = daftarPaket.filter(x => x.paket_id === paketId).sort(urutkan);
+    const pertamaTO = semua.length > 1 && !riwayat.some(r => r.paket_id === paketId);
+    const pesan = pertamaTO
+      ? `Try out ini terdiri atas ${semua.length} subtes (${semua.reduce((a, x) => a + x.jumlah_soal, 0)} soal, ${semua.reduce((a, x) => a + x.durasi_menit, 0)} menit) yang dikerjakan berurutan.\n\nSetiap subtes punya waktu sendiri. Setelah satu subtes dikirim atau waktunya habis, subtes berikutnya dimulai otomatis.\n\nSubtes pertama: ${p.subtes_nama} — ${p.jumlah_soal} soal, ${p.durasi_menit} menit.`
+      : `${p.subtes_nama}: ${p.jumlah_soal} soal, ${p.durasi_menit} menit.\n\nWaktu langsung berjalan dan tidak dapat dihentikan, meski halaman ditutup.`;
+    if (!await konfirmasi(pertamaTO ? 'Mulai try out?' : 'Mulai subtes?', pesan, 'Mulai')) return;
+  }
+  try {
+    await denganTombol(tombol, 'Menyiapkan…', async () => {
+      const d = await api('start', Object.assign({ paketId, subtesId }, kred));
+      if (d.sudahSelesai) { await segarkanLogin(); return bukaHasil(d.sesiId); }
+      siapkanUjian(d);
+    });
+  } catch (e) {
+    await info('Tidak dapat memulai', e.message);
+    if (!$('layarJeda').classList.contains('sembunyi')) $('btnTunda').classList.remove('sembunyi');
+  }
+}
+
+function siapkanUjian(d) {
+  clearInterval(hitungJeda);
+  sesi = d.sesiId; paketAktif = d.paket; toAktif = d.to;
+  soal = d.soal || []; passages = d.passages || {}; jawaban = d.jawaban || {}; ragu = d.ragu || {};
+  idx = 0; jedaDetik = d.jedaDetik || aturan.jedaDetik || 10;
+  deadline = Date.now() + d.sisaDetik * 1000; peringatanTerpakai = {}; sedangKirim = false;
+  sessionStorage.setItem('to_ujian', JSON.stringify({ paketId: paketAktif.paket_id, subtesId: paketAktif.subtes_id }));
+  if (!berjalan.some(b => b.paket_id === paketAktif.paket_id && b.subtes_id === paketAktif.subtes_id))
+    berjalan.push({ paket_id: paketAktif.paket_id, subtes_id: paketAktif.subtes_id, sisaDetik: d.sisaDetik });
+
+  $('uSubtes').textContent = paketAktif.subtes_nama;
+  if (toAktif) {
+    const pos = toAktif.subtes.map(x => x.subtes_id).indexOf(paketAktif.subtes_id) + 1;
+    $('uPeserta').textContent = 'Subtes ' + pos + ' dari ' + toAktif.subtes.length + ' · ' + siswa.nama;
+    $('uLangkah').innerHTML = toAktif.subtes.map(x => `<span class="${x.subtes_id === paketAktif.subtes_id ? 'aktif' : (x.status === 'selesai' ? 'selesai' : '')}">${teks(namaSingkat(x.subtes_id))}</span>`).join('');
+  } else {
+    $('uPeserta').textContent = siswa.nama + ' · ' + siswa.nisn;
+    $('uLangkah').innerHTML = '';
+  }
+  $('btnAkhiri').classList.toggle('sembunyi', !toAktif);
+  $('btnSelesai').disabled = false; $('btnSelesai').textContent = 'Selesaikan subtes';
+  $('statusSimpan').textContent = 'Jawaban tersimpan otomatis.';
+  $('kotakBacaan').dataset.pid = '';
+
+  layar('layarUjian');
+  gambarSoal(); gambarKisi();
+  mulaiPengawasan();
+  if (d.sisaDetik <= 0) kirimUjian(true);
+}
+
+function mulaiPengawasan() {
+  jalankanTimer();
+  pasangPengawas();
+  clearInterval(simpanBerkala);
+  simpanBerkala = setInterval(simpanJawaban, CONFIG.intervalSimpan);
+}
+
+function jalankanTimer() {
+  clearInterval(timer);
+  const detak = () => {
+    const sisa = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+    $('uJam').textContent = formatJam(sisa);
+    $('uJam').classList.toggle('mendesak', sisa <= 60);
+    CONFIG.peringatanDetik.forEach(function (p) {
+      if (sisa <= p && sisa > 0 && !peringatanTerpakai[p]) {
+        peringatanTerpakai[p] = true;
+        kabar('Sisa waktu ' + (p >= 60 ? Math.round(p / 60) + ' menit' : p + ' detik') + ' untuk ' + paketAktif.subtes_nama + '.');
+      }
+    });
+    if (sisa <= 0) { clearInterval(timer); kirimUjian(true); }
+  };
+  detak();
+  timer = setInterval(detak, 1000);
+}
+
+function terjawab(s) {
+  const j = jawaban[s.no];
+  if (j === undefined || j === null) return false;
+  if (s.tipe === 'kategori') return Array.isArray(j) && s.baris.every((_, i) => j[i]);
+  if (Array.isArray(j)) return j.length > 0;
+  return String(j).trim() !== '';
+}
+
+function gambarSoal() {
+  const s = soal[idx];
+  if (!s) return;
+  const psg = s.passage_id ? passages[s.passage_id] : null;
+  const kb = $('kotakBacaan');
+  $('panelSoal').classList.toggle('tanpa-bacaan', !psg);
+  kb.classList.toggle('sembunyi', !psg);
+  if (psg) {
+    if (kb.dataset.pid !== s.passage_id) {
+      kb.dataset.pid = s.passage_id;
+      kb.innerHTML = `<div class="bacaan-kepala"><h4>${teks(psg.judul || 'Bacaan')}</h4><button class="lipat" id="btnLipat" type="button"></button></div>
+        <div class="isi-bacaan">${psg.sumber ? `<p class="sumber">${teks(psg.sumber)}</p>` : ''}<div class="teks">${renderTeks(psg.teks)}</div></div>`;
+      kb.scrollTop = 0;
+    }
+    kb.classList.toggle('terlipat', bacaanTerlipat);
+    $('btnLipat').textContent = bacaanTerlipat ? 'Tampilkan teks' : 'Sembunyikan teks';
+    $('btnLipat').onclick = () => { bacaanTerlipat = !bacaanTerlipat; gambarSoal(); };
+  } else {
+    kb.dataset.pid = ''; kb.innerHTML = '';
+  }
+
+  const j = jawaban[s.no];
+  let isi = `<div class="soal-kepala"><span class="nomor">Soal ${idx + 1} dari ${soal.length}</span>
+    ${ragu[s.no] ? '<span class="chip berjalan">Ragu-ragu</span>' : ''}</div>
+    <div class="pertanyaan">${renderTeks(s.pertanyaan)}</div>`;
+
+  if (s.tipe === 'mcq') {
+    isi += s.opsi.map(o => `<label class="opsi ${j === o.key ? 'pilih' : ''}">
+      <input type="radio" name="jw" value="${o.key}" ${j === o.key ? 'checked' : ''}>
+      <span class="abjad">${o.key}.</span><span>${teks(o.text)}</span></label>`).join('');
+  } else if (s.tipe === 'mcma') {
+    const pilih = Array.isArray(j) ? j : [];
+    isi += '<p class="petunjuk-tipe">Pilih semua jawaban yang benar (bisa lebih dari satu).</p>';
+    isi += s.opsi.map(o => `<label class="opsi ${pilih.indexOf(o.key) >= 0 ? 'pilih' : ''}">
+      <input type="checkbox" name="jw" value="${o.key}" ${pilih.indexOf(o.key) >= 0 ? 'checked' : ''}>
+      <span class="abjad">${o.key}.</span><span>${teks(o.text)}</span></label>`).join('');
+  } else if (s.tipe === 'kategori') {
+    const arr = Array.isArray(j) ? j : [];
+    if (s.kategori.length <= 3) {
+      isi += '<p class="petunjuk-tipe">Tentukan pilihan yang tepat untuk setiap pernyataan.</p>';
+      isi += `<div class="tabel-gulir"><table class="tabel-kategori kategori-grid"><thead><tr><th>Pernyataan</th>${s.kategori.map(k => `<th class="pilih-sel">${teks(k)}</th>`).join('')}</tr></thead><tbody>` +
+        s.baris.map((b, i) => `<tr><td>${teks(b)}</td>${s.kategori.map(k =>
+          `<td class="pilih-sel"><input type="radio" name="kat${i}" data-baris="${i}" value="${teks(k)}" aria-label="${teks(k)}" ${arr[i] === k ? 'checked' : ''}></td>`).join('')}</tr>`).join('') +
+        '</tbody></table></div>';
+    } else {
+      isi += '<p class="petunjuk-tipe">Pilih kategori yang tepat untuk setiap pernyataan.</p>';
+      isi += '<table class="tabel-kategori"><thead><tr><th>Pernyataan</th><th style="width:40%">Jawaban</th></tr></thead><tbody>' +
+        s.baris.map((b, i) => `<tr><td>${teks(b)}</td><td><select data-baris="${i}"><option value="">— pilih —</option>${s.kategori.map(k =>
+          `<option ${arr[i] === k ? 'selected' : ''}>${teks(k)}</option>`).join('')}</select></td></tr>`).join('') +
+        '</tbody></table>';
+    }
+  } else if (s.tipe === 'isian') {
+    isi += `<p class="petunjuk-tipe">Ketik jawaban berupa angka. Gunakan koma untuk desimal (contoh 2,5), tanpa titik ribuan dan tanpa satuan.</p>
+      <div class="isian-wadah"><input type="text" class="isian" id="inIsian" inputmode="decimal" autocomplete="off" maxlength="20"
+        placeholder="Jawaban" value="${teks(j === undefined ? '' : j)}" aria-label="Jawaban isian"></div>`;
+  }
+  $('kotakSoal').innerHTML = isi;
+
+  $('btnSebelum').disabled = idx === 0;
+  $('btnLanjut').textContent = idx === soal.length - 1 ? 'Periksa dan kirim' : 'Selanjutnya';
+  $('btnRagu').textContent = ragu[s.no] ? 'Batalkan ragu-ragu' : 'Tandai ragu-ragu';
+}
+
+$('kotakSoal').addEventListener('change', e => {
+  const t = e.target, s = soal[idx];
+  if (!s) return;
+  if (t.name === 'jw') {
+    if (s.tipe === 'mcma') {
+      const pilih = Array.from(document.querySelectorAll('#kotakSoal input[name=jw]:checked')).map(x => x.value);
+      if (pilih.length) jawaban[s.no] = pilih; else delete jawaban[s.no];
+    } else jawaban[s.no] = t.value;
+    setelahJawab(true);
+  } else if (t.dataset.baris !== undefined) {
+    const arr = Array.isArray(jawaban[s.no]) ? jawaban[s.no].slice() : new Array(s.baris.length).fill('');
+    arr[Number(t.dataset.baris)] = t.value;
+    if (arr.some(Boolean)) jawaban[s.no] = arr; else delete jawaban[s.no];
+    setelahJawab(false);
+  }
+});
+$('kotakSoal').addEventListener('input', e => {
+  if (!e.target.classList.contains('isian')) return;
+  const s = soal[idx];
+  const v = e.target.value.replace(/[^0-9.,\-\/]/g, '').slice(0, 20);
+  if (v !== e.target.value) e.target.value = v;
+  if (v.trim()) jawaban[s.no] = v.trim(); else delete jawaban[s.no];
+  gambarKisi(); tundaSimpan();
+});
+
+function setelahJawab(gambarUlang) { if (gambarUlang) gambarSoal(); gambarKisi(); tundaSimpan(); }
+
+function tundaSimpan() { clearTimeout(jedaSimpan); jedaSimpan = setTimeout(simpanJawaban, 2500); }
+
+async function simpanJawaban() {
+  if (!sesi || sedangKirim || sedangSimpan) return;
+  sedangSimpan = true;
+  const sesiIni = sesi;
+  $('statusSimpan').textContent = 'Menyimpan…';
+  try {
+    const d = await api('autosave', { sesiId: sesiIni, jawaban, ragu });
+    if (sesiIni !== sesi) return;
+    if (d.sudahSelesai || d.waktuHabis) { kirimUjian(true); return; }
+    if (typeof d.sisaDetik === 'number') {
+      const baru = Date.now() + d.sisaDetik * 1000;
+      if (Math.abs(baru - deadline) > 3000) deadline = baru;
+    }
+    const w = new Date();
+    $('statusSimpan').textContent = 'Tersimpan pukul ' + String(w.getHours()).padStart(2, '0') + '.' + String(w.getMinutes()).padStart(2, '0') + '.';
+  } catch (e) {
+    $('statusSimpan').textContent = 'Menunggu koneksi… lanjutkan saja mengerjakan.';
+  } finally { sedangSimpan = false; }
+}
+
+function gambarKisi() {
+  $('kisiNomor').innerHTML = soal.map((s, i) => {
+    const kelas = [ragu[s.no] ? 'ragu' : (terjawab(s) ? 'terjawab' : ''), i === idx ? 'aktif' : ''].join(' ');
+    return `<button class="${kelas}" data-i="${i}" aria-label="Soal ${i + 1}">${i + 1}</button>`;
+  }).join('');
+}
+$('kisiNomor').onclick = e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  idx = Number(b.dataset.i); gambarSoal(); gambarKisi();
+  if (window.innerWidth <= 1020) $('panelSoal').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+$('btnSebelum').onclick = () => { if (idx > 0) { idx--; gambarSoal(); gambarKisi(); } };
+$('btnLanjut').onclick = () => {
+  if (idx < soal.length - 1) { idx++; gambarSoal(); gambarKisi(); window.scrollTo(0, 0); }
+  else $('btnSelesai').click();
+};
+$('btnRagu').onclick = () => {
+  const s = soal[idx];
+  if (ragu[s.no]) delete ragu[s.no]; else ragu[s.no] = true;
+  setelahJawab(true);
+};
+
+$('btnSelesai').onclick = async () => {
+  if (sedangKirim) return;
+  const kosong = soal.filter(s => !terjawab(s)).length;
+  const rg = soal.filter(s => ragu[s.no]).length;
+  const bagian = [];
+  if (kosong) bagian.push(kosong + ' soal belum dijawab lengkap');
+  if (rg) bagian.push(rg + ' soal masih ditandai ragu-ragu');
+  const pesan = (bagian.length ? 'Masih ada ' + bagian.join(' dan ') + '. ' : 'Semua soal sudah dijawab. ') +
+    'Jawaban subtes ini tidak bisa diubah lagi setelah dikirim.' +
+    (toAktif ? '\n\nSetelah dikirim, subtes berikutnya dimulai otomatis.' : '');
+  if (await konfirmasi('Selesaikan ' + paketAktif.subtes_nama + '?', pesan, 'Kirim jawaban')) kirimUjian(false);
+};
+
+function hentikanUjian() {
+  clearInterval(timer); clearInterval(simpanBerkala); clearTimeout(jedaSimpan);
+}
+
+async function kirimUjian(otomatis) {
+  if (sedangKirim || !sesi) return;
+  sedangKirim = true;
+  hentikanUjian();
+  await kirimLog(true);
+  lepasPengawas();
+  $('btnSelesai').disabled = true; $('btnSelesai').textContent = 'Mengirim…';
+  for (let coba = 1; coba <= 3; coba++) {
+    try {
+      const d = await api('submit', { sesiId: sesi, jawaban });
+      sessionStorage.removeItem('to_ujian');
+      setelahKirim(d, otomatis);
+      return;
+    } catch (e) {
+      if (coba === 3) {
+        sedangKirim = false;
+        $('btnSelesai').disabled = false; $('btnSelesai').textContent = 'Kirim ulang jawaban';
+        info('Pengiriman belum berhasil', e.message + '\n\nJawaban terakhir yang tersimpan tetap aman di server. Tekan "Kirim ulang jawaban" setelah jaringan pulih.');
+        return;
+      }
+      $('btnSelesai').textContent = 'Mencoba lagi…';
+      await tidur(2500 * coba);
+    }
+  }
+}
+
+function setelahKirim(d, otomatis) {
+  const selesai = paketAktif;
+  riwayat.push({ sesi_id: sesi, paket_id: selesai.paket_id, subtes_id: selesai.subtes_id, skor: d.hasil.skor, catatan: d.hasil.catatan || '' });
+  berjalan = berjalan.filter(b => !(b.paket_id === selesai.paket_id && b.subtes_id === selesai.subtes_id));
+  sesi = null;
+  if (d.berikutnya) tampilkanJeda(d.berikutnya, otomatis);
+  else if (d.toSelesai) bukaRekap(selesai.paket_id, null,
+    (otomatis ? 'Waktu subtes terakhir habis dan jawaban otomatis terkirim. ' : '') + 'Seluruh subtes selesai. Kunci dan pembahasan kini dapat dibuka dari tombol Pembahasan pada tiap subtes.');
+  else { gambarHasil(d.hasil); if (otomatis) info('Waktu habis', 'Jawaban Anda otomatis dikirim.'); }
+}
+
+/* ============== 3b. JEDA & PERPINDAHAN SUBTES OTOMATIS =========== */
+function tampilkanJeda(b, otomatis) {
+  layar('layarJeda');
+  $('btnTunda').classList.add('sembunyi');
+  const list = daftarPaket.filter(p => p.paket_id === b.paket_id).sort(urutkan);
+  $('jJalur').innerHTML = list.map(p => `<span class="${statusSubtes(p).status === 'selesai' ? 'selesai' : ''}">${teks(singkat(p))}</span>`).join('');
+  $('jJudul').textContent = (otomatis ? 'Waktu habis. ' : '') + paketAktif.subtes_nama + ' selesai.';
+  $('jKet').textContent = (otomatis ? 'Jawaban otomatis terkirim. ' : 'Jawaban sudah terkirim. ') + 'Tarik napas sejenak; subtes berikutnya segera dimulai.';
+  $('jNama').textContent = b.subtes_nama;
+  $('jSoal').textContent = b.jumlah_soal + ' soal';
+  $('jMenit').textContent = b.durasi_menit + ' menit';
+  let n = Math.max(3, Number(jedaDetik) || 10);
+  $('jHitung').textContent = n;
+  clearInterval(hitungJeda);
+  const mulai = () => { clearInterval(hitungJeda); mulaiUjian(b.paket_id, b.subtes_id, $('btnMulaiBerikut'), { tanpaKonfirmasi: true }); };
+  hitungJeda = setInterval(() => { n--; $('jHitung').textContent = Math.max(0, n); if (n <= 0) mulai(); }, 1000);
+  $('btnMulaiBerikut').onclick = mulai;
+}
+$('btnTunda').onclick = async () => {
+  clearInterval(hitungJeda);
+  try { await segarkanLogin(); } catch (e) { }
+  tampilkanDasbor();
+};
+
+/* ===================== AKHIRI SELURUH TRY OUT ==================== */
+$('btnAkhiri').onclick = async () => {
+  if (!toAktif || sedangKirim) return;
+  const sisa = toAktif.subtes.filter(x => x.status !== 'selesai' && x.subtes_id !== paketAktif.subtes_id).length;
+  const ok = await konfirmasi('Akhiri seluruh try out?',
+    'Jawaban ' + paketAktif.subtes_nama + ' akan dikirim apa adanya' +
+    (sisa ? ', dan ' + sisa + ' subtes yang belum dikerjakan dinilai kosong (skor terendah).' : '.') +
+    '\n\nTindakan ini tidak dapat dibatalkan. Gunakan hanya bila Anda benar-benar berhenti.', 'Ya, akhiri try out');
+  if (!ok) return;
+  sedangKirim = true;
+  hentikanUjian();
+  await kirimLog(true);
+  lepasPengawas();
+  try {
+    const d = await api('akhiriTO', Object.assign({ paketId: paketAktif.paket_id, sesiId: sesi, jawaban }, kred));
+    sesi = null;
+    sessionStorage.removeItem('to_ujian');
+    try { await segarkanLogin(); } catch (e) { }
+    gambarRekap(d.rekap);
+  } catch (e) {
+    sedangKirim = false;
+    mulaiPengawasan();
+    info('Belum berhasil', e.message);
+  }
+};
+
+/* ============ PENGAWASAN SENYAP (tanpa mengganggu siswa) ========= */
+let bufferLog = [], kirimBerkala = null;
+
+function catat(jenis, detail) {
+  if (!sesi) return;
+  bufferLog.push({ waktu: new Date().toISOString(), jenis, detail: detail || '' });
+  if (bufferLog.length >= 25) kirimLog();
+}
+
+async function kirimLog(paksa) {
+  if (!sesi || (!bufferLog.length && !paksa)) return;
+  const kirim = bufferLog.splice(0, bufferLog.length);
+  if (!kirim.length) return;
+  try { await api('logViolation', { sesiId: sesi, items: kirim }); }
+  catch (e) { bufferLog = kirim.concat(bufferLog); }
+}
+
+function pasangPengawas() {
+  if (pengawas) return;
+  pengawas = {
+    visibilitas: () => { if (document.hidden) catat('pindah_tab', 'Halaman ujian tidak lagi terlihat'); },
+    blur: () => catat('keluar_fokus', 'Jendela ujian kehilangan fokus'),
+    salin: e => { e.preventDefault(); catat('salin', 'Ctrl/Cmd+C atau menu salin'); },
+    tempel: e => { e.preventDefault(); catat('tempel', 'Menempel teks ke halaman ujian'); },
+    potong: e => { e.preventDefault(); catat('potong', ''); },
+    klikKanan: e => { e.preventDefault(); catat('klik_kanan', ''); },
+    tombol: e => {
+      const k = (e.key || '').toLowerCase();
+      if ((e.ctrlKey || e.metaKey) && k === 'p') { e.preventDefault(); catat('cetak', 'Ctrl/Cmd+P'); }
+      if (e.key === 'PrintScreen') catat('cetak', 'PrintScreen');
+      if ((e.ctrlKey || e.metaKey) && (k === 'u' || k === 's')) { e.preventDefault(); catat('lain', 'Ctrl+' + k); }
+    },
+    tutup: e => {
+      catat('muat_ulang', 'Halaman ditutup atau dimuat ulang');
+      if (navigator.sendBeacon && sesi) navigator.sendBeacon(CONFIG.API,
+        new Blob([JSON.stringify({ action: 'logViolation', sesiId: sesi, items: bufferLog })],
+          { type: 'text/plain;charset=utf-8' }));
+      e.preventDefault(); e.returnValue = '';
+    }
+  };
+  document.addEventListener('visibilitychange', pengawas.visibilitas);
+  window.addEventListener('blur', pengawas.blur);
+  document.addEventListener('copy', pengawas.salin);
+  document.addEventListener('paste', pengawas.tempel);
+  document.addEventListener('cut', pengawas.potong);
+  document.addEventListener('contextmenu', pengawas.klikKanan);
+  document.addEventListener('keydown', pengawas.tombol);
+  window.addEventListener('beforeunload', pengawas.tutup);
+  clearInterval(kirimBerkala);
+  kirimBerkala = setInterval(kirimLog, CONFIG.intervalLog);
+}
+
+function lepasPengawas() {
+  if (!pengawas) return;
+  document.removeEventListener('visibilitychange', pengawas.visibilitas);
+  window.removeEventListener('blur', pengawas.blur);
+  document.removeEventListener('copy', pengawas.salin);
+  document.removeEventListener('paste', pengawas.tempel);
+  document.removeEventListener('cut', pengawas.potong);
+  document.removeEventListener('contextmenu', pengawas.klikKanan);
+  document.removeEventListener('keydown', pengawas.tombol);
+  window.removeEventListener('beforeunload', pengawas.tutup);
+  clearInterval(kirimBerkala);
+  pengawas = null;
+}
+
+/* ======================= 4. HASIL SUBTES ========================= */
+async function bukaHasil(sesiId, tombol) {
+  try {
+    await denganTombol(tombol, 'Memuat…', async () => {
+      const d = await api('result', { sesiId });
+      gambarHasil(d.hasil);
+    });
+  } catch (e) { info('Hasil belum dapat dibuka', e.message); }
+}
+
+const LABEL_STATUS = { benar: 'Benar', salah: 'Salah', sebagian: 'Sebagian benar', kosong: 'Tidak dijawab' };
+const WARNA_DIAG = { kuat: 'var(--benar)', cukup: 'var(--ragu)', lemah: 'var(--salah)' };
+
+function gambarHasil(h) {
+  hasilAktif = h;
+  layar('layarHasil');
+  $('hNama').textContent = h.siswa.nama;
+  $('hInfo').textContent = h.paket.nama_paket + ' · ' + h.paket.subtes_nama;
+  $('btnKembali').textContent = h.to ? 'Kembali ke rekap try out' : 'Kembali ke beranda';
+  const r = h.ringkasan;
+
+  const catatan = h.catatan === 'DIAKHIRI' ? '<div class="kartu pengumuman"><p>Subtes ini tidak dikerjakan karena try out diakhiri, sehingga seluruh butir dinilai kosong.</p></div>'
+    : h.catatan === 'WAKTU_HABIS' ? '<div class="kartu pengumuman"><p>Jawaban subtes ini terkirim otomatis saat waktu habis. Yang dinilai adalah jawaban terakhir yang sempat tersimpan.</p></div>' : '';
+
+  const diag = h.diagnosa.map(d => `<div class="diag">
+    <div class="atas"><span>${teks(d.kisi_label)}</span><b>${d.persen}%</b></div>
+    <div class="rel"><i style="width:${d.persen}%;background:${WARNA_DIAG[d.status]}"></i></div>
+    ${d.status !== 'kuat' && d.saran ? `<small>${teks(d.saran)}</small>` : ''}</div>`).join('') || '<p class="ket">Belum ada data indikator.</p>';
+
+  const log = Object.keys(h.pelanggaran.rekap).map(k => `<div><span>${teks(labelLog(k))}</span><b>${h.pelanggaran.rekap[k]}</b></div>`).join('')
+    || '<div><span>Tidak ada catatan pengawasan</span><b>0</b></div>';
+
+  const pg = h.passingGrade && h.passingGrade.length ? `<div class="kartu blok"><h3>Perkiraan peluang program studi</h3>
+    <table class="pg"><thead><tr><th>Program studi</th><th>Skor acuan</th><th>Peluang</th></tr></thead><tbody>
+    ${h.passingGrade.map(p => `<tr><td>${teks(p.prodi)}<br><small class="ket">${teks(p.ptn)}</small></td><td>${p.skor_min}</td><td><b>${p.peluang}%</b></td></tr>`).join('')}
+    </tbody></table></div>` : '';
+
+  let tinjau;
+  if (h.terkunci) {
+    tinjau = `<div class="terkunci"><b>Pembahasan belum dibuka</b>Kunci dan pembahasan ${teks(h.paket.subtes_nama)} terbuka setelah seluruh subtes try out selesai dikerjakan. Status tiap nomor tetap dapat dilihat di bawah.</div>
+      <div class="kisi-nomor" style="margin-top:16px;grid-template-columns:repeat(auto-fill,minmax(42px,1fr))">${h.review.map(x =>
+        `<button disabled style="cursor:default;${x.status === 'benar' ? 'background:var(--benar);border-color:var(--benar);color:#fff' : x.status === 'kosong' ? '' : x.status === 'sebagian' ? 'background:var(--ragu);border-color:var(--ragu);color:#fff' : 'background:var(--salah);border-color:var(--salah);color:#fff'}">${x.no}</button>`).join('')}</div>`;
+  } else {
+    tinjau = `<div class="saring" id="saringTinjau">
+        <button class="aktif" data-saring="semua">Semua (${h.review.length})</button>
+        <button data-saring="perlu">Salah, sebagian, kosong (${h.review.filter(x => x.status !== 'benar').length})</button>
+      </div><div id="daftarTinjau">${h.review.map(x => kartuTinjau(x, h.passages || {})).join('')}</div>`;
+  }
+
+  $('isiHasil').innerHTML = `
+    <div class="skor-panel">
+      <div><div class="label">Skor ${teks(h.paket.subtes_nama)}</div><div class="skor-angka">${h.skor}</div>
+        <div class="label" style="margin-top:8px">Rentang prediksi ${h.skor - h.sem}–${h.skor + h.sem}</div></div>
+      <div class="skor-detail">
+        <div><b>${r.benar}</b><span>Benar</span></div>
+        <div><b>${r.sebagian}</b><span>Sebagian benar</span></div>
+        <div><b>${r.salah}</b><span>Salah</span></div>
+        <div><b>${r.kosong}</b><span>Tidak dijawab</span></div>
+        <div><b>${h.peringkat}/${h.peserta}</b><span>Peringkat subtes</span></div>
+        <div><b>${h.rataKelas}</b><span>Rata-rata peserta</span></div>
+      </div>
+    </div>
+    ${catatan}
+    <div class="grid-hasil">
+      <div class="kartu blok"><h3>Diagnosis per indikator</h3>${diag}</div>
+      <div class="kartu blok"><h3>Catatan pengawasan</h3><div class="rekap-log">${log}</div>
+        <p class="catatan-kecil">Skor memakai pembobotan tingkat kesulitan butir dan dapat bergeser sedikit ketika peserta lain menyusul.</p></div>
+      ${pg}
+    </div>
+    <h2 class="judul-bagian" style="margin-top:30px">Pembahasan tiap soal</h2>
+    <p class="ket">Baca dulu butir yang salah atau kosong. Setiap pilihan jawaban disertai alasan mengapa benar atau keliru.</p>
+    ${tinjau}
+    <div class="unduh">
+      <button class="tombol sekunder" data-unduh="xlsx">Unduh laporan (Excel)</button>
+      <button class="tombol sekunder" data-unduh="pdf">Unduh laporan (PDF)</button>
+    </div>`;
+
+  const sr = $('saringTinjau');
+  if (sr) sr.onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    sr.querySelectorAll('button').forEach(x => x.classList.toggle('aktif', x === b));
+    document.querySelectorAll('#daftarTinjau .tinjau').forEach(k =>
+      k.classList.toggle('sembunyi', b.dataset.saring === 'perlu' && k.dataset.status === 'benar'));
+  };
+  $('isiHasil').querySelectorAll('[data-unduh]').forEach(b => b.onclick = () => unduhLaporan(h.sesi_id, b.dataset.unduh, b));
+}
+
+function kartuTinjau(x, psgMap) {
+  const psg = x.passage_id && psgMap[x.passage_id];
+  let isi = psg ? `<details class="bacaan-tinjau"><summary>Lihat bacaan: ${teks(psg.judul || 'Bacaan')}</summary><div class="teks">${renderTeks(psg.teks)}</div></details>` : '';
+  isi += `<div class="pertanyaan">${renderTeks(x.pertanyaan)}</div>`;
+
+  if (x.tipe === 'mcq' || x.tipe === 'mcma') {
+    const pilih = (Array.isArray(x.jawabanSiswa) ? x.jawabanSiswa : [x.jawabanSiswa]).map(v => String(v).toUpperCase());
+    isi += (x.opsi || []).map(o => {
+      const kunci = x.kunciList.map(k => k.toUpperCase()).indexOf(o.key) >= 0;
+      const dipilih = pilih.indexOf(o.key) >= 0;
+      const kelas = kunci ? 'kunci' : (dipilih ? 'pilihan-salah' : '');
+      const tanda = kunci ? ' <b style="color:var(--benar)">— kunci</b>' : '';
+      const milik = dipilih ? ' <b style="color:' + (kunci ? 'var(--benar)' : 'var(--salah)') + '">(jawaban Anda)</b>' : '';
+      return `<div class="opsi-hasil ${kelas}"><b>${o.key}.</b><span>${teks(o.text)}${tanda}${milik}${o.alasan ? `<span class="ket-opsi">${teks(o.alasan)}</span>` : ''}</span></div>`;
+    }).join('');
+  } else if (x.tipe === 'kategori') {
+    const jw = Array.isArray(x.jawabanSiswa) ? x.jawabanSiswa : [];
+    isi += `<div class="tabel-gulir"><table class="tabel-hasil"><thead><tr><th>Pernyataan</th><th>Jawaban Anda</th><th>Kunci</th></tr></thead><tbody>
+      ${(x.baris || []).map((b, i) => {
+        const ok = String(jw[i] || '').toLowerCase() === String(x.kunciList[i] || '').toLowerCase();
+        return `<tr><td>${teks(b)}</td><td class="${ok ? 'ok' : 'no'}">${teks(jw[i] || '—')}</td><td>${teks(x.kunciList[i] || '')}</td></tr>`;
+      }).join('')}</tbody></table></div>`;
+  } else if (x.tipe === 'isian') {
+    const jw = Array.isArray(x.jawabanSiswa) ? x.jawabanSiswa[0] : x.jawabanSiswa;
+    isi += `<div class="isian-hasil"><div><small>Jawaban Anda</small><b style="color:${x.status === 'benar' ? 'var(--benar)' : 'var(--salah)'}">${teks(jw === '' || jw === undefined || jw === null ? '—' : jw)}</b></div>
+      <div><small>Kunci</small><b>${teks(x.kunciList.join(' atau '))}</b></div></div>`;
+  }
+  isi += x.pembahasan ? `<div class="pembahasan"><b>Pembahasan</b>${teks(x.pembahasan)}</div>` : '';
+  isi += x.alasanJawaban ? `<div class="alasan"><b>Mengapa jawaban Anda keliru</b>${teks(x.alasanJawaban)}</div>` : '';
+
+  return `<div class="kartu tinjau" data-status="${x.status}">
+    <div class="kepala"><b>Soal ${x.no}</b><span class="tanda ${x.status}">${LABEL_STATUS[x.status] || x.status}</span>
+      <span class="chip">${teks(x.kisi_label)}</span></div>${isi}</div>`;
+}
+
+function labelLog(k) {
+  return ({ pindah_tab: 'Berpindah tab atau aplikasi', keluar_fokus: 'Jendela kehilangan fokus', salin: 'Menyalin teks',
+    tempel: 'Menempel teks', potong: 'Memotong teks', klik_kanan: 'Klik kanan', cetak: 'Mencetak atau tangkapan layar',
+    muat_ulang: 'Menutup atau memuat ulang halaman', lain: 'Pintasan lain' })[k] || k;
+}
+
+$('btnKembali').onclick = async () => {
+  if (hasilAktif && hasilAktif.to) return bukaRekap(hasilAktif.to.paket_id, $('btnKembali'));
+  try { await segarkanLogin(); } catch (e) { }
+  tampilkanDasbor();
+};
+
+async function unduhLaporan(sesiId, format, tombol) {
+  try {
+    await denganTombol(tombol, 'Menyiapkan berkas…', async () => {
+      const d = await api('exportReport', { sesiId, format });
+      unduhBase64(d.base64, d.filename, d.mime);
+    });
+  } catch (e) { info('Unduhan gagal', e.message); }
+}
+
+/* ======================= 5. REKAP TRY OUT ======================== */
+async function bukaRekap(paketId, tombol, pesan) {
+  try {
+    await denganTombol(tombol, 'Memuat…', async () => {
+      const d = await api('rekapTO', Object.assign({ paketId }, kred));
+      gambarRekap(d.rekap);
+    });
+    if (pesan) info('Try out selesai', pesan);
+  } catch (e) { info('Rekap belum dapat dibuka', e.message); }
+}
+
+function gambarRekap(r) {
+  layar('layarRekap');
+  $('rNama').textContent = r.siswa.nama;
+  $('rInfo').textContent = [r.paket.nama_paket, r.siswa.tingkat || r.siswa.kelas, r.siswa.jurusan].filter(Boolean).join(' · ');
+  const selesai = r.subtes.filter(x => x.status === 'selesai').length;
+  const posisi = v => Math.max(0, Math.min(100, (v - 200) / 8));
+  const kosong = v => (v === '' || v === null || v === undefined) ? '—' : v;
+  const berikut = r.subtes.filter(x => x.status !== 'selesai')[0];
+
+  const baris = r.subtes.map(x => {
+    let ket, aksi = '';
+    if (x.status === 'selesai') {
+      ket = x.catatan === 'DIAKHIRI' ? 'Tidak dikerjakan (try out diakhiri)'
+        : `Benar ${x.benar}${x.sebagian ? ' · sebagian ' + x.sebagian : ''} · salah ${x.salah} · kosong ${x.kosong} dari ${x.jumlah_soal}`;
+      aksi = r.pembahasanTerbuka
+        ? `<button class="tombol kecil sekunder" data-hasil="${teks(x.sesi_id)}">Pembahasan</button>`
+        : `<button class="tombol kecil netral" data-hasil="${teks(x.sesi_id)}">Hasil</button>`;
+    } else ket = x.status === 'berjalan' ? 'Sedang berjalan' : 'Belum dikerjakan';
+    return `<div class="baris-subtes">
+      <div class="nm"><b>${teks(x.subtes_nama)}</b><span>${teks(ket)}</span></div>
+      <div class="skala">${x.skor !== null ? `<i style="width:${posisi(x.skor)}%"></i>` : ''}<em style="left:37.5%" title="Skor 500"></em></div>
+      <div class="nilai">${x.skor !== null ? x.skor : '—'}</div>
+      <div class="aksi-baris">${aksi}</div>
+    </div>`;
+  }).join('');
+
+  const pengumuman = r.lengkap ? '' : `<div class="kartu pengumuman">
+      <p><b>${r.subtes.length - selesai} subtes belum selesai.</b> Skor di atas masih sementara. Kunci dan pembahasan terbuka setelah semua subtes dikerjakan.</p>
+      ${berikut ? `<button class="tombol" data-mulai="1" data-paket="${teks(r.paket.paket_id)}" data-subtes="${teks(berikut.subtes_id)}">${berikut.status === 'berjalan' ? 'Lanjutkan' : 'Kerjakan'} ${teks(namaSingkat(berikut.subtes_id))}</button>` : ''}
+    </div>`;
+
+  const pg = r.passingGrade && r.passingGrade.length ? `<div class="kartu blok" style="margin-top:20px"><h3>Perkiraan peluang program studi${r.siswa.jurusan ? ' (' + teks(r.siswa.jurusan) + ')' : ''}</h3>
+    <table class="pg"><thead><tr><th>Program studi</th><th>Skor acuan</th><th>Peluang</th></tr></thead><tbody>
+    ${r.passingGrade.map(p => `<tr><td>${teks(p.prodi)}<br><small class="ket">${teks(p.ptn)}</small></td><td>${p.skor_min}</td><td><b>${p.peluang}%</b></td></tr>`).join('')}
+    </tbody></table><p class="catatan-kecil">Perkiraan kasar berdasarkan skor total try out ini, bukan jaminan kelulusan.</p></div>` : '';
+
+  $('isiRekap').innerHTML = `
+    <div class="papan">
+      <div class="utama">
+        <div class="label">${r.lengkap ? 'Skor total try out' : 'Skor sementara'} (rata-rata ${selesai} subtes)</div>
+        <div class="skor-angka">${kosong(r.skorTotal)}</div>
+        <div class="label">${r.peringkat ? 'Peringkat ' + r.peringkat + ' dari ' + r.peserta + ' peserta yang sudah lengkap' : selesai + ' dari ' + r.subtes.length + ' subtes selesai'}</div>
+      </div>
+      <div class="kelompok">
+        <div><b>${kosong(r.skorTps)}</b><span>Rata-rata TPS — PU, PPU, PBM, PK</span></div>
+        <div><b>${kosong(r.skorLiterasi)}</b><span>Rata-rata Literasi — Bahasa Indonesia, Bahasa Inggris, PM</span></div>
+        ${r.rataKelompok !== null ? `<div><b>${r.rataKelompok}</b><span>Rata-rata skor total seluruh peserta</span></div>` : ''}
+      </div>
+    </div>
+    ${pengumuman}
+    <div class="kartu" style="margin-top:20px">
+      <div style="padding:18px 20px 4px"><h3 style="margin:0;font-size:16px">Skor per subtes</h3>
+        <p class="catatan-kecil">Skala 200–1000. Garis tipis menandai skor 500. ${r.totalSoal} soal, ${r.totalMenit} menit.</p></div>
+      ${baris}
+    </div>
+    ${pg}
+    <div class="unduh">
+      <button class="tombol sekunder" data-unduh-to="xlsx">Unduh laporan try out (Excel)</button>
+      <button class="tombol sekunder" data-unduh-to="pdf">Unduh laporan try out (PDF)</button>
+    </div>`;
+
+  $('isiRekap').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.hasil) bukaHasil(b.dataset.hasil, b);
+    else if (b.dataset.mulai) mulaiUjian(b.dataset.paket, b.dataset.subtes, b);
+    else if (b.dataset.unduhTo) unduhLaporanTO(r.paket.paket_id, b.dataset.unduhTo, b);
+  };
+}
+
+async function unduhLaporanTO(paketId, format, tombol) {
+  try {
+    await denganTombol(tombol, 'Menyiapkan berkas…', async () => {
+      const d = await api('exportReportTO', Object.assign({ paketId, format }, kred));
+      unduhBase64(d.base64, d.filename, d.mime);
+    });
+  } catch (e) { info('Unduhan gagal', e.message); }
+}
+
+$('btnKembaliRekap').onclick = async () => {
+  try { await segarkanLogin(); } catch (e) { }
+  tampilkanDasbor();
+};
+
+/* ===================== PEMULIHAN SESI ============================ */
+(async function () {
+  try {
+    const d = await api('info');
+    if (d.namaLembaga) $('lencanaLembaga').textContent = d.namaLembaga;
+    if (d.registrasiTerbuka) $('tabMasuk').classList.remove('sembunyi');
+  } catch (e) { /* halaman masuk tetap dapat dipakai */ }
+
+  const simpan = sessionStorage.getItem('to_login');
+  if (!simpan) return;
+  try {
+    kred = JSON.parse(simpan);
+    $('inNisn').value = kred.nisn || ''; $('inKode').value = kred.kode || '';
+    terimaLogin(await api('login', kred));
+    const uj = JSON.parse(sessionStorage.getItem('to_ujian') || 'null');
+    if (uj && berjalan.some(b => b.paket_id === uj.paketId && b.subtes_id === uj.subtesId)) {
+      await mulaiUjian(uj.paketId, uj.subtesId, null, { tanpaKonfirmasi: true });
+      return;
+    }
+    sessionStorage.removeItem('to_ujian');
+    lanjutSetelahMasuk();
+  } catch (e) { sessionStorage.clear(); }
+})();
+</script>
+</body>
+</html>
