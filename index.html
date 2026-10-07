@@ -3,6 +3,7 @@
 <html lang="id">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Try Out UTBK-SNBT</title>
 <style>
 :root{
@@ -285,6 +286,16 @@ details.bacaan-tinjau .teks{padding:4px 14px 12px;font-size:14.5px}
 
 .pernyataan-1234{margin:6px 0 12px;padding-left:22px}.pernyataan-1234 li{margin:4px 0;list-style-type:none;counter-increment:p1234}
 .pernyataan-1234{counter-reset:p1234}.pernyataan-1234 li::before{content:"(" counter(p1234) ") ";font-weight:700}
+/* ============ ruang ujian terkunci: halaman tidak bergeser/memantul; hanya isi yang menggulir ============ */
+input,select,textarea{font-size:16px}                     /* < 16px membuat Safari iPad/iPhone memperbesar & menggeser halaman */
+.cbt textarea.esai{font-size:16px}
+html.kunci-layar,html.kunci-layar body{height:100%;overflow:hidden;overscroll-behavior:none}
+html.kunci-layar body{position:fixed;inset:0;width:100%;touch-action:manipulation}
+html.kunci-layar #layarUjian:not(.sembunyi),html.kunci-layar #layarCbt:not(.sembunyi),html.kunci-layar #layarJeda:not(.sembunyi){
+  position:fixed;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+  padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 28px)}
+html.kunci-layar .ujian-bar{padding-top:env(safe-area-inset-top, 0px)}
+html.kunci-layar .sedang-mengetik{padding-bottom:60vh !important}   /* ruang di bawah agar kotak jawaban bisa naik di atas keyboard layar */
 /* ============ kunci layar ujian ============ */
 body.mode-kunci{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;overscroll-behavior:none}
 body.mode-kunci input,body.mode-kunci textarea{-webkit-user-select:text;user-select:text}
@@ -337,7 +348,7 @@ body.mode-kunci img{-webkit-user-drag:none}
 .cbt-viol b{color:var(--salah)}
 .cbt-media img{max-width:100%;border-radius:8px;border:1px solid var(--garis);margin:6px 0 12px}
 .cbt-media audio{width:100%;margin:6px 0 12px}
-.cbt textarea.esai{width:100%;min-height:260px;padding:12px 14px;border:1px solid var(--garis);border-radius:var(--r);font-family:inherit;font-size:15px;line-height:1.6;resize:vertical}
+.cbt textarea.esai{width:100%;min-height:260px;padding:12px 14px;border:1px solid var(--garis);border-radius:var(--r);font-family:inherit;font-size:16px;line-height:1.6;resize:vertical}
 .cbt textarea.esai:focus{outline:none;border-color:var(--pt);box-shadow:0 0 0 3px var(--pt-muda)}
 .hitung-kata{font-size:12.5px;color:var(--tinta-3);text-align:right;margin-top:4px}
 .tf-pilih{display:flex;gap:10px;flex-wrap:wrap}
@@ -664,7 +675,7 @@ body.mode-kunci img{-webkit-user-drag:none}
    ================================================================== */
 // Data awal dari server (disisipkan Apps Script saat halaman dibuka)
 // Alamat web app Apps Script (terhubung ke Google Sheets). Dipakai bila halaman ini dibuka di luar Apps Script.
-const URL_GAS = 'https://script.google.com/macros/s/AKfycbzc7xHWj4oV0Kwb_E-H6g-o4Bv2HQ9c-yJK_oZvMYicnbHX4r-4BR7wOIgcU99Ff8823Q/exec';
+const URL_GAS = 'https://script.google.com/macros/s/AKfycbynEA4Vp0QjStA7zrABCG7eMiKrF_LngCK5D4CPbW52kGE0dCXTQmSMCDElcXCQLaElfg/exec';
 let BOOT = {};
 try { BOOT = JSON.parse(document.getElementById('dataAwal').textContent); } catch (e) { BOOT = {}; }
 if (!BOOT.url) BOOT.url = URL_GAS;
@@ -781,9 +792,33 @@ const PERANGKAT = (function () {
   const jenis = ipad ? 'ipad' : iphone ? 'iphone' : android ? 'android' : cros ? 'chromebook' : /Mac OS X|Macintosh/.test(ua) ? 'mac' : /Windows/.test(ua) ? 'windows' : 'lain';
   return { jenis: jenis, sentuh: sentuh, seb: /\bSEB\b|SafeExamBrowser/i.test(ua) };
 })();
+/* Salin/tempel di kotak jawaban: teks milik siswa sendiri boleh dipindah (bukan pelanggaran);
+   menempel teks dari luar (aplikasi lain/internet) tetap dicegah. */
+const SALINAN = { teks: '' };
+function diKotakJawaban(el) { return !!(el && /^(INPUT|TEXTAREA)$/.test(el.tagName) && !el.readOnly && el.type !== 'radio' && el.type !== 'checkbox'); }
+function teksTerpilih(el) { try { return String(el.value || '').slice(el.selectionStart, el.selectionEnd); } catch (e) { return ''; } }
+function salinSendiri(e) {
+  if (!diKotakJawaban(e.target)) return false;
+  SALINAN.teks = teksTerpilih(e.target) || SALINAN.teks;
+  return true;
+}
+function tempelSendiri(e) {
+  if (!diKotakJawaban(e.target)) return false;
+  let t = '';
+  try { t = (e.clipboardData || window.clipboardData).getData('text') || ''; } catch (er) { }
+  t = t.trim();
+  if (!t) return true;                                     // kosong → tidak merugikan siapa pun
+  if (SALINAN.teks && SALINAN.teks.trim() === t) return true;
+  const jawabanSendiri = []
+    .concat(typeof cb !== 'undefined' && cb.jawaban ? Object.values(cb.jawaban) : [])
+    .concat(typeof jawaban !== 'undefined' && jawaban ? Object.values(jawaban) : []);
+  return jawabanSendiri.some(v => [].concat(v).some(x => String(x || '').indexOf(t) >= 0));
+}
+
 const KUNCI = { aktif: false, fs: false, ditolak: false, wl: null, h: null, cb: {}, en: false };
 function fsEl() { return document.fullscreenElement || document.webkitFullscreenElement || null; }
 function bisaFs() {
+  if (PERANGKAT.jenis === 'ipad' || PERANGKAT.jenis === 'iphone') return false;
   const d = document.documentElement;
   return !!(d.requestFullscreen || d.webkitRequestFullscreen) && (document.fullscreenEnabled || document.webkitFullscreenEnabled || false) !== false;
 }
@@ -843,12 +878,67 @@ function kunciMulai(opsi) {
     fs: () => {
       if (!KUNCI.aktif) return;
       if (fsEl()) { KUNCI.fs = true; return; }
-      if (KUNCI.fs) { KUNCI.fs = false; kunciTampil('fs'); lapor('MULTITASK', 'Keluar dari layar penuh'); }
+      if (KUNCI.fs) {
+        KUNCI.fs = false;
+        // tablet/HP: layar penuh dapat keluar sendiri (keyboard layar, sapuan, tombol kembali) → tanpa layar kunci, tanpa pelanggaran
+        if (PERANGKAT.sentuh) return;
+        kunciTampil('fs'); lapor('MULTITASK', 'Keluar dari layar penuh');
+      }
     },
     lihat: () => {
       if (!KUNCI.aktif) return;
-      if (document.hidden) { kunciTampil('tab'); lapor('TAB_SWITCH', PERANGKAT.sentuh ? 'Keluar dari peramban/aplikasi' : 'Pindah tab atau aplikasi'); }
-      else { KUNCI.wl = null; kunciNyala(); }
+      if (document.hidden) {
+        KUNCI.sembunyiSejak = Date.now();
+        if (!PERANGKAT.sentuh) { kunciTampil('tab'); lapor('TAB_SWITCH', 'Pindah tab atau aplikasi'); }
+        return;
+      }
+      KUNCI.wl = null; kunciNyala();
+      if (PERANGKAT.sentuh && KUNCI.sembunyiSejak) {
+        // tablet/HP: (1) sapuan tak sengaja yang langsung kembali (< 2 detik) tidak dihitung;
+        // (2) layar yang mati sendiri (Kunci Otomatis) setelah siswa diam ≥ 100 detik tidak dihitung —
+        //     siswa yang sedang membaca lama tidak boleh dianggap pindah aplikasi.
+        const lama = Date.now() - KUNCI.sembunyiSejak;
+        const diamSebelum = KUNCI.sembunyiSejak - (KUNCI.interaksi || 0);
+        KUNCI.sembunyiSejak = 0;
+        if (lama >= 2000 && diamSebelum < 100000) { kunciTampil('tab'); lapor('TAB_SWITCH', 'Keluar dari peramban/aplikasi ' + Math.round(lama / 1000) + ' detik'); }
+        else if (lama >= 2000) kabar(KUNCI.en ? 'The screen turned off for a moment. Continue your test.' : 'Layar perangkat sempat mati. Silakan lanjutkan mengerjakan.');
+      }
+    },
+    sentuhan: () => { KUNCI.interaksi = Date.now(); },
+    fokusMasuk: e => {
+      // keyboard layar: kotak jawaban diletakkan di bagian atas layar SEBELUM keyboard muncul,
+      // sehingga Safari tidak perlu menggeser seluruh halaman ke atas (bilah judul & timer tetap di tempat)
+      KUNCI.interaksi = Date.now();
+      const el = e.target;
+      if (!KUNCI.aktif || !PERANGKAT.sentuh || !diKotakJawaban(el)) return;
+      const wadah = el.closest('#layarCbt, #layarUjian, #layarJeda');
+      if (!wadah) return;
+      const atur = () => {
+        if (document.activeElement !== el) return;
+        const r = el.getBoundingClientRect(), tinggi = window.innerHeight;
+        const bar = wadah.querySelector('.ujian-bar'), batasAtas = (bar ? bar.getBoundingClientRect().bottom : 0) + 16;
+        const sasaran = Math.max(batasAtas, tinggi * 0.16);
+        if (r.top > tinggi * 0.4 || r.top < batasAtas) wadah.scrollTop += r.top - sasaran;
+        window.scrollTo(0, 0);
+      };
+      wadah.classList.add('sedang-mengetik');
+      // peramban sendiri ikut menggulir ke kotak yang difokus → atur lagi sesudahnya & setelah animasi keyboard
+      atur(); requestAnimationFrame(atur); setTimeout(atur, 120); setTimeout(atur, 350);
+    },
+    tetapDiTempat: () => {                                  // Safari kadang menggeser halaman saat keyboard naik/turun
+      if (!KUNCI.aktif) return;
+      if (window.scrollY || document.documentElement.scrollTop || document.body.scrollTop) {
+        window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0;
+      }
+    },
+    fokusKeluar: e => {
+      // Safari iPad/iPhone kadang membiarkan halaman tergeser setelah keyboard layar ditutup → kembalikan
+      if (!KUNCI.aktif || !/INPUT|TEXTAREA|SELECT/.test((e.target && e.target.tagName) || '')) return;
+      setTimeout(() => {
+        if (/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) return;
+        window.scrollTo(0, 0);
+        document.querySelectorAll('.sedang-mengetik').forEach(x => x.classList.remove('sedang-mengetik'));
+      }, 120);
     },
     kabur: () => {
       // Tablet/HP: keyboard layar, dikte, pusat notifikasi dapat memicu blur → TIDAK dihitung.
@@ -872,6 +962,14 @@ function kunciMulai(opsi) {
   document.addEventListener('visibilitychange', h.lihat); window.addEventListener('blur', h.kabur);
   window.addEventListener('popstate', h.mundur); document.addEventListener('keydown', h.tombol, true);
   document.addEventListener('gesturestart', h.cubit); window.addEventListener('beforeunload', h.tutup);
+  document.addEventListener('focusout', h.fokusKeluar);
+  document.addEventListener('focusin', h.fokusMasuk);
+  ['touchstart', 'keydown', 'input', 'pointerdown'].forEach(n => document.addEventListener(n, h.sentuhan, { capture: true, passive: true }));
+  document.addEventListener('scroll', h.sentuhan, { capture: true, passive: true });
+  window.addEventListener('scroll', h.tetapDiTempat, { passive: true });
+  if (window.visualViewport) { visualViewport.addEventListener('resize', h.tetapDiTempat); visualViewport.addEventListener('scroll', h.tetapDiTempat); }
+  KUNCI.interaksi = Date.now();
+  document.documentElement.classList.add('kunci-layar');
   setTimeout(() => { if (KUNCI.aktif && bisaFs() && !fsEl() && !KUNCI.ditolak) kunciTampil('mulai'); }, 1500);
 }
 function kunciSelesai() {
@@ -882,6 +980,12 @@ function kunciSelesai() {
   document.removeEventListener('visibilitychange', h.lihat); window.removeEventListener('blur', h.kabur);
   window.removeEventListener('popstate', h.mundur); document.removeEventListener('keydown', h.tombol, true);
   document.removeEventListener('gesturestart', h.cubit); window.removeEventListener('beforeunload', h.tutup);
+  document.removeEventListener('focusout', h.fokusKeluar);
+  document.removeEventListener('focusin', h.fokusMasuk);
+  ['touchstart', 'keydown', 'input', 'pointerdown', 'scroll'].forEach(n => document.removeEventListener(n, h.sentuhan, { capture: true }));
+  window.removeEventListener('scroll', h.tetapDiTempat);
+  if (window.visualViewport) { visualViewport.removeEventListener('resize', h.tetapDiTempat); visualViewport.removeEventListener('scroll', h.tetapDiTempat); }
+  document.documentElement.classList.remove('kunci-layar');
   try { if (KUNCI.wl) KUNCI.wl.release(); } catch (e) { } KUNCI.wl = null;
   try { if (navigator.keyboard && navigator.keyboard.unlock) navigator.keyboard.unlock(); } catch (e) { }
   KUNCI.fs = false;
@@ -954,10 +1058,14 @@ async function kirimSampaiBerhasil(aksi, payloadFn, judul) {
 }
 
 const LAYAR = ['layarMasuk', 'layarProfil', 'layarDasbor', 'layarUjian', 'layarJeda', 'layarHasil', 'layarRekap', 'layarCbtInfo', 'layarCbt', 'layarCbtHasil'];
+function gulirAtas() {
+  ['layarCbt', 'layarUjian', 'layarJeda'].forEach(i => { const e = document.getElementById(i); if (e && !e.classList.contains('sembunyi')) e.scrollTop = 0; });
+  window.scrollTo(0, 0);
+}
 function layar(id) {
   LAYAR.forEach(x => $(x).classList.toggle('sembunyi', x !== id));
   if (['layarUjian', 'layarJeda', 'layarCbt'].indexOf(id) < 0 && typeof kunciSelesai === 'function') kunciSelesai();
-  window.scrollTo(0, 0);
+  gulirAtas();
 }
 
 function konfirmasi(judul, pesan, tombolYa) {
@@ -1496,7 +1604,7 @@ $('kisiNomor').onclick = e => {
 };
 $('btnSebelum').onclick = () => { if (idx > 0) { idx--; gambarSoal(); gambarKisi(); } };
 $('btnLanjut').onclick = () => {
-  if (idx < soal.length - 1) { idx++; gambarSoal(); gambarKisi(); window.scrollTo(0, 0); }
+  if (idx < soal.length - 1) { idx++; gambarSoal(); gambarKisi(); gulirAtas(); }
   else $('btnSelesai').click();
 };
 $('btnRagu').onclick = () => {
@@ -1627,9 +1735,9 @@ function pasangPengawas() {
   if (pengawas) return;
   pengawas = {
 
-    salin: e => { e.preventDefault(); catat('salin', 'Ctrl/Cmd+C atau menu salin'); },
-    tempel: e => { e.preventDefault(); catat('tempel', 'Menempel teks ke halaman ujian'); },
-    potong: e => { e.preventDefault(); catat('potong', ''); },
+    salin: e => { if (salinSendiri(e)) return; e.preventDefault(); catat('salin', 'Ctrl/Cmd+C atau menu salin'); },
+    tempel: e => { if (tempelSendiri(e)) return; e.preventDefault(); catat('tempel', 'Menempel teks ke halaman ujian'); },
+    potong: e => { if (salinSendiri(e)) return; e.preventDefault(); catat('potong', ''); },
     klikKanan: e => { e.preventDefault(); if (!PERANGKAT.sentuh) catat('klik_kanan', ''); },   // tekan lama di tablet bukan pelanggaran
     tombol: e => {
       const k = (e.key || '').toLowerCase();
@@ -2145,7 +2253,7 @@ $('cbSebelum').onclick = () => { if (cb.idx > 0) pindahCbt(cb.idx - 1); };
 $('cbLanjut').onclick = () => { if (cb.idx < cb.soal.length - 1) pindahCbt(cb.idx + 1); else $('cbSelesai').click(); };
 $('cbRagu').onclick = () => { const q = cb.soal[cb.idx]; if (cb.ragu[q.qid]) delete cb.ragu[q.qid]; else cb.ragu[q.qid] = true; ubahCbt(true); };
 function pindahCbt(i) {
-  cb.idx = i; gambarCbt(); window.scrollTo(0, 0);
+  cb.idx = i; gambarCbt(); gulirAtas();
   if (cb.berubah && Date.now() - cb.terakhir > 8000) simpanCbt();       // simpan saat berpindah soal
 }
 
@@ -2406,25 +2514,34 @@ $('vKembali').onclick = () => { $('tiraiViol').classList.add('sembunyi'); if (!f
 function pasangPengawasCbt() {
   if (pgCbt) return;
   const larang = e => { e.preventDefault(); laporViol('COPY_PASTE', e.type); };
+  const salinCek = e => { if (salinSendiri(e)) return; larang(e); };            // salin/potong teks jawaban sendiri: boleh
+  const tempelCek = e => { if (tempelSendiri(e)) return; larang(e); };          // tempel teks dari luar: pelanggaran
   // tekan lama di tablet/HP memicu contextmenu/drag → cukup dicegah, BUKAN pelanggaran
   const cegahSaja = e => { e.preventDefault(); if (!PERANGKAT.sentuh) laporViol('COPY_PASTE', e.type); };
   let tLebar = 0;
   pgCbt = {
-    salin: larang, tempel: larang, potong: larang, kanan: cegahSaja, seret: cegahSaja, jatuh: larang,
+    salin: salinCek, tempel: tempelCek, potong: salinCek, kanan: cegahSaja, seret: cegahSaja, jatuh: larang,
     tombol: e => {
       const k = (e.key || '').toLowerCase();
+      // di kotak jawaban: pilih semua/salin/potong/tempel teks sendiri diperbolehkan (tempel dinilai oleh event paste)
+      if ((e.ctrlKey || e.metaKey) && ['a', 'c', 'x', 'v'].indexOf(k) >= 0 && diKotakJawaban(e.target)) return;
       if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'a', 'p', 's', 'u'].indexOf(k) >= 0) { e.preventDefault(); laporViol('COPY_PASTE', 'Ctrl+' + k.toUpperCase()); }
       else if (e.key === 'F12') { e.preventDefault(); laporViol('COPY_PASTE', 'F12'); }
     },
     lepas: e => { if (e.key === 'PrintScreen') laporViol('COPY_PASTE', 'PrintScreen'); },
     ukuran: () => {
-      // hanya LEBAR yang diperiksa: keyboard layar mengubah tinggi, bukan lebar; outerWidth tidak terpengaruh zoom peramban
-      const kini = Date.now();
-      if (kini - tLebar < 5000 || !window.screen) return;
-      const lanskap = window.matchMedia && matchMedia('(orientation: landscape)').matches;
-      const lebarLayar = PERANGKAT.sentuh ? (lanskap ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height)) : screen.availWidth;
-      const lebar = PERANGKAT.sentuh ? window.innerWidth : (window.outerWidth || window.innerWidth);
-      if (lebarLayar && lebar < lebarLayar * 0.55) { tLebar = kini; laporViol('MULTITASK', 'Layar terbagi / jendela diperkecil'); }
+      // hanya LEBAR yang diperiksa (keyboard layar mengubah tinggi, bukan lebar; outerWidth tidak terpengaruh zoom).
+      // Dihitung hanya bila jendela tetap sempit ≥ 1,5 detik — memutar tablet tidak dianggap layar terbagi.
+      const sempit = () => {
+        if (!window.screen) return false;
+        const lanskap = window.matchMedia && matchMedia('(orientation: landscape)').matches;
+        const lebarLayar = PERANGKAT.sentuh ? (lanskap ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height)) : screen.availWidth;
+        const lebar = PERANGKAT.sentuh ? window.innerWidth : (window.outerWidth || window.innerWidth);
+        return !!lebarLayar && lebar < lebarLayar * 0.55;
+      };
+      if (Date.now() - tLebar < 5000 || !sempit()) return;
+      clearTimeout(pgCbt.hUkuran);
+      pgCbt.hUkuran = setTimeout(() => { if (pgCbt && sempit() && Date.now() - tLebar >= 5000) { tLebar = Date.now(); laporViol('MULTITASK', 'Layar terbagi / jendela diperkecil'); } }, 1500);
     },
     layarDua: () => { if (window.screen && window.screen.isExtended) laporViol('MULTITASK', 'Dua layar terdeteksi'); }
   };
@@ -2496,4 +2613,4 @@ function lepasPengawasCbt() {
 <script>window.__berkasUtuh = true;</script>
 </body>
 </html>
-<!-- AKHIR BERKAS Index · 147245 -->
+<!-- AKHIR BERKAS Index · 155128 -->
