@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- AWAL BERKAS Index · CBT & Try Out SMAIT Al-Ittihad v5 · build v5-2026-10-21 · hapus semua isi lama, tempel SATU kali -->
+<!-- AWAL BERKAS Index · CBT & Try Out SMAIT Al-Ittihad v5 · build v5-2026-10-21b · hapus semua isi lama, tempel SATU kali -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -838,7 +838,7 @@ let BOOT = {};
 try { BOOT = JSON.parse(document.getElementById('dataAwal').textContent); } catch (e) { BOOT = {}; }
 if (!BOOT.url) BOOT.url = URL_GAS;
 const DI_GAS = !!(window.google && google.script && google.script.run);
-const BUILD_HALAMAN = 'v5-2026-10-21';      // diperbarui otomatis saat paket dibuat; harus sama dengan BUILD di Code.gs
+const BUILD_HALAMAN = 'v5-2026-10-21b';      // diperbarui otomatis saat paket dibuat; harus sama dengan BUILD di Code.gs
 /** Halaman yang dipasang di hosting luar: beri peringatan bila versinya tidak sama dengan server (Code.gs). */
 if (!DI_GAS) setTimeout(function () {
   fetch((typeof BOOT !== 'undefined' && BOOT.url) || URL_GAS, { method: 'POST', body: JSON.stringify({ action: 'ping' }), headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow' })
@@ -1307,6 +1307,12 @@ async function denganTombol(tombol, labelProses, kerja) {
   finally { if (tombol && document.body.contains(tombol)) { tombol.disabled = false; tombol.textContent = asli; } }
 }
 
+/** Label kolom tabel B/S: baris "[KOLOM: Label 1 | Label 2]" di teks soal (B = kolom 1, S = kolom 2), mis. "[KOLOM: Fact | Opinion]".
+ *  Tanpa baris itu kolomnya Benar / Salah. Baris [KOLOM: …] tidak ditampilkan sebagai teks. */
+function kolomBS(s, bawaan) {
+  const m = String(s || '').match(/^[ \t]*\[KOLOM[ \t]*:[ \t]*([^|\]\n]+?)[ \t]*\|[ \t]*([^|\]\n]+?)[ \t]*\][ \t]*$/im);
+  return m ? [m[1], m[2]] : (bawaan || ['Benar', 'Salah']);
+}
 /** Teks bacaan/soal: baris diawali "|" menjadi tabel, sisanya paragraf. */
 function renderTeks(s) {
   const baris = String(s === undefined || s === null ? '' : s).replace(/\r\n?/g, '\n').split('\n');
@@ -1318,6 +1324,7 @@ function renderTeks(s) {
   };
   const tutupTabel = () => { if (tabel.length) html += tabelHTML(tabel); tabel = []; };
   baris.forEach(b => {
+    if (/^\s*\[KOLOM\s*:[^\]\n]*\]\s*$/i.test(b)) return;                 // label kolom tabel B/S, bukan teks
     // gambar/audio di dalam teks: baris "[GAMBAR: https://…]" atau "[AUDIO: https://…]"
     const m = b.match(/^\s*\[(GAMBAR|AUDIO)\s*:\s*(https:\/\/[^\s\]]+)\s*\]\s*$/i);
     if (m) { tutupPara(); tutupTabel(); html += htmlMedia(m[2].replace(/#(audio|gambar)$/, '') + (m[1].toUpperCase() === 'AUDIO' ? '#audio' : '#gambar')); return; }
@@ -3053,7 +3060,7 @@ function gambarCbt() {
     isi += htmlSpeaking(q);
   } else if (q.tipe === 'TABEL_BS') {
     const arr = Array.isArray(j) ? j : [];
-    isi += `<div class="tabel-gulir"><table class="tabel-kategori kategori-grid"><thead><tr><th>${T('pernyataan')}</th><th class="pilih-sel">${T('benar')}</th><th class="pilih-sel">${T('salah')}</th></tr></thead><tbody>` +
+    isi += `<div class="tabel-gulir"><table class="tabel-kategori kategori-grid"><thead><tr><th>${T('pernyataan')}</th>${kolomBS(q.teks, [T('benar'), T('salah')]).map(l => `<th class="pilih-sel">${teks(l)}</th>`).join('')}</tr></thead><tbody>` +
       q.baris.map((b, i) => `<tr><td>${teks(b)}</td>${['B', 'S'].map(k => `<td class="pilih-sel"><input type="radio" name="cb${i}" data-baris="${i}" value="${k}" ${arr[i] === k ? 'checked' : ''}></td>`).join('')}</tr>`).join('') +
       '</tbody></table></div>';
   }
@@ -3382,7 +3389,7 @@ function gambarHasilCbt(h, otomatis) {
   const kelas = { benar: 'benar', salah: 'salah', sebagian: 'sebagian', kosong: 'kosong', esai: 'sebagian' };
   const fmtJw = (r, v) => {
     if (v === '' || v === undefined || v === null) return '—';
-    if (r.tipe === 'TABEL_BS' && Array.isArray(v)) return v.map((x, i) => (i + 1) + ': ' + (x === 'B' ? 'Benar' : x === 'S' ? 'Salah' : '—')).join(', ');
+    if (r.tipe === 'TABEL_BS' && Array.isArray(v)) { const kl = kolomBS(r.teks); return v.map((x, i) => (i + 1) + ': ' + (x === 'B' ? kl[0] : x === 'S' ? kl[1] : '—')).join(', '); }
     return Array.isArray(v) ? v.join(', ') : String(v);
   };
   const kartu = h.review.map(r => `<div class="kartu tinjau" data-status="${r.status}">
@@ -3396,7 +3403,7 @@ function gambarHasilCbt(h, otomatis) {
       : r.tipe === 'ESSAY_TERSTRUKTUR'
       ? r.opsi.map((o, i) => `<div class="isian-hasil"><div><small>${teks(o.text)}</small><b style="font-size:15px;white-space:pre-wrap">${teks((Array.isArray(r.jawaban) ? r.jawaban[i] : '') || '—')}</b></div></div>`).join('')
       : r.tipe === 'TABEL_BS'
-      ? `<div class="tabel-gulir"><table class="tabel-hasil"><thead><tr><th>Pernyataan</th><th>Jawaban Anda</th><th>Kunci</th></tr></thead><tbody>${r.opsi.map((o, i) => { const a = Array.isArray(r.jawaban) ? r.jawaban[i] : ''; const k = String(r.kunci).split(',')[i]; return `<tr><td>${teks(o.text)}</td><td class="${a === k ? 'ok' : 'no'}">${a === 'B' ? 'Benar' : a === 'S' ? 'Salah' : '—'}</td><td>${k === 'B' ? 'Benar' : 'Salah'}</td></tr>`; }).join('')}</tbody></table></div>`
+      ? `<div class="tabel-gulir"><table class="tabel-hasil"><thead><tr><th>Pernyataan</th><th>Jawaban Anda</th><th>Kunci</th></tr></thead><tbody>${r.opsi.map((o, i) => { const kl = kolomBS(r.teks), a = Array.isArray(r.jawaban) ? r.jawaban[i] : ''; const k = String(r.kunci).split(',')[i]; return `<tr><td>${teks(o.text)}</td><td class="${a === k ? 'ok' : 'no'}">${teks(a === 'B' ? kl[0] : a === 'S' ? kl[1] : '—')}</td><td>${teks(k === 'B' ? kl[0] : kl[1])}</td></tr>`; }).join('')}</tbody></table></div>`
       : (r.opsi.length && r.tipe !== 'TABEL_BS' ? r.opsi.map(o => { const kunciL = String(r.kunci).split(','); const dipilih = (Array.isArray(r.jawaban) ? r.jawaban : [r.jawaban]).indexOf(o.key) >= 0; const kn = kunciL.indexOf(o.key) >= 0;
           return `<div class="opsi-hasil ${kn ? 'kunci' : (dipilih ? 'pilihan-salah' : '')}"><b>${o.key}.</b><span>${teks(o.text)}${kn ? ' <b style="color:var(--benar)">— kunci</b>' : ''}${dipilih ? ' <b>(jawaban Anda)</b>' : ''}</span></div>`; }).join('')
         : `<div class="isian-hasil ${['ESSAY', 'STUDI_KASUS', 'SPEAKING'].indexOf(r.tipe) >= 0 ? 'penuh' : ''}"><div><small>Jawaban Anda</small><b style="font-size:15px;white-space:pre-wrap">${teks(fmtJw(r, r.jawaban))}</b></div>${['ESSAY', 'STUDI_KASUS', 'SPEAKING'].indexOf(r.tipe) < 0 ? `<div><small>Kunci</small><b>${teks(String(r.kunci).split('|').join(' / '))}</b></div>` : ''}</div>`)}
@@ -3595,4 +3602,4 @@ function lepasPengawasCbt() {
 <script>window.__berkasUtuh = true;</script>
 </body>
 </html>
-<!-- AKHIR BERKAS Index · 279831 -->
+<!-- AKHIR BERKAS Index · 280465 -->
