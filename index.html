@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- AWAL BERKAS Index · CBT & Try Out SMAIT Al-Ittihad v5 · hapus semua isi lama, tempel SATU kali -->
+<!-- AWAL BERKAS Index · CBT & Try Out SMAIT Al-Ittihad v5 · build v5-2026-10-21 · hapus semua isi lama, tempel SATU kali -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-<title>Try Out UTBK-SNBT</title>
+<title>CBT-SMAIT</title>
 <style>
 :root{
   --tinta:#14202E; --tinta-2:#43556B; --tinta-3:#6F8196;
@@ -231,6 +231,8 @@ table.tabel-data td.angka{text-align:right;font-variant-numeric:tabular-nums}
 .isian-hasil div{border:1px solid var(--garis);border-radius:8px;padding:10px 12px}
 .isian-hasil small{display:block;color:var(--tinta-3);font-size:12px}
 .isian-hasil b{font-size:17px;font-variant-numeric:tabular-nums}
+.isian-hasil.penuh{grid-template-columns:minmax(0,1fr)}
+.isian-hasil.penuh b{font-weight:400;font-size:15px;line-height:1.6;white-space:pre-wrap}
 .pembahasan{background:var(--biru-muda);border-left:3px solid var(--biru);padding:13px 15px;border-radius:0 8px 8px 0;margin-top:12px;font-size:14px;white-space:pre-line}
 .pembahasan b{display:block;font-size:12.5px;color:var(--biru);margin-bottom:4px}
 .alasan{background:#FDF3F2;border-left:3px solid var(--salah);padding:13px 15px;border-radius:0 8px 8px 0;margin-top:10px;font-size:14px}
@@ -296,6 +298,27 @@ html.kunci-layar #layarUjian:not(.sembunyi),html.kunci-layar #layarCbt:not(.semb
   padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 28px)}
 html.kunci-layar .ujian-bar{padding-top:env(safe-area-inset-top, 0px)}
 html.kunci-layar .sedang-mengetik{padding-bottom:60vh !important}   /* ruang di bawah agar kotak jawaban bisa naik di atas keyboard layar */
+/* ============ audio Listening otomatis ============ */
+.audio-bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;max-width:1400px;margin:0 auto;padding:8px 20px 10px;color:#fff}
+.audio-bar .audio-teks{display:flex;flex-direction:column;min-width:200px}
+.audio-bar .audio-teks b{font-size:14px}.audio-bar .audio-teks span{font-size:12px;color:rgba(255,255,255,.8)}
+.audio-bar .audio-rel{flex:1;min-width:120px;height:6px;background:rgba(255,255,255,.25);border-radius:99px;overflow:hidden}
+.audio-bar .audio-rel i{display:block;height:100%;width:0;background:#fff;transition:width .5s linear}
+.audio-bar .audio-waktu{font-variant-numeric:tabular-nums;font-size:13px;min-width:86px;text-align:right}
+.audio-bar button{border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer}
+.audio-bar .audio-putar{background:#fff;color:#14202E;font-size:15px;padding:9px 18px;animation:denyut 1.4s ease-in-out infinite}
+@keyframes denyut{50%{box-shadow:0 0 0 6px rgba(255,255,255,.25)}}
+/* ============ perekam Speaking ============ */
+.rekam{border:1px solid var(--garis);border-radius:12px;padding:16px;margin-top:12px;background:#FBFCFE}
+.rekam .rekam-info{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--tinta-2);margin-bottom:10px}
+.rekam .rekam-status{font-size:14.5px;margin:6px 0 10px;color:var(--tinta-2)}
+.rekam .rekam-status.merekam{color:#B4232C;font-weight:700}.rekam .rekam-status.selesai{color:#1B7A55;font-weight:700}
+.rekam .rekam-status.persiapan{color:#8A6110;font-weight:700}.rekam .rekam-status.tunda{color:#8A6110}
+.rekam .rekam-jam{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;margin:4px 0 10px}
+.rekam .rekam-level{height:8px;background:#EEF2F6;border-radius:99px;overflow:hidden;margin:0 0 12px;max-width:360px}
+.rekam .rekam-level i{display:block;height:100%;width:0;background:#16A34A;transition:width .1s}
+.rekam .titik-rekam{display:inline-block;width:11px;height:11px;border-radius:50%;background:#DC2626;margin-right:8px;animation:denyut-merah 1s infinite}
+@keyframes denyut-merah{50%{opacity:.3}}
 /* ============ kunci layar ujian ============ */
 body.mode-kunci{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;overscroll-behavior:none}
 body.mode-kunci input,body.mode-kunci textarea{-webkit-user-select:text;user-select:text}
@@ -346,6 +369,7 @@ body.mode-kunci img{-webkit-user-drag:none}
 .cbt-bawah .legenda{display:flex;gap:16px;flex-wrap:wrap;margin:0}
 .cbt-viol{font-size:13px;font-weight:600;color:var(--tinta-2)}
 .cbt-viol b{color:var(--salah)}
+.media-gagal{font-size:13px;color:#8A6110;background:#FCF3DF;border-radius:8px;padding:8px 10px;margin:6px 0 12px}
 .cbt-media img{max-width:100%;border-radius:8px;border:1px solid var(--garis);margin:6px 0 12px}
 .cbt-media audio{width:100%;margin:6px 0 12px}
 .cbt textarea.esai{width:100%;min-height:260px;padding:12px 14px;border:1px solid var(--garis);border-radius:var(--r);font-family:inherit;font-size:16px;line-height:1.6;resize:vertical}
@@ -392,6 +416,120 @@ body.mode-kunci img{-webkit-user-drag:none}
   .bar,.unduh,.sisi,.ujian-bar{display:none}
   body{background:#fff}
 }
+/* <<RAPOR-CSS>> */
+.rapor{--rp:#15803D;background:#fff;border:1px solid #DCE3EC;border-top:6px solid var(--rp);border-radius:12px;padding:22px 24px;margin:0 auto 18px;max-width:880px;color:#14202E;font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif}
+.rapor .rp-kepala{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;border-bottom:1px solid #E5EAF0;padding-bottom:12px}
+.rapor .rp-kepala .rp-logo{height:54px;width:auto;flex:none;margin-right:2px}.rapor .rp-kepala .rp-judul{flex:1;min-width:200px}
+.rapor .rp-yayasan{font-size:11px;color:#6F8196}
+.rapor .rp-lembaga{font-size:12.5px;color:#5B6B7F;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
+.rapor h2{margin:4px 0 0;font-size:20px;color:var(--rp)}
+.rapor .rp-label-skema{font-size:12px;background:#F4F6F9;border-radius:99px;padding:4px 10px;color:#43556B;font-weight:600}
+.rapor .rp-identitas{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:6px 14px;margin:14px 0;font-size:14px}
+.rapor .rp-identitas span{color:#6F8196}.rapor .rp-identitas b{font-weight:600}
+@media(max-width:620px){.rapor .rp-identitas{grid-template-columns:auto 1fr}}
+.rapor .rp-utama{display:grid;grid-template-columns:minmax(180px,240px) 1fr;gap:18px;align-items:stretch;margin:6px 0 10px}
+@media(max-width:720px){.rapor .rp-utama{grid-template-columns:1fr}}
+.rapor .rp-total{background:var(--rp);color:#fff;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.rapor .rp-total span{font-size:12.5px;opacity:.9}.rapor .rp-total b{font-size:44px;line-height:1.05;font-variant-numeric:tabular-nums}
+.rapor .rp-sementara{font-size:12px;opacity:.95}
+.rapor .rp-chip{display:inline-block;margin:6px 4px 0 0;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.45);border-radius:99px;padding:3px 9px;font-size:12px;font-weight:700}
+.rapor .rp-chip.rp-ok{background:#DCFCE7;color:#14532D;border-color:#86EFAC}.rapor .rp-chip.rp-tidak{background:#FEE2E2;color:#991B1B;border-color:#FCA5A5}
+.rapor .rp-kotak{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.rapor .rp-k{border:1px solid #DCE3EC;border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:2px;text-align:center}
+.rapor .rp-k span{font-size:12.5px;color:#43556B;font-weight:600}.rapor .rp-k b{font-size:28px;color:var(--rp);font-variant-numeric:tabular-nums}.rapor .rp-k small{font-size:11.5px;color:#6F8196}
+.rapor .rp-batang{display:grid;gap:10px;align-content:center}
+.rapor .rp-b-atas{display:flex;justify-content:space-between;font-size:13.5px;gap:8px}.rapor .rp-b-atas b{font-variant-numeric:tabular-nums}
+.rapor .rp-rel{position:relative;height:9px;background:#EEF2F6;border-radius:99px;overflow:visible;margin-top:4px}
+.rapor .rp-rel i{display:block;height:100%;background:var(--rp);border-radius:99px}
+.rapor .rp-rel em{position:absolute;top:-4px;bottom:-4px;width:2px;background:#14202E;opacity:.55}
+.rapor .rp-b small{font-size:11.5px;color:#6F8196}
+.rapor .rp-sub{font-weight:700;font-size:13.5px;margin:14px 0 6px}
+.rapor .rp-tabel{width:100%;border-collapse:collapse;font-size:13px}.rapor .rp-tabel th,.rapor .rp-tabel td{border:1px solid #DCE3EC;padding:6px 8px;text-align:center}
+.rapor .rp-tabel th:first-child,.rapor .rp-tabel td:first-child{text-align:left}.rapor .rp-tabel th{background:#F4F6F9;font-size:12px}
+.rapor .rp-stat{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.rapor .rp-stat span{background:#F4F6F9;border-radius:8px;padding:5px 10px;font-size:12.5px;color:#43556B}
+.rapor .rp-catatan{background:#FFF7E6;border:1px solid #F6D58E;color:#7A4B00;border-radius:8px;padding:8px 12px;font-size:13px;margin:12px 0 0}
+.rapor .rp-kaki{font-size:11.5px;color:#6F8196;margin:12px 0 0}
+#areaCetak{display:none}
+body.sedang-cetak>*:not(#areaCetak){display:none!important}
+body.sedang-cetak #areaCetak{display:block;background:#fff;padding:16px}
+#areaCetak .tutup-cetak{position:fixed;top:10px;right:10px;z-index:5;border:1px solid #DCE3EC;background:#fff;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer}
+@media print{
+  body.sedang-cetak{background:#fff!important}
+  body.sedang-cetak #areaCetak{padding:0}
+  #areaCetak .tutup-cetak{display:none}
+  .halaman-cetak{break-after:page;page-break-after:always}
+  .halaman-cetak:last-child{break-after:auto;page-break-after:auto}
+  .rapor{border-color:#999;max-width:none;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{size:A4;margin:14mm}
+}
+.aksi-rapor{text-align:center;margin:-4px 0 20px}
+.sertifikat{--rp:#15803D;width:281mm;height:194mm;box-sizing:border-box;margin:0 auto 10mm;padding:3.2mm;background:#fff;border:2.4mm solid var(--rp);color:#14202E;
+  font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;page-break-inside:avoid;break-inside:avoid;overflow:hidden}
+.sertifikat .sr-dalam{isolation:isolate;position:relative;height:100%;box-sizing:border-box;border:.5mm solid var(--rp);padding:7mm 14mm 5mm;display:flex;flex-direction:column;align-items:center;text-align:center;
+  background:radial-gradient(circle at 50% 42%,rgba(0,0,0,.035) 0,rgba(0,0,0,0) 62%),repeating-linear-gradient(45deg,rgba(0,0,0,.012) 0 2mm,rgba(0,0,0,0) 2mm 4mm)}
+.sertifikat .sr-sudut{position:absolute;width:13mm;height:13mm;border:1.2mm solid var(--rp);opacity:.85}
+.sertifikat .sr-s1{top:2.2mm;left:2.2mm;border-right:0;border-bottom:0}.sertifikat .sr-s2{top:2.2mm;right:2.2mm;border-left:0;border-bottom:0}
+.sertifikat .sr-s3{bottom:2.2mm;left:2.2mm;border-right:0;border-top:0}.sertifikat .sr-s4{bottom:2.2mm;right:2.2mm;border-left:0;border-top:0}
+.sertifikat .sr-kepala{width:100%;display:grid;grid-template-columns:36mm 1fr 36mm;align-items:center;gap:4mm}
+.sertifikat .sr-tanda-air{position:absolute;inset:0;width:100%;height:100%;z-index:-1;opacity:.16;pointer-events:none}
+.sertifikat .sr-logo-air{position:absolute;left:50%;top:52%;width:118mm;transform:translate(-50%,-50%);opacity:.07;z-index:-1;pointer-events:none}
+.sertifikat .sr-logo{width:30mm;height:auto;justify-self:start}
+.sertifikat .sr-yayasan{font-size:2.9mm;color:#6F8196;letter-spacing:.2mm;margin-bottom:.6mm}
+.sertifikat .sr-segel{width:24mm;height:24mm;border-radius:50%;border:1mm double var(--rp);color:var(--rp);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;line-height:1.05}
+.sertifikat .sr-segel b{font-size:8mm}.sertifikat .sr-segel span{font-size:2.4mm;letter-spacing:.4mm}
+.sertifikat .sr-lembaga{font-size:3.6mm;letter-spacing:.6mm;text-transform:uppercase;font-weight:700;color:#43556B}
+.sertifikat h1{font-family:Georgia,'Times New Roman',serif;font-size:10.5mm;line-height:1.1;margin:1.5mm 0 0;color:var(--rp);font-weight:700;letter-spacing:.2mm}
+.sertifikat .sr-sub{font-size:3.6mm;font-weight:700;color:#43556B;letter-spacing:.3mm;margin-top:1mm}
+.sertifikat .sr-nomor{text-align:right;font-size:2.6mm;color:#6F8196;display:flex;flex-direction:column;gap:.6mm;align-self:start}
+.sertifikat .sr-nomor b{font-size:2.9mm;color:#14202E;white-space:nowrap;line-height:1.35;font-family:ui-monospace,Consolas,monospace}
+.sertifikat .sr-teks{font-size:3.7mm;color:#43556B;margin-top:4mm;line-height:1.45}
+.sertifikat .sr-teks i{color:#6F8196}
+.sertifikat .sr-nama{font-family:Georgia,'Times New Roman',serif;font-size:11mm;font-weight:700;font-style:italic;margin-top:2.5mm;padding:0 12mm 1.2mm;border-bottom:.4mm solid #9AA9BA;min-width:150mm;line-height:1.15}
+.sertifikat .sr-id{font-size:3.4mm;color:#43556B;margin-top:1.6mm;font-weight:600}
+.sertifikat .sr-skor{display:flex;flex-wrap:wrap;justify-content:center;gap:3mm;margin-top:4.5mm;width:100%}
+.sertifikat .sr-k{min-width:30mm;border:.35mm solid #C9D3DE;border-radius:2.5mm;padding:2.2mm 3mm;display:flex;flex-direction:column;gap:.4mm;background:#fff}
+.sertifikat .sr-k span{font-size:3mm;font-weight:700;color:#43556B}.sertifikat .sr-k b{font-size:8mm;line-height:1.05;color:var(--rp);font-variant-numeric:tabular-nums}
+.sertifikat .sr-k small{font-size:2.4mm;color:#6F8196}
+.sertifikat .sr-k.sr-total{background:var(--rp);border-color:var(--rp);min-width:38mm}.sertifikat .sr-k.sr-total span,.sertifikat .sr-k.sr-total b,.sertifikat .sr-k.sr-total small{color:#fff}
+.sertifikat .sr-k.sr-total b{font-size:10mm}
+.sertifikat.sr-padat .sr-k{min-width:22mm;padding:1.6mm 2mm}.sertifikat.sr-padat .sr-k b{font-size:6.2mm}.sertifikat.sr-padat .sr-k span{font-size:2.5mm}
+.sertifikat .sr-ket{margin-top:3mm;font-size:3.4mm;font-weight:700;color:#14202E}
+.sertifikat .sr-kaki{margin-top:auto;width:100%;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6mm;align-items:end;text-align:center}
+.sertifikat .sr-qr{display:flex;gap:3mm;align-items:center;text-align:left}
+.sertifikat .sr-qr svg,.sertifikat .sr-qr img{width:22mm;height:22mm;flex:none;display:block}
+.sertifikat .sr-qr b{display:block;font-size:3mm}.sertifikat .sr-qr small{font-size:2.5mm;color:#6F8196;display:block;max-width:46mm}
+.sertifikat .sr-ttd{font-size:3.2mm;display:flex;flex-direction:column;align-items:center;gap:.5mm}
+.sertifikat .sr-garis-ttd{height:16mm;display:flex;align-items:flex-end;justify-content:center;margin-bottom:-1.5mm}
+.sertifikat .sr-garis-ttd img{max-height:16mm;max-width:55mm;object-fit:contain;mix-blend-mode:multiply}
+.sertifikat .sr-ttd b{border-bottom:.3mm solid #14202E;padding:0 4mm .4mm;min-width:55mm;display:inline-block}.sertifikat .sr-ttd small{font-size:2.6mm;color:#43556B}
+.sertifikat .sr-catatan{font-size:2.3mm;color:#8494A7;margin-top:2.5mm}
+.sertifikat.sr-reportcard .sr-dalam{align-items:stretch;text-align:left}
+.sertifikat.sr-reportcard .sr-kepala{text-align:center}
+.sertifikat .rc-identitas{display:grid;grid-template-columns:auto 1fr auto 1fr auto 1fr;gap:1.2mm 4mm;font-size:3.3mm;margin:4mm 0 3mm;padding:2.5mm 4mm;border:.35mm solid #C9D3DE;border-radius:2.5mm;background:rgba(255,255,255,.85)}
+.sertifikat .rc-identitas span{color:#6F8196}.sertifikat .rc-identitas b{font-weight:700}
+.sertifikat .rc-utama{display:grid;grid-template-columns:1fr 52mm;gap:5mm;align-items:start}
+.sertifikat .rc-tabel{width:100%;border-collapse:collapse;font-size:3.3mm;background:rgba(255,255,255,.9)}
+.sertifikat .rc-tabel th{background:var(--rp);color:#fff;font-weight:700;padding:1.6mm 2mm;text-align:left;font-size:3mm}
+.sertifikat .rc-tabel td{border-bottom:.3mm solid #DCE3EC;padding:1.5mm 2mm}
+.sertifikat .rc-tabel td.rc-skor{font-weight:800;color:var(--rp);font-size:4mm;font-variant-numeric:tabular-nums}
+.sertifikat .rc-tabel td.rc-nama{font-weight:600}.sertifikat .rc-grafik{width:42mm}
+.sertifikat .rc-rel{height:2.6mm;background:#EEF2F6;border-radius:9mm;overflow:hidden}.sertifikat .rc-rel i{display:block;height:100%;background:var(--rp);border-radius:9mm}
+.sertifikat.rc-padat .rc-tabel td{padding:.9mm 2mm;font-size:2.9mm}
+.sertifikat .rc-ringkas{display:flex;flex-direction:column;gap:3mm}.sertifikat .rc-ringkas .sr-total{text-align:center}
+.sertifikat .rc-catat{border:.35mm solid #C9D3DE;border-radius:2.5mm;padding:2mm 3mm;font-size:3mm;background:rgba(255,255,255,.9)}
+.sertifikat .rc-catat span{display:block;color:#6F8196}.sertifikat .rc-catat b{font-size:3.3mm}
+.sertifikat.sr-reportcard .sr-catatan{text-align:center}
+body.cetak-sertifikat #areaCetak{overflow-x:auto}
+@media print{body.cetak-sertifikat #areaCetak .halaman-cetak{display:flex;justify-content:center}.sertifikat{margin:0;border-width:2.4mm}}
+.kop-sekolah{display:flex;gap:12px;align-items:center;margin:0 0 16px;text-align:left}
+.kop-sekolah img{height:50px;width:auto;flex:none}.kop-sekolah b{display:block;font-size:15px;line-height:1.25}.kop-sekolah small{display:block;font-size:11.5px;color:#6F8196;line-height:1.3}
+img.logo-bar{height:36px;width:auto;flex:none}
+/* <</RAPOR-CSS>> */
+.jeda-subtes{position:fixed;inset:0;z-index:9000;background:rgba(15,32,46,.72);display:flex;align-items:center;justify-content:center;padding:16px}
+.jeda-subtes .kartu-jeda{background:#fff;border-radius:16px;padding:26px 24px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.jeda-subtes .ok{color:var(--benar);font-weight:700}.jeda-subtes h2{margin:16px 0 4px;font-size:19px}.jeda-subtes .nama{font-size:22px;font-weight:800;color:var(--biru)}
+.jeda-subtes .tombol{margin-top:16px;width:100%}
+#tiraiViol.viol-terakhir .modal{border:3px solid var(--salah)}
 </style>
 <script>
 /* Pemeriksa keutuhan berkas: mendeteksi berkas yang tertempel dua kali / terpotong di editor Apps Script */
@@ -420,7 +558,8 @@ body.mode-kunci img{-webkit-user-drag:none}
 <!-- ============ 1. MASUK ============ -->
 <section id="layarMasuk" class="masuk">
   <div class="masuk-kotak">
-    <span class="lencana" id="lencanaLembaga">Try Out UTBK-SNBT</span>
+    <div class="kop-sekolah"><img data-logo alt="Logo YKPI Al-Ittihad"><div><b data-lembaga>SMA IT Al-Ittihad Pekanbaru</b><small>Yayasan Kesatuan Pendidikan Islam (YKPI) Al-Ittihad</small></div></div>
+    <span class="lencana" id="lencanaLembaga">CBT-SMAIT</span>
     <h1>Masuk ruang ujian</h1>
     <p class="sub">Masukkan NISN dan token ujian dari pengawas.</p>
     <div id="formMasuk">
@@ -434,6 +573,7 @@ body.mode-kunci img{-webkit-user-drag:none}
       </div>
       <div id="pesanMasuk" class="pesan"></div>
       <button id="btnMasuk" class="tombol" style="width:100%;margin-top:20px">Masuk</button>
+      <p class="ket" style="margin:12px 0 0;text-align:center;font-size:12.5px">Melihat hasil ujian: masuk lagi dengan NISN dan token ujian yang sama.</p>
     </div>
 
   </div>
@@ -558,6 +698,7 @@ body.mode-kunci img{-webkit-user-drag:none}
 <!-- ============ CBT: INFO UJIAN ============ -->
 <section id="layarCbtInfo" class="masuk sembunyi">
   <div class="masuk-kotak cbt-info" style="max-width:520px">
+    <div class="kop-sekolah"><img data-logo alt="Logo YKPI Al-Ittihad"><div><b data-lembaga>SMA IT Al-Ittihad Pekanbaru</b><small>Yayasan Kesatuan Pendidikan Islam (YKPI) Al-Ittihad</small></div></div>
     <span class="lencana" id="ciKategori">Ujian</span>
     <h1 id="ciJudul">—</h1>
     <p class="sub" id="ciNama">—</p>
@@ -567,10 +708,18 @@ body.mode-kunci img{-webkit-user-drag:none}
       <ul>
         <li>Tutup aplikasi dan tab lain, lepaskan monitor kedua, dan matikan layar terbagi.</li>
         <li>Izinkan layar penuh bila diminta. Jangan keluar dari layar penuh.</li>
-        <li>Menyalin/menempel, berpindah tab, atau berpindah jendela dicatat sebagai pelanggaran.
-          Pada pelanggaran ke-<span id="ciMaks">5</span>, sesi dikunci dan hanya dapat dibuka pengawas.</li>
+        <li id="ciAturanViol">Menyalin/menempel, berpindah tab, atau berpindah jendela dicatat sebagai pelanggaran.
+          Pada pelanggaran ke-<span id="ciMaks">6</span>, sesi dikunci dan hanya dapat dibuka pengawas.</li>
+        <li id="ciAturanWaktu" class="sembunyi">Ujian <b>tidak dapat diselesaikan sebelum waktu habis</b>. Gunakan sisa waktu untuk memeriksa jawaban; jawaban terkirim otomatis tepat saat waktu berakhir.</li>
+        <li id="ciAturanSubtes" class="sembunyi">Subtes dikerjakan <b>berurutan</b>, masing-masing dengan waktu sendiri. Setelah sebuah subtes berakhir, Anda tidak dapat kembali ke subtes itu.</li>
         <li>Jawaban tersimpan otomatis. Bila perangkat mati, masuk lagi dengan NISN dan token yang sama.</li>
       </ul>
+    </div>
+    <div id="ciMic" class="cek-mic sembunyi">
+      <b style="font-size:14px">🎙 Tes mikrofon (ujian ini memiliki Speaking)</b>
+      <p class="ket" style="margin:4px 0 8px">Coba sebelum mulai: rekam 3 detik lalu dengarkan. Bila gagal, beri tahu pengawas sekarang.</p>
+      <button type="button" id="btnTesMic" class="tombol netral" style="width:100%">Tes mikrofon</button>
+      <div id="ciMicStatus" class="ket" style="margin-top:8px"></div>
     </div>
     <div id="ciHasil"></div>
     <div id="pesanCbt" class="pesan"></div>
@@ -582,10 +731,19 @@ body.mode-kunci img{-webkit-user-drag:none}
 <!-- ============ CBT: RUANG UJIAN ============ -->
 <section id="layarCbt" class="cbt sembunyi">
   <div class="ujian-bar"><div class="ujian-bar-isi">
-    <div><div class="subtes" id="cbJudul">—</div><div class="kecil" id="cbNama">—</div></div>
+    <div style="display:flex;gap:10px;align-items:center;min-width:0"><img data-logo class="logo-bar" alt=""><div style="min-width:0"><div class="subtes" id="cbJudul">—</div><div class="kecil" id="cbNama">—</div></div></div>
     <div class="cbt-tabs" id="cbTabs"></div>
     <div style="text-align:right"><div class="kecil" id="cbLabelWaktu">Sisa waktu</div><div class="jam" id="cbJam">--:--</div></div>
+  </div>
+  <div id="cbAudioBar" class="audio-bar sembunyi" role="status">
+    <div class="audio-teks"><b id="cbAudioJudul">🔊 Audio</b><span id="cbAudioStatus"></span></div>
+    <div class="audio-rel"><i id="cbAudioIsi"></i></div>
+    <span class="audio-waktu" id="cbAudioWaktu"></span>
+    <button type="button" id="cbAudioJeda" class="sembunyi">❚❚</button>
+    <button type="button" id="cbAudioUlang" class="sembunyi" title="Putar ulang dari awal">↺</button>
+    <button type="button" id="cbAudioPutar" class="audio-putar sembunyi">▶ Putar audio</button>
   </div></div>
+  <audio id="cbAudio" preload="auto" playsinline></audio>
   <div class="ruang">
     <div>
       <div class="panel-soal" id="cbPanel">
@@ -619,7 +777,7 @@ body.mode-kunci img{-webkit-user-drag:none}
 <!-- ============ CBT: HASIL ============ -->
 <section id="layarCbtHasil" class="sembunyi">
   <div class="bar"><div class="bar-isi">
-    <div class="identitas"><b id="chNama">—</b><span id="chInfo">—</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><img data-logo class="logo-bar" alt=""><div class="identitas"><b id="chNama">—</b><span id="chInfo">—</span></div></div>
     <button id="btnCbtHasilKeluar" class="tombol netral">Keluar</button>
   </div></div>
   <div class="wadah" id="isiCbtHasil"></div>
@@ -680,10 +838,22 @@ let BOOT = {};
 try { BOOT = JSON.parse(document.getElementById('dataAwal').textContent); } catch (e) { BOOT = {}; }
 if (!BOOT.url) BOOT.url = URL_GAS;
 const DI_GAS = !!(window.google && google.script && google.script.run);
+const BUILD_HALAMAN = 'v5-2026-10-21';      // diperbarui otomatis saat paket dibuat; harus sama dengan BUILD di Code.gs
+/** Halaman yang dipasang di hosting luar: beri peringatan bila versinya tidak sama dengan server (Code.gs). */
+if (!DI_GAS) setTimeout(function () {
+  fetch((typeof BOOT !== 'undefined' && BOOT.url) || URL_GAS, { method: 'POST', body: JSON.stringify({ action: 'ping' }), headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow' })
+    .then(r => r.json()).then(function (d) {
+      if (!d || !d.build || d.build === BUILD_HALAMAN) return;
+      const p = document.createElement('div');
+      p.setAttribute('style', 'position:fixed;left:0;right:0;top:0;z-index:99999;background:#B4302B;color:#fff;padding:10px 14px;font:600 14px system-ui,sans-serif;text-align:center');
+      p.textContent = 'Versi halaman ini (' + BUILD_HALAMAN + ') tidak sama dengan server (' + d.build + '). Admin: perbarui berkas di hosting dari paket yang sama dengan Code.gs.';
+      document.body.appendChild(p);
+    }).catch(function () { });
+}, 1500);
 const CONFIG = {
   intervalSimpan: 45000,      // simpan otomatis bila ada perubahan (ms, diberi acak ±10 detik)
   peringatanDetik: [300, 60], // peringatan sisa waktu
-  jedaKirimMaks: 30000,       // saat waktu habis, kiriman diacak 0–30 detik agar ratusan peserta tidak serentak (server menerima s.d. 90 detik)
+  jedaKirimMaks: 45000,       // saat waktu habis, kiriman diacak 0–45 detik agar ratusan peserta tidak serentak (jawaban akhir sudah disimpan lebih dulu; server menerima s.d. 90 detik)
   antreanMulaiMaks: 20000     // saat memulai subtes baru, permintaan diacak 0–20 detik (waktu belum berjalan)
 };
 
@@ -869,6 +1039,8 @@ $('kuTombol').onclick = () => { kunciMasukFs(); kunciNyala(); $('tiraiKunci').cl
 function kunciMulai(opsi) {
   KUNCI.cb = opsi || {}; KUNCI.en = !!(opsi && opsi.en);
   if (KUNCI.aktif) return;
+  KUNCI.pergi = false;
+  if (!KUNCI.pasangPergi) { KUNCI.pasangPergi = true; window.addEventListener('pagehide', () => { KUNCI.pergi = true; }); window.addEventListener('beforeunload', () => { KUNCI.pergi = true; setTimeout(() => { KUNCI.pergi = false; }, 1500); }); }
   KUNCI.aktif = true;
   document.body.classList.add('mode-kunci');
   kunciNyala();
@@ -882,14 +1054,16 @@ function kunciMulai(opsi) {
         KUNCI.fs = false;
         // tablet/HP: layar penuh dapat keluar sendiri (keyboard layar, sapuan, tombol kembali) → tanpa layar kunci, tanpa pelanggaran
         if (PERANGKAT.sentuh) return;
-        kunciTampil('fs'); lapor('MULTITASK', 'Keluar dari layar penuh');
+        // ditunda sebentar: muat ulang/menutup halaman juga keluar dari layar penuh — itu bukan pelanggaran
+        setTimeout(() => { if (!KUNCI.aktif || KUNCI.pergi || fsEl() || Date.now() < (KUNCI.abaikanSampai || 0)) return; kunciTampil('fs'); lapor('MULTITASK', 'Keluar dari layar penuh'); }, 450);
       }
     },
     lihat: () => {
       if (!KUNCI.aktif) return;
       if (document.hidden) {
         KUNCI.sembunyiSejak = Date.now();
-        if (!PERANGKAT.sentuh) { kunciTampil('tab'); lapor('TAB_SWITCH', 'Pindah tab atau aplikasi'); }
+        KUNCI.sembunyiSejakAbaikan = Date.now() < (KUNCI.abaikanSampai || 0);      // pemilih berkas / izin mikrofon
+        if (!PERANGKAT.sentuh) setTimeout(() => { if (KUNCI.aktif && !KUNCI.pergi && document.hidden && Date.now() >= (KUNCI.abaikanSampai || 0)) { kunciTampil('tab'); lapor('TAB_SWITCH', 'Pindah tab atau aplikasi'); } }, 450);
         return;
       }
       KUNCI.wl = null; kunciNyala();
@@ -900,7 +1074,7 @@ function kunciMulai(opsi) {
         const lama = Date.now() - KUNCI.sembunyiSejak;
         const diamSebelum = KUNCI.sembunyiSejak - (KUNCI.interaksi || 0);
         KUNCI.sembunyiSejak = 0;
-        if (lama >= 2000 && diamSebelum < 100000) { kunciTampil('tab'); lapor('TAB_SWITCH', 'Keluar dari peramban/aplikasi ' + Math.round(lama / 1000) + ' detik'); }
+        if (lama >= 2000 && diamSebelum < 100000 && KUNCI.sembunyiSejakAbaikan !== true) { kunciTampil('tab'); lapor('TAB_SWITCH', 'Keluar dari peramban/aplikasi ' + Math.round(lama / 1000) + ' detik'); }
         else if (lama >= 2000) kabar(KUNCI.en ? 'The screen turned off for a moment. Continue your test.' : 'Layar perangkat sempat mati. Silakan lanjutkan mengerjakan.');
       }
     },
@@ -943,12 +1117,23 @@ function kunciMulai(opsi) {
     kabur: () => {
       // Tablet/HP: keyboard layar, dikte, pusat notifikasi dapat memicu blur → TIDAK dihitung.
       // Keluar sungguhan dari peramban tetap terdeteksi lewat 'lihat' (halaman tersembunyi).
-      if (!KUNCI.aktif || PERANGKAT.sentuh) return;
+      if (!KUNCI.aktif || PERANGKAT.sentuh || Date.now() < (KUNCI.abaikanSampai || 0)) return;
       setTimeout(() => {
-        if (!KUNCI.aktif || document.hidden || document.hasFocus()) return;
-        kunciTampil('fokus'); lapor('MULTITASK', 'Jendela ujian kehilangan fokus');
+        if (!KUNCI.aktif || document.hidden || document.hasFocus() || Date.now() < (KUNCI.abaikanSampai || 0)) return;
+        kunciTampil('fokus');                                       // soal langsung ditutup (ketat)
+        // dihitung pelanggaran bila jendela lain tetap aktif > 1,5 detik; sentuhan sekejap (notifikasi sistem) hanya diperingatkan
+        setTimeout(() => {
+          if (!KUNCI.aktif || document.hidden || Date.now() < (KUNCI.abaikanSampai || 0)) return;
+          if (!document.hasFocus()) lapor('MULTITASK', 'Jendela ujian kehilangan fokus');
+          else kunciInfo(KUNCI.en ? 'Focus left the test window for a moment — not counted. Stay in the test window.' : 'Fokus sempat berpindah sekejap — tidak dihitung. Tetap di jendela ujian.');
+        }, 1100);
       }, 400);
     },
+    pilihBerkas: e => {                                         // pemilih berkas (unggah rekaman) membuka jendela sistem: bukan pelanggaran
+      const t = e.target && e.target.closest ? e.target.closest('input[type=file], label') : null;
+      if (t && (t.matches('input[type=file]') || t.querySelector('input[type=file]'))) KUNCI.abaikanSampai = Date.now() + 120000;
+    },
+    fokusKembali: () => { if ((KUNCI.abaikanSampai || 0) > Date.now() + 3000) KUNCI.abaikanSampai = Date.now() + 1500; },
     mundur: () => { if (!KUNCI.aktif) return; try { history.pushState({ kunciUjian: 3 }, ''); } catch (e) { } kunciTampil('mundur'); },
     tombol: e => {
       const k = (e.key || '').toLowerCase(), tag = (e.target && e.target.tagName) || '';
@@ -960,6 +1145,7 @@ function kunciMulai(opsi) {
   };
   document.addEventListener('fullscreenchange', h.fs); document.addEventListener('webkitfullscreenchange', h.fs);
   document.addEventListener('visibilitychange', h.lihat); window.addEventListener('blur', h.kabur);
+  document.addEventListener('click', h.pilihBerkas, true); window.addEventListener('focus', h.fokusKembali); document.addEventListener('change', h.fokusKembali, true);
   window.addEventListener('popstate', h.mundur); document.addEventListener('keydown', h.tombol, true);
   document.addEventListener('gesturestart', h.cubit); window.addEventListener('beforeunload', h.tutup);
   document.addEventListener('focusout', h.fokusKeluar);
@@ -978,6 +1164,7 @@ function kunciSelesai() {
   const h = KUNCI.h;
   document.removeEventListener('fullscreenchange', h.fs); document.removeEventListener('webkitfullscreenchange', h.fs);
   document.removeEventListener('visibilitychange', h.lihat); window.removeEventListener('blur', h.kabur);
+  document.removeEventListener('click', h.pilihBerkas, true); window.removeEventListener('focus', h.fokusKembali); document.removeEventListener('change', h.fokusKembali, true);
   window.removeEventListener('popstate', h.mundur); document.removeEventListener('keydown', h.tombol, true);
   document.removeEventListener('gesturestart', h.cubit); window.removeEventListener('beforeunload', h.tutup);
   document.removeEventListener('focusout', h.fokusKeluar);
@@ -1131,6 +1318,9 @@ function renderTeks(s) {
   };
   const tutupTabel = () => { if (tabel.length) html += tabelHTML(tabel); tabel = []; };
   baris.forEach(b => {
+    // gambar/audio di dalam teks: baris "[GAMBAR: https://…]" atau "[AUDIO: https://…]"
+    const m = b.match(/^\s*\[(GAMBAR|AUDIO)\s*:\s*(https:\/\/[^\s\]]+)\s*\]\s*$/i);
+    if (m) { tutupPara(); tutupTabel(); html += htmlMedia(m[2].replace(/#(audio|gambar)$/, '') + (m[1].toUpperCase() === 'AUDIO' ? '#audio' : '#gambar')); return; }
     if (/^\s*\|/.test(b)) { tutupPara(); tabel.push(b); }
     else { tutupTabel(); para.push(b); }
   });
@@ -1985,7 +2175,9 @@ function gambarRekap(r) {
     <div class="unduh">
       <button class="tombol sekunder" data-unduh-to="xlsx">Unduh laporan try out (Excel)</button>
       <button class="tombol sekunder" data-unduh-to="pdf">Unduh laporan try out (PDF)</button>
+      ${r.reportCard ? '<button class="tombol" id="btnRcTo">📄 Cetak report card (PDF)</button>' : ''}
     </div>`;
+  if ($('btnRcTo')) $('btnRcTo').onclick = () => cetakReportCardTO(r).catch(e => info('Report card', e.message));
 
   $('isiRekap').onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
@@ -2033,44 +2225,627 @@ const LABEL_VIOL = {
   MULTITASK: ['Keluar dari layar penuh, jendela lain, atau layar kedua', 'Leaving full screen, another window, or a second screen']
 };
 const cb = { d: null, sesi: null, soal: [], jawaban: {}, ragu: {}, idx: 0, deadline: 0, timer: null, simpanH: null, jedaH: null, violTunda: [],
-  berubah: false, terakhir: 0, kirim: false, simpanJalan: false, total: 0, maks: 5, fs: false, violT: 0, habis: false, portal: 'CBT' };
+  berubah: false, terakhir: 0, kirim: false, simpanJalan: false, total: 0, maks: 6, fs: false, violT: 0, habis: false, portal: 'CBT', subtes: null, kirimAwal: true };
 const T = k => (PORTAL_EN.indexOf(cb.portal) >= 0 ? LBL.en : LBL.id)[k];
 const EN = () => PORTAL_EN.indexOf(cb.portal) >= 0;
 
-function urlMedia(u) {
+/* ===== Media soal: gambar & audio (unggahan Google Drive atau tautan https) — juga dipakai Mode Bahas guru ===== */
+function idDrive(u) {
+  const m = String(u || '').match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[\w=&-]*&)?id=)|lh3\.googleusercontent\.com\/d\/|drive\.usercontent\.google\.com\/download\?id=|docs\.google\.com\/uc\?(?:[\w=&-]*&)?id=)([\w-]{20,})/);
+  return m ? m[1] : '';
+}
+function jenisMedia(u) { return /#audio\b|\.(mp3|wav|ogg|oga|m4a|aac|weba|webm)(\?|#|$)/i.test(String(u || '')) || /export=download/.test(String(u || '')) ? 'audio' : 'gambar'; }
+/** Beberapa alamat untuk berkas yang sama: bila satu gagal (mis. di Safari iPad), alamat berikutnya dicoba otomatis. */
+function sumberMedia(u) {
   u = String(u || '').trim();
-  const m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]{20,})/);
-  if (m) return /\.(mp3|wav|ogg|m4a)(\?|$)/i.test(u) ? 'https://drive.google.com/uc?export=download&id=' + m[1] : 'https://drive.google.com/uc?export=view&id=' + m[1];
-  return u;
+  const id = idDrive(u);
+  if (!id) return [u.split('#')[0]];
+  return jenisMedia(u) === 'audio'
+    ? ['https://drive.google.com/uc?export=download&id=' + id, 'https://docs.google.com/uc?export=open&id=' + id, 'https://drive.usercontent.google.com/download?id=' + id + '&export=download']
+    : ['https://lh3.googleusercontent.com/d/' + id, 'https://drive.google.com/uc?export=view&id=' + id, 'https://drive.google.com/thumbnail?id=' + id + '&sz=w2000'];
+}
+function mediaCadangan(el) {
+  try {
+    const s = JSON.parse(el.getAttribute('data-cadangan') || '[]');
+    if (!s.length) { const p = el.parentNode; if (p && !p.querySelector('.media-gagal')) p.insertAdjacentHTML('beforeend', '<div class="media-gagal">Media belum dapat dimuat. Periksa koneksi lalu ketuk Muat ulang.</div>'); return; }
+    el.setAttribute('data-cadangan', JSON.stringify(s.slice(1)));
+    el.src = s[0];
+    if (el.load) el.load();
+  } catch (e) { }
 }
 function htmlMedia(u) {
   if (!u) return '';
-  const url = urlMedia(u);
-  if (/\.(mp3|wav|ogg|m4a)(\?|$)/i.test(u) || /export=download/.test(url))
-    return `<div class="cbt-media"><audio controls controlsList="nodownload" preload="none" src="${teks(url)}"></audio></div>`;
-  return `<div class="cbt-media"><img src="${teks(url)}" alt="Gambar soal" loading="lazy"></div>`;
+  const src = sumberMedia(u), cad = teks(JSON.stringify(src.slice(1)));
+  if (jenisMedia(u) === 'audio')
+    return `<div class="cbt-media"><audio controls controlsList="nodownload" preload="metadata" src="${teks(src[0])}" data-cadangan="${cad}" onerror="mediaCadangan(this)"></audio></div>`;
+  return `<div class="cbt-media"><img src="${teks(src[0])}" alt="Gambar soal" loading="lazy" referrerpolicy="no-referrer" data-cadangan="${cad}" onerror="mediaCadangan(this)"></div>`;
 }
 
+/* <<RAPOR>> — laporan hasil per jenis tes (sama persis di portal siswa & portal guru) */
+/** Logo resmi YKPI Al-Ittihad (PNG transparan, ±16 KB) — dipakai di portal, rapor, sertifikat, kartu peserta, dan naskah soal. */
+const LOGO_YKPI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAaQAAAEWCAMAAAAekBN5AAADAFBMVEXr3l9dJCIhJyGSaWLe3dTc6t4qFh3s56xkMTKqkWyilZJmZlmdcl0ODQ9xXl6aZWWNY1ZXUlPMsmh1GRlVXjFemF4eHR4cVB+xmotlS0qriXr38VM9XUGomBfNsqj/+Vny719gO0LEpSfIrZzczaLV1qppZAipmmWrn5fGspr/f3/x5yXe0KHHrpHz5zM1kTpBPkGCfYO4nYTIudVjAGNOPkF9lYGoh3O9zcL78TY7O0EA/wBAPj5cRjxDQT9qnmd7lY3hsEvCvsH58zQAAFU9QT8AVVVAiz6iixe/vMG8whe2yLb/AP//fwD/qgDNv0YAAAAXExTx6A1vp3AJBgqLt4pRllXz9/K407XV5NP99AmqyqnH3MdiJSRlnGaawpnj7eJdnGFvNzGIV0kyOC/D2Lz+/v7Ot5NGi0o7i0Osh23EqYiVZ1R6RTng7N0mKSS3l3qKqYl8sHyhxJ1OWUx+fn43NBUoJxRQZk7ayaU2RTOjemPk16xrZipuiGxVVVWuqSXXw5qPiBKOl4389iatuKwkGRatqhVwd27x5ioziDtcJSSLhicbJBiBsX67oYbr5LZISUYlIyS5m4OCTUIaGRpPd1B8SEOcclzHx8YoJyi6tRyJiIicmSpLRxJoZRZ9sYGBq33OxhaoqKgpJyg2VTVoaGfm2xXPxyq6tSZHRkZ5eHhZVRNERSzo2Sw4Njc3NjZWVVWASzzZ1StWFxddoWOJeimnmixoZ2iEVTbZ0xd3dBZIR0eIhoZoZ2h4dSo9PT1RVi3KuCdFOykzMjI0aDg7kUSdxqKRZjCht5zW2NZCOhPEqHEYFxh9rIC92MH//wCBln3z+NYweDjp2EzPt1HMubD//30qKSmtiCqpqKi4uLfjzCrgzaYMCwtEQkKVdmvJuhbm2JTy6Ezt5+k8dkFiHR1kHSFiWxaXlBSUlpWopaXFpisYFxgbGCCieS0kGyJVAABSU1Fiml2DexfbxnH/AADl2dX6+Iv9+rE3NzdXVldiIx5hhl2Ua2SVlZVE3BSIAAABAHRSTlP86t9bEf8gHKTwIP3qnFYiqC78Cv7/XP9anmOd//4cD1X//+ah9Aka7VkC5F+kDv9s/5wUAo3/qP+n/wFvc5sVHBX/WQOEA/8L//8OAQIDhQD+/v/+///////+///+//////7+//4E/v///v7+/v/+/v////8C/v7//v/+/v//A/7+/v/+//7///7//v7///7//83+/tL//v7/sP7////////+/5D///7//20x///+co1P/v////7+Mf/+/lAtR/4E//7+qP//////Ef7/tv//Af////7//wVv/hgV/v7Nhvr///wO//78/v8XJv6P/v/8A2b//v8B////Tzf+//woLNtTdwAAPC9JREFUeNrtnQdAG1e294VrXGKnl80mu9lsstn6trzevle+XjXSFZJGQhJGyNgYZIFAMonBNghLtsEPbHDABDC2AYPBvfeSOHF673GycXrZbNqmbfLdMuXOaEaakWQjOzo2SEij0cz9zf/cc88tYzBedDbhnYvtjAwXHaMXpr6Qg5TtVvWuLwcp263uuhyk7Ic0Y2oOUtbb9ZNykLLeWnOQst58OUjZb+8wOUjZHoAbD4EcpKy3y8G2HKQsr5GMw2AoBynb3V0OUvY3ZY2HwZkcpGyHNAQ25CBltx01bgCX5iBlu10KHspByn5IOSVlPyQmBynrrRO0+Yy+HKTstc+MvtYcpCy3/2082wqYb2GbNgcpi20ChHQoBym7bRIAzHAOUrZDYpi9xrocpGyHtM34lzlI2Q7pYkuDX3SQrgQM2JKDlN12MAcp+20bhPRPOUjZbUMQ0tYcpGy2P+YgXQi2FUIa58tBynpIrTlIOSXlIKVpnRASuMj6Ki46SK2AYZgXcpCy16CC2hCki6xD6eKEdCgHKbshQUYXW4fSxQWpyngaMWK2XVwdShcbpOcZ5O6+NB7NQcpeSMMIErgm107KXqszHv4QQdqQg5TNkLahKikHKbvtyxyk7LctKG4AnTlIOUg5SBmA1JobC57NthXgSuloDlIOUg5SOtZJIF2eg5TF9jLO3YGLK8N6kUHyEUjM4Ysqw3rxQWpszEHKakRGHwNOjADmIpuAfpFBuokBVy3MQcpmqzMeYsCRFTDAy0HKYkiHGbBiUQ5SdkM6yIBFxyGk93OQssQmy184anwWgOM7mA+YuAzrM5NzkMYG0uTJj8peugaAvoH4DOszcFPjozlI59+eMf5wMvwlg8QMmEKAkUJ6xjj5F48+mlPSGNgPjD+8wfeoVDIbQMjEdssgPfqDCT/+Idw8B2ksKD1zww3GX8khsexmgEaD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';
+const NAMA_YAYASAN = 'Yayasan Kesatuan Pendidikan Islam (YKPI) Al-Ittihad';
+function pasangLogo() {
+  document.querySelectorAll('img[data-logo]').forEach(i => { if (i.getAttribute('src') !== LOGO_YKPI) i.src = LOGO_YKPI; });
+  const nm = (typeof BOOT !== 'undefined' && BOOT && BOOT.namaLembaga) || '';
+  if (nm) document.querySelectorAll('[data-lembaga]').forEach(e => e.textContent = nm);
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', pasangLogo); else pasangLogo();
+const WARNA_RAPOR = { IELTS: '#B4232C', TOEFL_ITP: '#0F766E', TOEFL_IBT: '#0F766E', SAT: '#1D4ED8', UTBK: '#1E3A8A', TKA: '#6D28D9',
+  SEKOLAH: '#15803D', PERSEN: '#15803D', KULIAH: '#9A3412' };
+const JUDUL_RAPOR = { IELTS: 'IELTS Academic — Test Report (Simulasi)', TOEFL_ITP: 'TOEFL ITP — Score Report (Simulasi)', TOEFL_IBT: 'TOEFL iBT — Score Report (Simulasi)',
+  SAT: 'SAT — Score Report (Simulasi)', UTBK: 'Laporan Hasil Try Out UTBK-SNBT', TKA: 'Laporan Hasil Tes Kemampuan Akademik',
+  SEKOLAH: 'Laporan Hasil Ujian', PERSEN: 'Laporan Hasil Ujian', KULIAH: 'Kartu Hasil Ujian' };
+function _eRap(s) { return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function _angkaRap(v, desimal) {
+  if (v === null || v === undefined || v === '') return '—';
+  const n = Number(v);
+  if (!isFinite(n)) return _eRap(v);
+  return desimal ? n.toFixed(desimal) : String(Math.round(n * 100) / 100);
+}
+/** r = objek rapor dari server (raporSesi). opsi.ringkas: tanpa statistik (untuk cetak massal). */
+function htmlRapor(r, opsi) {
+  if (!r) return '';
+  opsi = opsi || {};
+  const sk = r.skema || 'PERSEN', warna = WARNA_RAPOR[sk] || '#15803D';
+  const band = sk === 'IELTS';
+  const komp = (r.komponen || []).filter(k => k && k.nama);
+  const tunggu = !!r.menunggu || komp.some(k => k.nilai === null || k.nilai === undefined);   // ada bagian yang belum dinilai guru
+  const total = tunggu ? '—' : (band ? _angkaRap(r.nilai, 1) : _angkaRap(r.nilai));
+  const skala = { IELTS: 'Overall Band Score (0–9)', TOEFL_ITP: 'Total Score (310–677)', TOEFL_IBT: 'Total Score (0–120)', SAT: 'Total Score (400–1600)',
+    UTBK: 'Rata-rata skor (200–1000)', TKA: 'Rata-rata skor (200–1000)', SEKOLAH: 'Nilai akhir (0–100)', PERSEN: 'Nilai (0–100)', KULIAH: 'Nilai (0–100)' }[sk] || 'Nilai';
+  const kotak = band || sk === 'TOEFL_IBT' || sk === 'TOEFL_ITP' || sk === 'SAT';
+  const htmlKomp = !komp.length ? '' : kotak
+    ? `<div class="rp-kotak">${komp.map(k => `<div class="rp-k"><span>${_eRap(k.nama)}</span><b>${k.nilai === null ? '—' : (band ? _angkaRap(k.nilai, 1) : _angkaRap(k.nilai))}</b>
+        <small>${_eRap(k.nilai === null ? (k.sub || 'menunggu penilaian') : (k.sub || (k.maks ? 'maks. ' + k.maks : '')))}</small></div>`).join('')}</div>`
+    : `<div class="rp-batang">${komp.map(function (k) {
+        const lo = k.min === null || k.min === undefined ? 0 : Number(k.min), hi = k.maks === null || k.maks === undefined ? 100 : Number(k.maks);
+        const p = k.nilai === null || !isFinite(Number(k.nilai)) ? 0 : Math.max(0, Math.min(100, (Number(k.nilai) - lo) / Math.max(1e-9, hi - lo) * 100));
+        return `<div class="rp-b"><div class="rp-b-atas"><span>${_eRap(k.nama)}</span><b>${_angkaRap(k.nilai)}</b></div>
+          <div class="rp-rel"><i style="width:${p.toFixed(1)}%"></i>${r.kkm !== null && r.kkm !== undefined && hi === 100 ? `<em style="left:${r.kkm}%"></em>` : ''}</div>
+          ${k.sub ? `<small>${_eRap(k.sub)}</small>` : ''}</div>`;
+      }).join('')}</div>`;
+  const label = [];
+  if (r.cefr) label.push(`<span class="rp-chip">CEFR ${_eRap(r.cefr)}${band ? '' : ' (perkiraan)'}</span>`);
+  if (r.huruf) label.push(`<span class="rp-chip">Nilai huruf ${_eRap(r.huruf)}${r.mutu !== '' && r.mutu !== undefined ? ' · mutu ' + Number(r.mutu).toFixed(2) : ''}</span>`);
+  if (r.tuntas === true) label.push(`<span class="rp-chip rp-ok">TUNTAS · KKM ${_eRap(r.kkm)}</span>`);
+  if (r.tuntas === false) label.push(`<span class="rp-chip rp-tidak">BELUM TUNTAS (remedial) · KKM ${_eRap(r.kkm)}</span>`);
+  if (r.status === 'Terminated') label.push('<span class="rp-chip rp-tidak">Sesi dikunci (pelanggaran)</span>');
+  const krit = (r.kriteria || []).length ? `<div class="rp-sub">Rincian kriteria penilaian</div><table class="rp-tabel"><thead><tr><th>Bagian</th>${r.kriteria[0].label.map(l => `<th>${_eRap(l)}</th>`).join('')}<th>Band</th></tr></thead>
+      <tbody>${r.kriteria.map(k => `<tr><td>${_eRap(k.nama)}</td>${k.nilai.map(v => `<td>${_angkaRap(v, 1)}</td>`).join('')}<td><b>${_angkaRap(k.band, 1)}</b></td></tr>`).join('')}</tbody></table>` : '';
+  const st = r.statistik || {};
+  const stat = opsi.ringkas ? '' : `<div class="rp-stat"><span>Jumlah soal <b>${st.jumlah || 0}</b></span><span>Benar <b>${st.benar || 0}</b></span>${st.sebagian ? `<span>Sebagian <b>${st.sebagian}</b></span>` : ''}
+      <span>Salah <b>${st.salah || 0}</b></span><span>Tidak dijawab <b>${st.kosong || 0}</b></span>${st.manual ? `<span>Dinilai guru <b>${st.manual}</b></span>` : ''}</div>`;
+  const resmi = ['IELTS', 'TOEFL_ITP', 'TOEFL_IBT', 'SAT', 'UTBK'].indexOf(sk) >= 0;
+  return `<article class="rapor" style="--rp:${warna}">
+    <header class="rp-kepala"><img class="rp-logo" src="${LOGO_YKPI}" alt="Logo YKPI Al-Ittihad"><div class="rp-judul"><div class="rp-lembaga">${_eRap(r.lembaga || '')}</div><div class="rp-yayasan">${NAMA_YAYASAN}</div><h2>${_eRap(JUDUL_RAPOR[sk] || 'Laporan Hasil')}</h2></div>
+      <div class="rp-label-skema">${_eRap(r.label || '')}</div></header>
+    <div class="rp-identitas"><span>Nama</span><b>${_eRap(r.nama)}</b><span>NISN</span><b>${_eRap(r.nisn)}</b><span>Kelas</span><b>${_eRap(r.kelas || '-')}</b>
+      <span>Ujian</span><b>${_eRap(r.judul)}${r.mapel ? ' · ' + _eRap(r.mapel) : ''}</b><span>Tanggal</span><b>${_eRap(r.tanggal)}</b></div>
+    <div class="rp-utama"><div class="rp-total"><span>${_eRap(skala)}</span><b>${total}</b>${tunggu ? `<small class="rp-sementara">Menunggu penilaian guru · sementara ${band ? _angkaRap(r.nilai, 1) : _angkaRap(r.nilai)}</small>` : ''}<div>${tunggu ? '' : label.join(' ')}</div></div>${htmlKomp}</div>
+    ${krit}${stat}
+    ${r.catatan ? `<p class="rp-catatan">${_eRap(r.catatan)}</p>` : ''}
+    ${resmi ? '<p class="rp-kaki">Hasil simulasi untuk latihan; bukan sertifikat resmi lembaga penyelenggara tes.</p>' : ''}
+  </article>`;
+}
+/** Cetak satu atau banyak rapor (simpan sebagai PDF lewat dialog cetak). */
+function cetakRapor(daftarHtml, judul) {
+  let el = document.getElementById('areaCetak');
+  if (!el) { el = document.createElement('div'); el.id = 'areaCetak'; document.body.appendChild(el); }
+  el.innerHTML = '<button type="button" class="tutup-cetak" onclick="document.body.classList.remove(\'sedang-cetak\')">✕ Tutup tampilan cetak</button>' +
+    daftarHtml.map(h => `<div class="halaman-cetak">${h}</div>`).join('');
+  const lama = document.title;
+  if (judul) document.title = judul;
+  document.body.classList.add('sedang-cetak');
+  const selesai = () => { document.body.classList.remove('sedang-cetak'); el.innerHTML = ''; document.title = lama; window.removeEventListener('afterprint', selesai); };
+  window.addEventListener('afterprint', selesai);
+  setTimeout(() => window.print(), 150);
+}
+/* ---------------- SERTIFIKAT HASIL TES (lanskap A4) ---------------- */
+const JUDUL_SERT = {
+  IELTS: ['English Proficiency Certificate', 'IELTS Academic Format · Simulation Test'], TOEFL_ITP: ['English Proficiency Certificate', 'TOEFL ITP Format · Simulation Test'],
+  TOEFL_IBT: ['English Proficiency Certificate', 'TOEFL iBT Format · Simulation Test'], SAT: ['Certificate of Achievement', 'SAT Format · Practice Test'],
+  UTBK: ['Sertifikat Hasil Try Out', 'UTBK-SNBT · Tes Potensi Skolastik & Literasi'], TKA: ['Sertifikat Hasil Tes', 'Tes Kemampuan Akademik'],
+  SEKOLAH: ['Sertifikat Hasil Ujian', ''], PERSEN: ['Sertifikat Hasil Ujian', ''], KULIAH: ['Sertifikat Hasil Ujian', ''] };
+const BAND_IELTS = ['Did not attempt the test', 'Non-user', 'Intermittent user', 'Extremely limited user', 'Limited user', 'Modest user', 'Competent user', 'Good user', 'Very good user', 'Expert user'];
+const CEFR_DESK = { C2: 'Proficient User · Mastery', C1: 'Proficient User · Effective Operational Proficiency', B2: 'Independent User · Vantage',
+  B1: 'Independent User · Threshold', A2: 'Basic User · Waystage', A1: 'Basic User · Breakthrough' };
+/* qrcode-generator 1.4.4 (MIT © Kazuhiko Arase) — disematkan agar kode QR sertifikat tidak bergantung koneksi ke CDN */
+var qrcode=function(){var t=function(t,r){var e=t,n=g[r],o=null,i=0,a=null,u=[],f={},c=function(t,r){o=function(t){for(var r=new Array(t),e=0;e<t;e+=1){r[e]=new Array(t);for(var n=0;n<t;n+=1)r[e][n]=null}return r}(i=4*e+17),l(0,0),l(i-7,0),l(0,i-7),s(),h(),d(t,r),e>=7&&v(t),null==a&&(a=p(e,n,u)),w(a,r)},l=function(t,r){for(var e=-1;e<=7;e+=1)if(!(t+e<=-1||i<=t+e))for(var n=-1;n<=7;n+=1)r+n<=-1||i<=r+n||(o[t+e][r+n]=0<=e&&e<=6&&(0==n||6==n)||0<=n&&n<=6&&(0==e||6==e)||2<=e&&e<=4&&2<=n&&n<=4)},h=function(){for(var t=8;t<i-8;t+=1)null==o[t][6]&&(o[t][6]=t%2==0);for(var r=8;r<i-8;r+=1)null==o[6][r]&&(o[6][r]=r%2==0)},s=function(){for(var t=B.getPatternPosition(e),r=0;r<t.length;r+=1)for(var n=0;n<t.length;n+=1){var i=t[r],a=t[n];if(null==o[i][a])for(var u=-2;u<=2;u+=1)for(var f=-2;f<=2;f+=1)o[i+u][a+f]=-2==u||2==u||-2==f||2==f||0==u&&0==f}},v=function(t){for(var r=B.getBCHTypeNumber(e),n=0;n<18;n+=1){var a=!t&&1==(r>>n&1);o[Math.floor(n/3)][n%3+i-8-3]=a}for(n=0;n<18;n+=1){a=!t&&1==(r>>n&1);o[n%3+i-8-3][Math.floor(n/3)]=a}},d=function(t,r){for(var e=n<<3|r,a=B.getBCHTypeInfo(e),u=0;u<15;u+=1){var f=!t&&1==(a>>u&1);u<6?o[u][8]=f:u<8?o[u+1][8]=f:o[i-15+u][8]=f}for(u=0;u<15;u+=1){f=!t&&1==(a>>u&1);u<8?o[8][i-u-1]=f:u<9?o[8][15-u-1+1]=f:o[8][15-u-1]=f}o[i-8][8]=!t},w=function(t,r){for(var e=-1,n=i-1,a=7,u=0,f=B.getMaskFunction(r),c=i-1;c>0;c-=2)for(6==c&&(c-=1);;){for(var g=0;g<2;g+=1)if(null==o[n][c-g]){var l=!1;u<t.length&&(l=1==(t[u]>>>a&1)),f(n,c-g)&&(l=!l),o[n][c-g]=l,-1==(a-=1)&&(u+=1,a=7)}if((n+=e)<0||i<=n){n-=e,e=-e;break}}},p=function(t,r,e){for(var n=A.getRSBlocks(t,r),o=b(),i=0;i<e.length;i+=1){var a=e[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var u=0;for(i=0;i<n.length;i+=1)u+=n[i].dataCount;if(o.getLengthInBits()>8*u)throw"code length overflow. ("+o.getLengthInBits()+">"+8*u+")";for(o.getLengthInBits()+4<=8*u&&o.put(0,4);o.getLengthInBits()%8!=0;)o.putBit(!1);for(;!(o.getLengthInBits()>=8*u||(o.put(236,8),o.getLengthInBits()>=8*u));)o.put(17,8);return function(t,r){for(var e=0,n=0,o=0,i=new Array(r.length),a=new Array(r.length),u=0;u<r.length;u+=1){var f=r[u].dataCount,c=r[u].totalCount-f;n=Math.max(n,f),o=Math.max(o,c),i[u]=new Array(f);for(var g=0;g<i[u].length;g+=1)i[u][g]=255&t.getBuffer()[g+e];e+=f;var l=B.getErrorCorrectPolynomial(c),h=k(i[u],l.getLength()-1).mod(l);for(a[u]=new Array(l.getLength()-1),g=0;g<a[u].length;g+=1){var s=g+h.getLength()-a[u].length;a[u][g]=s>=0?h.getAt(s):0}}var v=0;for(g=0;g<r.length;g+=1)v+=r[g].totalCount;var d=new Array(v),w=0;for(g=0;g<n;g+=1)for(u=0;u<r.length;u+=1)g<i[u].length&&(d[w]=i[u][g],w+=1);for(g=0;g<o;g+=1)for(u=0;u<r.length;u+=1)g<a[u].length&&(d[w]=a[u][g],w+=1);return d}(o,n)};f.addData=function(t,r){var e=null;switch(r=r||"Byte"){case"Numeric":e=M(t);break;case"Alphanumeric":e=x(t);break;case"Byte":e=m(t);break;case"Kanji":e=L(t);break;default:throw"mode:"+r}u.push(e),a=null},f.isDark=function(t,r){if(t<0||i<=t||r<0||i<=r)throw t+","+r;return o[t][r]},f.getModuleCount=function(){return i},f.make=function(){if(e<1){for(var t=1;t<40;t++){for(var r=A.getRSBlocks(t,n),o=b(),i=0;i<u.length;i++){var a=u[i];o.put(a.getMode(),4),o.put(a.getLength(),B.getLengthInBits(a.getMode(),t)),a.write(o)}var g=0;for(i=0;i<r.length;i++)g+=r[i].dataCount;if(o.getLengthInBits()<=8*g)break}e=t}c(!1,function(){for(var t=0,r=0,e=0;e<8;e+=1){c(!0,e);var n=B.getLostPoint(f);(0==e||t>n)&&(t=n,r=e)}return r}())},f.createTableTag=function(t,r){t=t||2;var e="";e+='<table style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: "+(r=void 0===r?4*t:r)+"px;",e+='">',e+="<tbody>";for(var n=0;n<f.getModuleCount();n+=1){e+="<tr>";for(var o=0;o<f.getModuleCount();o+=1)e+='<td style="',e+=" border-width: 0px; border-style: none;",e+=" border-collapse: collapse;",e+=" padding: 0px; margin: 0px;",e+=" width: "+t+"px;",e+=" height: "+t+"px;",e+=" background-color: ",e+=f.isDark(n,o)?"#000000":"#ffffff",e+=";",e+='"/>';e+="<\/tr>"}return e+="<\/tbody>",e+="<\/table>"},f.createSvgTag=function(t,r,e,n){var o={};"object"==typeof arguments[0]&&(t=(o=arguments[0]).cellSize,r=o.margin,e=o.alt,n=o.title),t=t||2,r=void 0===r?4*t:r,(e="string"==typeof e?{text:e}:e||{}).text=e.text||null,e.id=e.text?e.id||"qrcode-description":null,(n="string"==typeof n?{text:n}:n||{}).text=n.text||null,n.id=n.text?n.id||"qrcode-title":null;var i,a,u,c,g=f.getModuleCount()*t+2*r,l="";for(c="l"+t+",0 0,"+t+" -"+t+",0 0,-"+t+"z ",l+='<svg version="1.1" xmlns="http://www.w3.org/2000/svg"',l+=o.scalable?"":' width="'+g+'px" height="'+g+'px"',l+=' viewBox="0 0 '+g+" "+g+'" ',l+=' preserveAspectRatio="xMinYMin meet"',l+=n.text||e.text?' role="img" aria-labelledby="'+y([n.id,e.id].join(" ").trim())+'"':"",l+=">",l+=n.text?'<title id="'+y(n.id)+'">'+y(n.text)+"<\/title>":"",l+=e.text?'<description id="'+y(e.id)+'">'+y(e.text)+"<\/description>":"",l+='<rect width="100%" height="100%" fill="white" cx="0" cy="0"/>',l+='<path d="',a=0;a<f.getModuleCount();a+=1)for(u=a*t+r,i=0;i<f.getModuleCount();i+=1)f.isDark(a,i)&&(l+="M"+(i*t+r)+","+u+c);return l+='" stroke="transparent" fill="black"/>',l+="<\/svg>"},f.createDataURL=function(t,r){t=t||2,r=void 0===r?4*t:r;var e=f.getModuleCount()*t+2*r,n=r,o=e-r;return I(e,e,function(r,e){if(n<=r&&r<o&&n<=e&&e<o){var i=Math.floor((r-n)/t),a=Math.floor((e-n)/t);return f.isDark(a,i)?0:1}return 1})},f.createImgTag=function(t,r,e){t=t||2,r=void 0===r?4*t:r;var n=f.getModuleCount()*t+2*r,o="";return o+="<img",o+=' src="',o+=f.createDataURL(t,r),o+='"',o+=' width="',o+=n,o+='"',o+=' height="',o+=n,o+='"',e&&(o+=' alt="',o+=y(e),o+='"'),o+="/>"};var y=function(t){for(var r="",e=0;e<t.length;e+=1){var n=t.charAt(e);switch(n){case"<":r+="&lt;";break;case">":r+="&gt;";break;case"&":r+="&amp;";break;case'"':r+="&quot;";break;default:r+=n}}return r};return f.createASCII=function(t,r){if((t=t||1)<2)return function(t){t=void 0===t?2:t;var r,e,n,o,i,a=1*f.getModuleCount()+2*t,u=t,c=a-t,g={"██":"█","█ ":"▀"," █":"▄","  ":" "},l={"██":"▀","█ ":"▀"," █":" ","  ":" "},h="";for(r=0;r<a;r+=2){for(n=Math.floor((r-u)/1),o=Math.floor((r+1-u)/1),e=0;e<a;e+=1)i="█",u<=e&&e<c&&u<=r&&r<c&&f.isDark(n,Math.floor((e-u)/1))&&(i=" "),u<=e&&e<c&&u<=r+1&&r+1<c&&f.isDark(o,Math.floor((e-u)/1))?i+=" ":i+="█",h+=t<1&&r+1>=c?l[i]:g[i];h+="\n"}return a%2&&t>0?h.substring(0,h.length-a-1)+Array(a+1).join("▀"):h.substring(0,h.length-1)}(r);t-=1,r=void 0===r?2*t:r;var e,n,o,i,a=f.getModuleCount()*t+2*r,u=r,c=a-r,g=Array(t+1).join("██"),l=Array(t+1).join("  "),h="",s="";for(e=0;e<a;e+=1){for(o=Math.floor((e-u)/t),s="",n=0;n<a;n+=1)i=1,u<=n&&n<c&&u<=e&&e<c&&f.isDark(o,Math.floor((n-u)/t))&&(i=0),s+=i?g:l;for(o=0;o<t;o+=1)h+=s+"\n"}return h.substring(0,h.length-1)},f.renderTo2dContext=function(t,r){r=r||2;for(var e=f.getModuleCount(),n=0;n<e;n++)for(var o=0;o<e;o++)t.fillStyle=f.isDark(n,o)?"black":"white",t.fillRect(n*r,o*r,r,r)},f};t.stringToBytes=(t.stringToBytesFuncs={default:function(t){for(var r=[],e=0;e<t.length;e+=1){var n=t.charCodeAt(e);r.push(255&n)}return r}}).default,t.createStringToBytes=function(t,r){var e=function(){for(var e=S(t),n=function(){var t=e.read();if(-1==t)throw"eof";return t},o=0,i={};;){var a=e.read();if(-1==a)break;var u=n(),f=n()<<8|n();i[String.fromCharCode(a<<8|u)]=f,o+=1}if(o!=r)throw o+" != "+r;return i}(),n="?".charCodeAt(0);return function(t){for(var r=[],o=0;o<t.length;o+=1){var i=t.charCodeAt(o);if(i<128)r.push(i);else{var a=e[t.charAt(o)];"number"==typeof a?(255&a)==a?r.push(a):(r.push(a>>>8),r.push(255&a)):r.push(n)}}return r}};var r,e,n,o,i,a=1,u=2,f=4,c=8,g={L:1,M:0,Q:3,H:2},l=0,h=1,s=2,v=3,d=4,w=5,p=6,y=7,B=(r=[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],e=1335,n=7973,i=function(t){for(var r=0;0!=t;)r+=1,t>>>=1;return r},(o={}).getBCHTypeInfo=function(t){for(var r=t<<10;i(r)-i(e)>=0;)r^=e<<i(r)-i(e);return 21522^(t<<10|r)},o.getBCHTypeNumber=function(t){for(var r=t<<12;i(r)-i(n)>=0;)r^=n<<i(r)-i(n);return t<<12|r},o.getPatternPosition=function(t){return r[t-1]},o.getMaskFunction=function(t){switch(t){case l:return function(t,r){return(t+r)%2==0};case h:return function(t,r){return t%2==0};case s:return function(t,r){return r%3==0};case v:return function(t,r){return(t+r)%3==0};case d:return function(t,r){return(Math.floor(t/2)+Math.floor(r/3))%2==0};case w:return function(t,r){return t*r%2+t*r%3==0};case p:return function(t,r){return(t*r%2+t*r%3)%2==0};case y:return function(t,r){return(t*r%3+(t+r)%2)%2==0};default:throw"bad maskPattern:"+t}},o.getErrorCorrectPolynomial=function(t){for(var r=k([1],0),e=0;e<t;e+=1)r=r.multiply(k([1,C.gexp(e)],0));return r},o.getLengthInBits=function(t,r){if(1<=r&&r<10)switch(t){case a:return 10;case u:return 9;case f:case c:return 8;default:throw"mode:"+t}else if(r<27)switch(t){case a:return 12;case u:return 11;case f:return 16;case c:return 10;default:throw"mode:"+t}else{if(!(r<41))throw"type:"+r;switch(t){case a:return 14;case u:return 13;case f:return 16;case c:return 12;default:throw"mode:"+t}}},o.getLostPoint=function(t){for(var r=t.getModuleCount(),e=0,n=0;n<r;n+=1)for(var o=0;o<r;o+=1){for(var i=0,a=t.isDark(n,o),u=-1;u<=1;u+=1)if(!(n+u<0||r<=n+u))for(var f=-1;f<=1;f+=1)o+f<0||r<=o+f||0==u&&0==f||a==t.isDark(n+u,o+f)&&(i+=1);i>5&&(e+=3+i-5)}for(n=0;n<r-1;n+=1)for(o=0;o<r-1;o+=1){var c=0;t.isDark(n,o)&&(c+=1),t.isDark(n+1,o)&&(c+=1),t.isDark(n,o+1)&&(c+=1),t.isDark(n+1,o+1)&&(c+=1),0!=c&&4!=c||(e+=3)}for(n=0;n<r;n+=1)for(o=0;o<r-6;o+=1)t.isDark(n,o)&&!t.isDark(n,o+1)&&t.isDark(n,o+2)&&t.isDark(n,o+3)&&t.isDark(n,o+4)&&!t.isDark(n,o+5)&&t.isDark(n,o+6)&&(e+=40);for(o=0;o<r;o+=1)for(n=0;n<r-6;n+=1)t.isDark(n,o)&&!t.isDark(n+1,o)&&t.isDark(n+2,o)&&t.isDark(n+3,o)&&t.isDark(n+4,o)&&!t.isDark(n+5,o)&&t.isDark(n+6,o)&&(e+=40);var g=0;for(o=0;o<r;o+=1)for(n=0;n<r;n+=1)t.isDark(n,o)&&(g+=1);return e+=Math.abs(100*g/r/r-50)/5*10},o),C=function(){for(var t=new Array(256),r=new Array(256),e=0;e<8;e+=1)t[e]=1<<e;for(e=8;e<256;e+=1)t[e]=t[e-4]^t[e-5]^t[e-6]^t[e-8];for(e=0;e<255;e+=1)r[t[e]]=e;var n={glog:function(t){if(t<1)throw"glog("+t+")";return r[t]},gexp:function(r){for(;r<0;)r+=255;for(;r>=256;)r-=255;return t[r]}};return n}();function k(t,r){if(void 0===t.length)throw t.length+"/"+r;var e=function(){for(var e=0;e<t.length&&0==t[e];)e+=1;for(var n=new Array(t.length-e+r),o=0;o<t.length-e;o+=1)n[o]=t[o+e];return n}(),n={getAt:function(t){return e[t]},getLength:function(){return e.length},multiply:function(t){for(var r=new Array(n.getLength()+t.getLength()-1),e=0;e<n.getLength();e+=1)for(var o=0;o<t.getLength();o+=1)r[e+o]^=C.gexp(C.glog(n.getAt(e))+C.glog(t.getAt(o)));return k(r,0)},mod:function(t){if(n.getLength()-t.getLength()<0)return n;for(var r=C.glog(n.getAt(0))-C.glog(t.getAt(0)),e=new Array(n.getLength()),o=0;o<n.getLength();o+=1)e[o]=n.getAt(o);for(o=0;o<t.getLength();o+=1)e[o]^=C.gexp(C.glog(t.getAt(o))+r);return k(e,0).mod(t)}};return n}var A=function(){var t=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12,7,37,13],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],r=function(t,r){var e={};return e.totalCount=t,e.dataCount=r,e},e={};return e.getRSBlocks=function(e,n){var o=function(r,e){switch(e){case g.L:return t[4*(r-1)+0];case g.M:return t[4*(r-1)+1];case g.Q:return t[4*(r-1)+2];case g.H:return t[4*(r-1)+3];default:return}}(e,n);if(void 0===o)throw"bad rs block @ typeNumber:"+e+"/errorCorrectionLevel:"+n;for(var i=o.length/3,a=[],u=0;u<i;u+=1)for(var f=o[3*u+0],c=o[3*u+1],l=o[3*u+2],h=0;h<f;h+=1)a.push(r(c,l));return a},e}(),b=function(){var t=[],r=0,e={getBuffer:function(){return t},getAt:function(r){var e=Math.floor(r/8);return 1==(t[e]>>>7-r%8&1)},put:function(t,r){for(var n=0;n<r;n+=1)e.putBit(1==(t>>>r-n-1&1))},getLengthInBits:function(){return r},putBit:function(e){var n=Math.floor(r/8);t.length<=n&&t.push(0),e&&(t[n]|=128>>>r%8),r+=1}};return e},M=function(t){var r=a,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+2<r.length;)t.put(o(r.substring(n,n+3)),10),n+=3;n<r.length&&(r.length-n==1?t.put(o(r.substring(n,n+1)),4):r.length-n==2&&t.put(o(r.substring(n,n+2)),7))}},o=function(t){for(var r=0,e=0;e<t.length;e+=1)r=10*r+i(t.charAt(e));return r},i=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);throw"illegal char :"+t};return n},x=function(t){var r=u,e=t,n={getMode:function(){return r},getLength:function(t){return e.length},write:function(t){for(var r=e,n=0;n+1<r.length;)t.put(45*o(r.charAt(n))+o(r.charAt(n+1)),11),n+=2;n<r.length&&t.put(o(r.charAt(n)),6)}},o=function(t){if("0"<=t&&t<="9")return t.charCodeAt(0)-"0".charCodeAt(0);if("A"<=t&&t<="Z")return t.charCodeAt(0)-"A".charCodeAt(0)+10;switch(t){case" ":return 36;case"$":return 37;case"%":return 38;case"*":return 39;case"+":return 40;case"-":return 41;case".":return 42;case"/":return 43;case":":return 44;default:throw"illegal char :"+t}};return n},m=function(r){var e=f,n=t.stringToBytes(r),o={getMode:function(){return e},getLength:function(t){return n.length},write:function(t){for(var r=0;r<n.length;r+=1)t.put(n[r],8)}};return o},L=function(r){var e=c,n=t.stringToBytesFuncs.SJIS;if(!n)throw"sjis not supported.";!function(){var t=n("友");if(2!=t.length||38726!=(t[0]<<8|t[1]))throw"sjis not supported."}();var o=n(r),i={getMode:function(){return e},getLength:function(t){return~~(o.length/2)},write:function(t){for(var r=o,e=0;e+1<r.length;){var n=(255&r[e])<<8|255&r[e+1];if(33088<=n&&n<=40956)n-=33088;else{if(!(57408<=n&&n<=60351))throw"illegal char at "+(e+1)+"/"+n;n-=49472}n=192*(n>>>8&255)+(255&n),t.put(n,13),e+=2}if(e<r.length)throw"illegal char at "+(e+1)}};return i},D=function(){var t=[],r={writeByte:function(r){t.push(255&r)},writeShort:function(t){r.writeByte(t),r.writeByte(t>>>8)},writeBytes:function(t,e,n){e=e||0,n=n||t.length;for(var o=0;o<n;o+=1)r.writeByte(t[o+e])},writeString:function(t){for(var e=0;e<t.length;e+=1)r.writeByte(t.charCodeAt(e))},toByteArray:function(){return t},toString:function(){var r="";r+="[";for(var e=0;e<t.length;e+=1)e>0&&(r+=","),r+=t[e];return r+="]"}};return r},S=function(t){var r=t,e=0,n=0,o=0,i={read:function(){for(;o<8;){if(e>=r.length){if(0==o)return-1;throw"unexpected end of file./"+o}var t=r.charAt(e);if(e+=1,"="==t)return o=0,-1;t.match(/^\s$/)||(n=n<<6|a(t.charCodeAt(0)),o+=6)}var i=n>>>o-8&255;return o-=8,i}},a=function(t){if(65<=t&&t<=90)return t-65;if(97<=t&&t<=122)return t-97+26;if(48<=t&&t<=57)return t-48+52;if(43==t)return 62;if(47==t)return 63;throw"c:"+t};return i},I=function(t,r,e){for(var n=function(t,r){var e=t,n=r,o=new Array(t*r),i={setPixel:function(t,r,n){o[r*e+t]=n},write:function(t){t.writeString("GIF87a"),t.writeShort(e),t.writeShort(n),t.writeByte(128),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(0),t.writeByte(255),t.writeByte(255),t.writeByte(255),t.writeString(","),t.writeShort(0),t.writeShort(0),t.writeShort(e),t.writeShort(n),t.writeByte(0);var r=a(2);t.writeByte(2);for(var o=0;r.length-o>255;)t.writeByte(255),t.writeBytes(r,o,255),o+=255;t.writeByte(r.length-o),t.writeBytes(r,o,r.length-o),t.writeByte(0),t.writeString(";")}},a=function(t){for(var r=1<<t,e=1+(1<<t),n=t+1,i=u(),a=0;a<r;a+=1)i.add(String.fromCharCode(a));i.add(String.fromCharCode(r)),i.add(String.fromCharCode(e));var f,c,g,l=D(),h=(f=l,c=0,g=0,{write:function(t,r){if(t>>>r!=0)throw"length over";for(;c+r>=8;)f.writeByte(255&(t<<c|g)),r-=8-c,t>>>=8-c,g=0,c=0;g|=t<<c,c+=r},flush:function(){c>0&&f.writeByte(g)}});h.write(r,n);var s=0,v=String.fromCharCode(o[s]);for(s+=1;s<o.length;){var d=String.fromCharCode(o[s]);s+=1,i.contains(v+d)?v+=d:(h.write(i.indexOf(v),n),i.size()<4095&&(i.size()==1<<n&&(n+=1),i.add(v+d)),v=d)}return h.write(i.indexOf(v),n),h.write(e,n),h.flush(),l.toByteArray()},u=function(){var t={},r=0,e={add:function(n){if(e.contains(n))throw"dup key:"+n;t[n]=r,r+=1},size:function(){return r},indexOf:function(r){return t[r]},contains:function(r){return void 0!==t[r]}};return e};return i}(t,r),o=0;o<r;o+=1)for(var i=0;i<t;i+=1)n.setPixel(i,o,e(i,o));var a=D();n.write(a);for(var u=function(){var t=0,r=0,e=0,n="",o={},i=function(t){n+=String.fromCharCode(a(63&t))},a=function(t){if(t<0);else{if(t<26)return 65+t;if(t<52)return t-26+97;if(t<62)return t-52+48;if(62==t)return 43;if(63==t)return 47}throw"n:"+t};return o.writeByte=function(n){for(t=t<<8|255&n,r+=8,e+=1;r>=6;)i(t>>>r-6),r-=6},o.flush=function(){if(r>0&&(i(t<<6-r),t=0,r=0),e%3!=0)for(var o=3-e%3,a=0;a<o;a+=1)n+="="},o.toString=function(){return n},o}(),f=a.toByteArray(),c=0;c<f.length;c+=1)u.writeByte(f[c]);return u.flush(),"data:image/gif;base64,"+u};return t}();qrcode.stringToBytesFuncs["UTF-8"]=function(t){return function(t){for(var r=[],e=0;e<t.length;e++){var n=t.charCodeAt(e);n<128?r.push(n):n<2048?r.push(192|n>>6,128|63&n):n<55296||n>=57344?r.push(224|n>>12,128|n>>6&63,128|63&n):(e++,n=65536+((1023&n)<<10|1023&t.charCodeAt(e)),r.push(240|n>>18,128|n>>12&63,128|n>>6&63,128|63&n))}return r}(t)},function(t){"function"==typeof define&&define.amd?define([],t):"object"==typeof exports&&(module.exports=t())}(function(){return qrcode});
+const _PUSTAKA_QR = ['https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js', 'https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js'];
+async function _muatQr() {
+  if (typeof qrcode !== 'undefined' || window.qrcode) return true;
+  for (const u of _PUSTAKA_QR) {
+    try {
+      await new Promise((res, rej) => { const s = document.createElement('script'); s.src = u; s.onload = res; s.onerror = rej; document.head.appendChild(s); setTimeout(rej, 8000); });
+      if (window.qrcode) return true;
+    } catch (e) { }
+  }
+  return false;
+}
+function _qrSert(url) {
+  if (!url) return '';
+  try {
+    if (typeof qrcode !== 'undefined') { const q = qrcode(0, 'M'); q.addData(url); q.make(); return q.createSvgTag({ cellSize: 2, margin: 0, scalable: true, alt: 'Kode QR verifikasi' }); }
+  } catch (e) { }
+  return `<img alt="Kode QR verifikasi" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=${encodeURIComponent(url)}">`;
+}
+let _noSert = 0;
+/** Tanda air pengaman: nama sekolah berulang dalam garis-garis miring bergradasi (hijau–emas–merah marun, warna logo). */
+function _tandaAirSert(id, lembaga) {
+  const nm = String(lembaga || 'SMA IT Al-Ittihad Pekanbaru').toUpperCase();
+  const baris = (nm + ' \u2022 SMAIT AL-ITTIHAD \u2022 YKPI AL-ITTIHAD \u2022 ').repeat(3);
+  return `<svg class="sr-tanda-air" viewBox="0 0 1124 776" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs>
+    <linearGradient id="${id}g" x1="0" y1="0" x2="1124" y2="776" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#15803D"/><stop offset=".35" stop-color="#B8960B"/><stop offset=".7" stop-color="#7F1D1D"/><stop offset="1" stop-color="#15803D"/></linearGradient>
+    <pattern id="${id}p" width="1400" height="30" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
+      <text x="0" y="20" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="700" letter-spacing="1.6">${_eRap(baris)}</text>
+      <line x1="0" y1="27" x2="1400" y2="27" stroke="#fff" stroke-width=".6"/></pattern>
+    <mask id="${id}m" maskUnits="userSpaceOnUse" x="0" y="0" width="1124" height="776"><rect width="1124" height="776" fill="url(#${id}p)"/></mask></defs>
+    <rect width="1124" height="776" fill="url(#${id}g)" mask="url(#${id}m)"/></svg>`;
+}
+/** Jenis dokumen hasil: sertifikat (IELTS/TOEFL/SAT berbahasa Inggris penuh; ujian sekolah) atau report card (UTBK, TKA). */
+function jenisDokumenHasil(sk) { return sk === 'UTBK' || sk === 'TKA' ? 'reportcard' : 'sertifikat'; }
+function labelDokumenHasil(sk) { return jenisDokumenHasil(sk) === 'reportcard' ? 'report card' : 'sertifikat'; }
+const BULAN_EN = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+/** Bingkai resmi bersama (logo, tanda air garis miring, nomor, QR verifikasi, dua tanda tangan). */
+function _bingkaiResmi(o) {
+  const c = o.c, en = o.en, ttd = o.ttd || {};
+  const blokTtd = (atas, jabatan, nama, nip, gambar) => `<div class="sr-ttd"><div>${atas}</div><div>${_eRap(jabatan)}</div>
+      <div class="sr-garis-ttd">${gambar && /^data:image\/(png|jpeg);base64,/.test(gambar) ? `<img src="${gambar}" alt="${en ? 'Signature' : 'Tanda tangan'}">` : ''}</div>
+      <b>${nama ? _eRap(nama) : '&nbsp;'}</b><small>${nip ? (en ? 'Employee ID ' : 'NIP/NIY ') + _eRap(nip) : '&nbsp;'}</small></div>`;
+  const uid = 'sr' + (++_noSert);
+  const tempat = _eRap((c.kota || '') + ', ' + ((en ? c.terbitEn : c.terbit) || c.terbit || ''));
+  return `<article class="sertifikat${o.kelas ? ' ' + o.kelas : ''}" style="--rp:${o.warna}">
+  <div class="sr-dalam">
+    ${_tandaAirSert(uid, o.r.lembaga)}
+    <img class="sr-logo-air" src="${LOGO_YKPI}" alt="">
+    <div class="sr-sudut sr-s1"></div><div class="sr-sudut sr-s2"></div><div class="sr-sudut sr-s3"></div><div class="sr-sudut sr-s4"></div>
+    <header class="sr-kepala">
+      <img class="sr-logo" src="${LOGO_YKPI}" alt="${en ? 'YKPI Al-Ittihad logo' : 'Logo YKPI Al-Ittihad'}">
+      <div class="sr-judul"><div class="sr-yayasan">${NAMA_YAYASAN}</div><div class="sr-lembaga">${_eRap(o.r.lembaga || '')}</div><h1>${_eRap(o.judul)}</h1>${o.sub ? `<div class="sr-sub">${_eRap(o.sub)}</div>` : ''}</div>
+      <div class="sr-nomor"><span>${_eRap(o.labelNomor)}</span><b>${_eRap(String(c.nomor).slice(0, String(c.nomor).lastIndexOf('/') + 1))}<br>${_eRap(String(c.nomor).slice(String(c.nomor).lastIndexOf('/') + 1))}</b></div>
+    </header>
+    ${o.isi}
+    <footer class="sr-kaki">
+      <div class="sr-qr">${c.urlVerifikasi ? _qrSert(c.urlVerifikasi) : ''}<div><b>${en ? 'Verification' : 'Verifikasi'}</b><small>${c.urlVerifikasi
+        ? (en ? 'Scan the QR code to verify the authenticity of this ' + o.namaDok + '.' : 'Pindai kode QR untuk memeriksa keaslian ' + o.namaDok + ' ini.') : (en ? 'No. ' : 'Nomor: ') + _eRap(c.nomor)}</small></div></div>
+      ${blokTtd('&nbsp;', en ? (c.jabatanPengujiEn || 'Examiner') : (c.jabatanPenguji || 'Penguji'), c.penguji, c.nipPenguji, ttd.penguji)}
+      ${blokTtd(tempat, en ? 'Principal' : 'Kepala Sekolah', c.kepala, c.nip, ttd.kepala)}
+    </footer>
+    <div class="sr-catatan">${_eRap(o.catatan)}</div>
+  </div>
+</article>`;
+}
+/** r = objek rapor yang memiliki r.sertifikat (diterbitkan server hanya untuk hasil final). */
+function htmlSertifikat(r, ttd) {
+  if (!r || !r.sertifikat) return '';
+  const c = r.sertifikat, sk = r.skema || 'PERSEN', warna = WARNA_RAPOR[sk] || '#15803D';
+  if (jenisDokumenHasil(sk) === 'reportcard') return htmlReportCard(r, ttd);
+  const en = ['IELTS', 'TOEFL_ITP', 'TOEFL_IBT', 'SAT'].indexOf(sk) >= 0, band = sk === 'IELTS';
+  const judul = JUDUL_SERT[sk] || JUDUL_SERT.PERSEN;
+  const komp = (r.komponen || []).filter(k => k && k.nama).slice(0, 10);
+  const fmt = v => band ? _angkaRap(v, 1) : _angkaRap(v);
+  const labelTotal = { IELTS: 'Overall Band', TOEFL_ITP: 'Total Score', TOEFL_IBT: 'Total Score', SAT: 'Total Score' }[sk] || 'Nilai Akhir';
+  const skalaTotal = { IELTS: '0 – 9', TOEFL_ITP: '310 – 677', TOEFL_IBT: '0 – 120', SAT: '400 – 1600' }[sk] || '0 – 100';
+  const cefr = String(r.cefr || '').trim(), kodeCefr = cefr.slice(0, 2).toUpperCase();
+  const ket = [];
+  if (band && isFinite(Number(r.nilai))) ket.push(BAND_IELTS[Math.max(0, Math.min(9, Math.floor(Number(r.nilai))))]);
+  if (cefr) ket.push('CEFR ' + cefr + (en && !band ? ' (estimated)' : '') + (CEFR_DESK[kodeCefr] ? ' — ' + CEFR_DESK[kodeCefr] : ''));
+  if (r.huruf) ket.push('Nilai huruf ' + r.huruf);
+  if (r.tuntas === true) ket.push('Tuntas (KKM ' + r.kkm + ')');
+  const tglTes = en ? (c.tesEn || String(r.tanggal || '').split(' ')[0]) : (c.tes || String(r.tanggal || '').split(' ')[0]);
+  const rentang = k => k.maks === undefined || k.maks === null || band ? '' : `<small>${k.min !== undefined && k.min !== null ? _eRap(k.min) + ' – ' : (en ? 'max. ' : 'maks. ')}${_eRap(k.maks)}</small>`;
+  const isi = `
+    <div class="sr-teks">${en ? 'This is to certify that' : 'Dengan ini menerangkan bahwa'}</div>
+    <div class="sr-nama">${_eRap(r.nama)}</div>
+    <div class="sr-id">${en ? 'Student ID (NISN)' : 'NISN'} ${_eRap(r.nisn)} · ${en ? 'Class' : 'Kelas'} ${_eRap(r.kelas || '-')}</div>
+    <div class="sr-teks">${en
+      ? `has taken the <b>${_eRap(r.judul)}</b> on <b>${_eRap(tglTes)}</b> and achieved the following results.`
+      : `telah mengikuti <b>${_eRap(r.judul)}</b>${r.mapel ? ' (' + _eRap(r.mapel) + ')' : ''} pada <b>${_eRap(tglTes)}</b> dengan hasil sebagai berikut.`}</div>
+    <div class="sr-skor">
+      ${komp.map(k => `<div class="sr-k"><span>${_eRap(k.nama)}</span><b>${fmt(k.nilai)}</b>${rentang(k)}</div>`).join('')}
+      <div class="sr-k sr-total"><span>${_eRap(labelTotal)}</span><b>${fmt(r.nilai)}</b><small>${skalaTotal}</small></div>
+    </div>
+    ${ket.length ? `<div class="sr-ket">${ket.map(_eRap).join(' · ')}</div>` : ''}`;
+  return _bingkaiResmi({ r: r, c: c, ttd: ttd, en: en, warna: warna, kelas: komp.length > 6 ? 'sr-padat' : '', judul: judul[0], sub: judul[1],
+    labelNomor: en ? 'Certificate No.' : 'Nomor', namaDok: en ? 'certificate' : 'sertifikat', isi: isi,
+    catatan: en ? 'This simulation test certificate is issued by the school for practice and proficiency mapping purposes only; it is not an official certificate of the international test provider.'
+      : 'Sertifikat diterbitkan sekolah berdasarkan hasil tes berbasis komputer.' });
+}
+/** Report card UTBK / TKA: tabel skor per subtes/mata pelajaran + grafik batang, siap cetak lanskap A4. */
+function htmlReportCard(r, ttd) {
+  if (!r || !r.sertifikat) return '';
+  const c = r.sertifikat, sk = r.skema, warna = WARNA_RAPOR[sk] || '#1E3A8A';
+  const komp = (r.komponen || []).filter(k => k && k.nama);
+  const utbk = sk === 'UTBK';
+  const baris = komp.map(function (k, i) {
+    const lo = k.min === null || k.min === undefined ? 200 : Number(k.min), hi = k.maks === null || k.maks === undefined ? 1000 : Number(k.maks);
+    const p = k.nilai === null || !isFinite(Number(k.nilai)) ? 0 : Math.max(0, Math.min(100, (Number(k.nilai) - lo) / Math.max(1e-9, hi - lo) * 100));
+    return `<tr><td>${i + 1}</td><td class="rc-nama">${_eRap(k.nama)}</td><td>${_eRap(k.sub || '-')}</td><td class="rc-skor">${_angkaRap(k.nilai)}</td>
+      <td class="rc-grafik"><div class="rc-rel"><i style="width:${p.toFixed(1)}%"></i></div></td></tr>`;
+  }).join('');
+  const nilai = komp.map(k => Number(k.nilai)).filter(isFinite);
+  const tinggi = nilai.length ? komp.filter(k => Number(k.nilai) === Math.max.apply(null, nilai))[0] : null;
+  const rendah = nilai.length ? komp.filter(k => Number(k.nilai) === Math.min.apply(null, nilai))[0] : null;
+  const tgl = c.tes || String(r.tanggal || '').split(' ')[0];
+  const isi = `
+    <div class="rc-identitas"><span>Nama peserta</span><b>${_eRap(r.nama)}</b><span>NISN</span><b>${_eRap(r.nisn)}</b>
+      <span>Kelas</span><b>${_eRap(r.kelas || '-')}</b><span>Tes</span><b>${_eRap(r.judul)}</b><span>${_eRap(r.labelTanggal || 'Tanggal tes')}</span><b>${_eRap(r.labelTanggal ? c.terbit : tgl)}</b>
+      <span>Jumlah ${utbk ? 'subtes' : 'mata pelajaran'}</span><b>${komp.length}</b></div>
+    <div class="rc-utama">
+      <table class="rc-tabel"><thead><tr><th>No</th><th>${utbk ? 'Subtes' : 'Mata pelajaran'}</th><th>Jawaban benar</th><th>Skor</th><th>Capaian (200–1000)</th></tr></thead>
+        <tbody>${baris}</tbody></table>
+      <div class="rc-ringkas">
+        <div class="sr-k sr-total"><span>Rata-rata skor</span><b>${_angkaRap(r.nilai)}</b><small>200 – 1000</small></div>
+        ${tinggi ? `<div class="rc-catat"><span>Skor tertinggi</span><b>${_eRap(tinggi.nama)} · ${_angkaRap(tinggi.nilai)}</b></div>` : ''}
+        ${rendah && rendah !== tinggi ? `<div class="rc-catat"><span>Perlu ditingkatkan</span><b>${_eRap(rendah.nama)} · ${_angkaRap(rendah.nilai)}</b></div>` : ''}
+      </div>
+    </div>`;
+  return _bingkaiResmi({ r: r, c: c, ttd: ttd, en: false, warna: warna, kelas: 'sr-reportcard' + (komp.length > 8 ? ' rc-padat' : ''),
+    judul: 'Report Card', sub: utbk ? 'Hasil Try Out UTBK-SNBT' : 'Hasil Tes Kemampuan Akademik (TKA)', labelNomor: 'No. dokumen', namaDok: 'report card', isi: isi,
+    catatan: utbk ? 'Skor berskala 200–1000 dihitung dari hasil try out berbasis komputer di sekolah; bukan hasil resmi UTBK-SNBT.'
+      : 'Skor berskala 200–1000 dihitung dari hasil tes berbasis komputer di sekolah; bukan hasil resmi TKA.' });
+}
+/** Cetak banyak sertifikat (lanskap A4, satu halaman per siswa) → simpan sebagai PDF lewat dialog cetak. */
+async function cetakSertifikat(daftarR, judul, ttd) {
+  const ada = (daftarR || []).filter(r => r && r.sertifikat);
+  if (!ada.length) throw new Error('Belum ada sertifikat/report card yang dapat diterbitkan (nilai harus final dan sudah dinilai semua).');
+  if (ada.some(r => r.sertifikat.urlVerifikasi)) await _muatQr();
+  let g = document.getElementById('gayaCetakSertifikat');
+  if (!g) { g = document.createElement('style'); g.id = 'gayaCetakSertifikat'; document.head.appendChild(g); }
+  g.textContent = '@media print{@page{size:A4 landscape;margin:7mm}}';
+  document.body.classList.add('cetak-sertifikat');
+  cetakRapor(ada.map(r => htmlSertifikat(r, ttd)), judul || ('Sertifikat ' + ada[0].nama));
+  const lepas = () => { g.textContent = ''; document.body.classList.remove('cetak-sertifikat'); window.removeEventListener('afterprint', lepas); };
+  window.addEventListener('afterprint', lepas);
+  return ada.length;
+}
+/* <</RAPOR>> */
+/* <<AUDIO-SISWA>> */
+/* =====================================================================
+   AUDIO LISTENING OTOMATIS — satu pemutar tetap untuk seluruh ujian.
+   Diputar otomatis saat siswa membuka soal dalam rentangnya; bagian berikutnya menunggu giliran;
+   "putar sekali" = tanpa jeda/ulang (seperti tes asli); posisi tersimpan bila halaman dimuat ulang.
+   ===================================================================== */
+const AUDIO = { daftar: [], peta: {}, aktif: -1, antre: -1, status: {}, sumber: [], diblok: false, berhenti: false, simpanT: 0, lanjut: 0 };
+const SUNYI = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+const mmss = d => { d = Math.max(0, Math.floor(d || 0)); return Math.floor(d / 60) + ':' + String(d % 60).padStart(2, '0'); };
+/** Dipanggil saat siswa mengetuk "Mulai ujian": membuka izin putar otomatis (wajib di Safari iPad). */
+function audioBuka() {
+  const a = $('cbAudio');
+  try { a.muted = true; a.src = SUNYI; const p = a.play(); if (p && p.then) p.then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; }); else a.muted = false; } catch (e) { a.muted = false; }
+}
+function audioSimpanStatus() { try { localStorage.setItem('cbt_audio_' + cb.sesi, JSON.stringify(AUDIO.status)); } catch (e) { } }
+function audioSiapkan(daftar) {
+  AUDIO.daftar = daftar || []; AUDIO.peta = {}; AUDIO.aktif = -1; AUDIO.antre = -1; AUDIO.diblok = false; AUDIO.berhenti = false;
+  AUDIO.daftar.forEach((x, i) => (x.qids || []).forEach(q => { AUDIO.peta[q] = i; }));
+  try { AUDIO.status = JSON.parse(localStorage.getItem('cbt_audio_' + cb.sesi) || '{}'); } catch (e) { AUDIO.status = {}; }
+  // halaman dimuat ulang di tengah rekaman → rekaman itu langsung dilanjutkan dari posisinya (seperti tes asli, rekaman terus berjalan)
+  const terputus = AUDIO.daftar.findIndex(x => { const st = AUDIO.status[x.id] || {}; return st.posisi > 0 && !st.selesai; });
+  if (terputus >= 0) audioMulai(terputus); else gambarAudio();
+}
+function audioUntukSoal(qid) {
+  const i = AUDIO.peta[qid];
+  if (i === undefined || AUDIO.berhenti) return gambarAudio();
+  const x = AUDIO.daftar[i], st = AUDIO.status[x.id] || {}, a = $('cbAudio');
+  if (AUDIO.aktif === i) return gambarAudio();
+  if (st.selesai && x.sekali) return gambarAudio(i);
+  if (AUDIO.aktif >= 0 && !a.ended) { AUDIO.antre = i; return gambarAudio(); }   // rekaman aktif belum selesai → antre
+  audioMulai(i);
+}
+function audioMulai(i) {
+  const x = AUDIO.daftar[i], a = $('cbAudio'), st = AUDIO.status[x.id] || {};
+  AUDIO.aktif = i; if (AUDIO.antre === i) AUDIO.antre = -1;
+  AUDIO.sumber = sumberMedia(x.url);
+  AUDIO.lanjut = st.posisi && !st.selesai ? st.posisi : 0;
+  a.onloadedmetadata = () => { if (AUDIO.lanjut && AUDIO.lanjut < (a.duration || Infinity) - 1) { try { a.currentTime = AUDIO.lanjut; } catch (e) { } } AUDIO.lanjut = 0; };
+  a.src = AUDIO.sumber.shift(); a.load();
+  audioPutar();
+  gambarAudio();
+}
+function audioPutar() {
+  const a = $('cbAudio');
+  if (AUDIO.lanjut && a.readyState >= 1) { try { a.currentTime = AUDIO.lanjut; } catch (e) { } AUDIO.lanjut = 0; }
+  try {
+    const p = a.play();
+    if (p && p.then) p.then(() => { AUDIO.diblok = false; gambarAudio(); }).catch(() => { AUDIO.diblok = true; gambarAudio(); });
+  } catch (e) { AUDIO.diblok = true; gambarAudio(); }
+}
+function audioHenti() {
+  AUDIO.berhenti = true; AUDIO.aktif = -1; AUDIO.antre = -1;
+  const a = $('cbAudio'); try { a.pause(); a.removeAttribute('src'); a.load(); } catch (e) { }
+  $('cbAudioBar').classList.add('sembunyi');
+}
+function gambarAudio(iTampil) {
+  const bar = $('cbAudioBar'), a = $('cbAudio');
+  const q = cb.soal && cb.soal[cb.idx];
+  let i = AUDIO.aktif >= 0 ? AUDIO.aktif : (iTampil !== undefined ? iTampil : (q ? AUDIO.peta[q.qid] : undefined));
+  if (i === undefined || i < 0 || AUDIO.berhenti || !AUDIO.daftar[i]) { bar.classList.add('sembunyi'); return; }
+  const x = AUDIO.daftar[i], st = AUDIO.status[x.id] || {}, en = EN();
+  const main = AUDIO.aktif === i && !a.paused && !a.ended;
+  let status;
+  if (AUDIO.aktif === i && AUDIO.diblok) status = en ? 'Tap the button to start the audio' : 'Ketuk tombol untuk memutar audio';
+  else if (main) status = en ? 'Playing' : 'Sedang diputar';
+  else if (AUDIO.aktif === i && a.paused && !a.ended) status = en ? 'Paused' : 'Dijeda';
+  else if (st.selesai) status = en ? 'Finished' : 'Selesai diputar';
+  else status = en ? 'Starting…' : 'Menyiapkan…';
+  const antreX = AUDIO.antre >= 0 ? AUDIO.daftar[AUDIO.antre] : null;
+  const dur = AUDIO.aktif === i ? a.duration : 0, pos = AUDIO.aktif === i ? a.currentTime : (st.selesai ? 1 : 0);
+  $('cbAudioJudul').textContent = '🔊 ' + x.judul + ' · ' + (en ? 'Questions ' : 'Soal ') + x.dari + '–' + x.sampai;
+  $('cbAudioStatus').textContent = status + (antreX ? (en ? ' · next: ' : ' · berikutnya: ') + antreX.judul + (en ? ' (plays automatically)' : ' (otomatis menyusul)') : '') +
+    (x.sekali ? (en ? ' · plays once' : ' · diputar sekali') : '');
+  $('cbAudioWaktu').textContent = AUDIO.aktif === i && isFinite(dur) && dur > 0 ? mmss(pos) + ' / ' + mmss(dur) : (st.selesai ? '✓' : '');
+  $('cbAudioIsi').style.width = (AUDIO.aktif === i && dur > 0 ? Math.min(100, pos / dur * 100) : (st.selesai ? 100 : 0)) + '%';
+  $('cbAudioPutar').classList.toggle('sembunyi', !(AUDIO.aktif === i && AUDIO.diblok));
+  $('cbAudioPutar').textContent = en ? '▶ Play audio' : '▶ Putar audio';
+  const kendali = !x.sekali && AUDIO.aktif === i && !AUDIO.diblok;
+  $('cbAudioJeda').classList.toggle('sembunyi', !kendali); $('cbAudioUlang').classList.toggle('sembunyi', x.sekali || !(AUDIO.aktif === i || st.selesai));
+  $('cbAudioJeda').textContent = main ? '❚❚' : '▶';
+  bar.classList.remove('sembunyi');
+}
+(function () {
+  const a = $('cbAudio');
+  a.addEventListener('error', () => { if (AUDIO.aktif < 0 || AUDIO.berhenti || /^data:/.test(a.currentSrc || a.src || '')) return; if (AUDIO.sumber.length) { a.src = AUDIO.sumber.shift(); a.load(); audioPutar(); } else { AUDIO.diblok = true; gambarAudio(); } });
+  a.addEventListener('playing', () => { if (AUDIO.aktif >= 0) { AUDIO.diblok = false; gambarAudio(); } });
+  a.addEventListener('timeupdate', () => {
+    if (AUDIO.aktif < 0) return;
+    const x = AUDIO.daftar[AUDIO.aktif];
+    // posisi disimpan hanya saat audio benar-benar berputar (bukan saat baru dimuat di detik 0 sebelum melompat ke posisi tersimpan)
+    const lama = (AUDIO.status[x.id] || {}).posisi || 0;
+    if (!a.paused && a.currentTime > 0.3 && a.currentTime >= lama - 1.5 && Date.now() - AUDIO.simpanT > 2000) {
+      AUDIO.simpanT = Date.now(); AUDIO.status[x.id] = Object.assign({}, AUDIO.status[x.id], { posisi: a.currentTime }); audioSimpanStatus();
+    }
+    gambarAudio();
+  });
+  a.addEventListener('ended', () => {
+    if (AUDIO.aktif < 0 || /^data:/.test(a.currentSrc || a.src || '')) return;
+    const x = AUDIO.daftar[AUDIO.aktif];
+    AUDIO.status[x.id] = { selesai: true, posisi: 0 }; audioSimpanStatus();
+    const lanjut = AUDIO.antre;
+    AUDIO.aktif = -1; AUDIO.antre = -1;
+    if (lanjut >= 0 && !AUDIO.berhenti) audioMulai(lanjut); else gambarAudio();
+  });
+  a.addEventListener('pause', () => {
+    // "putar sekali": jeda dari luar (mis. kontrol sistem) langsung dilanjutkan
+    if (AUDIO.aktif < 0 || AUDIO.berhenti || a.ended || cb.kirim || REKAM.aktif) return gambarAudio();
+    if (AUDIO.daftar[AUDIO.aktif].sekali && !AUDIO.jedaSendiri) setTimeout(() => { if (a.paused && !a.ended && AUDIO.aktif >= 0 && !AUDIO.berhenti && !AUDIO.diblok) audioPutar(); }, 300);
+    gambarAudio();
+  });
+  $('cbAudioPutar').onclick = () => { audioPutar(); };
+  $('cbAudioJeda').onclick = () => { if (a.paused) audioPutar(); else { AUDIO.jedaSendiri = true; a.pause(); setTimeout(() => { AUDIO.jedaSendiri = false; }, 400); } };
+  $('cbAudioUlang').onclick = () => {
+    const q = cb.soal[cb.idx]; const i = AUDIO.aktif >= 0 ? AUDIO.aktif : AUDIO.peta[q.qid];
+    if (i === undefined || AUDIO.daftar[i].sekali) return;
+    AUDIO.status[AUDIO.daftar[i].id] = { posisi: 0 }; audioSimpanStatus();
+    if (AUDIO.aktif === i) { try { a.currentTime = 0; } catch (e) { } audioPutar(); } else audioMulai(i);
+  };
+})();
+
+/* =====================================================================
+   SPEAKING — siswa merekam jawaban lisan di peramban.
+   Rekaman disimpan dulu di perangkat (IndexedDB) lalu dikirim ke server; bila jaringan putus, dikirim ulang otomatis.
+   Bila mikrofon tidak dapat dipakai, siswa dapat mengunggah rekaman dari aplikasi perekam suara.
+   ===================================================================== */
+const REKAM = { aktif: null, rec: null, stream: null, potong: [], mulai: 0, timer: 0, siapT: 0, siapSisa: 0, mime: '', tertunda: {}, kirim: {}, galat: '', ctx: null, analis: null, rafId: 0 };
+const DB_REKAM = (function () {
+  let dbp = null;
+  const buka = () => dbp || (dbp = new Promise((res, rej) => {
+    try { const r = indexedDB.open('cbt_rekaman', 1); r.onupgradeneeded = () => r.result.createObjectStore('r'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }
+    catch (e) { rej(e); }
+  }));
+  const jalan = (mode, f) => buka().then(db => new Promise((res, rej) => { const t = db.transaction('r', mode); const st = t.objectStore('r'); const h = f(st); t.oncomplete = () => res(h && h.result); t.onerror = () => rej(t.error); }));
+  return {
+    simpan: (k, v) => jalan('readwrite', s => s.put(v, k)).catch(() => { }),
+    hapus: k => jalan('readwrite', s => s.delete(k)).catch(() => { }),
+    semua: () => buka().then(db => new Promise(res => { const out = []; const t = db.transaction('r', 'readonly'); const c = t.objectStore('r').openCursor();
+      c.onsuccess = () => { const k = c.result; if (k) { out.push({ k: k.key, v: k.value }); k.continue(); } else res(out); }; c.onerror = () => res(out); })).catch(() => [])
+  };
+})();
+function mimeRekam() {
+  const c = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/aac'];
+  try { for (const m of c) if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) return m; } catch (e) { }
+  return '';
+}
+function teksRekam(id, en) {
+  const t = {
+    siap: ['Ketuk "Mulai merekam" lalu jawab dengan suara jelas. Rekaman berhenti otomatis saat waktu habis.', 'Tap "Start recording" and answer clearly. Recording stops automatically when time is up.'],
+    persiapan: ['Waktu persiapan — buat catatan singkat. Perekaman dimulai otomatis.', 'Preparation time — make brief notes. Recording starts automatically.'],
+    merekam: ['Sedang merekam… bicaralah sekarang.', 'Recording… speak now.'],
+    kirim: ['Menyimpan rekaman…', 'Saving your recording…'],
+    tunda: ['Rekaman tersimpan di perangkat dan akan dikirim otomatis saat jaringan kembali.', 'Recording kept on this device; it will be sent automatically when the connection returns.'],
+    selesai: ['Rekaman tersimpan', 'Recording saved'],
+    mic: ['Mikrofon tidak dapat dipakai di halaman ini. Rekam jawaban dengan aplikasi perekam suara di perangkat, lalu unggah berkasnya di bawah. Atau minta pengawas membuka portal versi hosting luar.',
+      'The microphone cannot be used on this page. Record your answer with the device voice recorder, then upload the file below.']
+  };
+  return (t[id] || ['', ''])[en ? 1 : 0];
+}
+function htmlSpeaking(q) {
+  const en = EN(), ada = cb.rek && cb.rek[q.qid], aktif = REKAM.aktif === q.qid, tunda = REKAM.tertunda[q.qid];
+  const maks = q.durasi || 120;
+  let isi = `<div class="rekam" id="cbRekam" data-q="${q.qid}">
+    <div class="rekam-info"><span>⏱ ${en ? 'Speaking time' : 'Waktu bicara'}: <b>${mmss(maks)}</b></span>${q.persiapan ? `<span>📝 ${en ? 'Preparation' : 'Persiapan'}: <b>${mmss(q.persiapan)}</b></span>` : ''}
+      <span>${q.ulang ? (en ? 'Re-recording allowed' : 'Boleh rekam ulang') : (en ? 'One attempt only' : 'Hanya satu kali rekam')}</span></div>`;
+  if (REKAM.siapSisa > 0 && REKAM.aktif === 'siap:' + q.qid) {
+    isi += `<div class="rekam-status persiapan">${teksRekam('persiapan', en)}</div><div class="rekam-jam" id="cbRekamJam">${mmss(REKAM.siapSisa)}</div>
+      <button type="button" class="tombol" id="cbRekamMulai">🎙 ${en ? 'Start speaking now' : 'Mulai bicara sekarang'}</button>`;
+  } else if (aktif) {
+    isi += `<div class="rekam-status merekam"><span class="titik-rekam"></span>${teksRekam('merekam', en)}</div>
+      <div class="rekam-jam" id="cbRekamJam">${mmss((Date.now() - REKAM.mulai) / 1000)} / ${mmss(maks)}</div><div class="rekam-level"><i id="cbRekamLevel"></i></div>
+      <button type="button" class="tombol bahaya" id="cbRekamStop">■ ${en ? 'Stop & save' : 'Selesai & simpan'}</button>`;
+  } else if (REKAM.kirim[q.qid]) {
+    isi += `<div class="rekam-status">${teksRekam('kirim', en)}</div>`;
+  } else if (ada) {
+    isi += `<div class="rekam-status selesai">✓ ${teksRekam('selesai', en)} (${mmss(ada.d)})</div>` +
+      (q.ulang ? `<button type="button" class="tombol netral" id="cbRekamUlang">🎙 ${en ? 'Record again' : 'Rekam ulang'}</button>` : '');
+  } else if (tunda) {
+    isi += `<div class="rekam-status tunda">${teksRekam('tunda', en)}</div><button type="button" class="tombol netral" id="cbRekamKirimUlang">${en ? 'Send now' : 'Kirim sekarang'}</button>`;
+  } else {
+    isi += `<div class="rekam-status">${REKAM.galat ? '' : teksRekam('siap', en)}</div>` +
+      `<button type="button" class="tombol" id="cbRekamMulai">🎙 ${q.persiapan ? (en ? 'Start preparation' : 'Mulai persiapan') : (en ? 'Start recording' : 'Mulai merekam')}</button>`;
+  }
+  if (REKAM.galat && !aktif && !ada) isi += `<div class="pesan galat" style="display:block;margin-top:10px">${teks(REKAM.galat)}</div>
+    <label class="tombol netral" style="margin-top:8px;display:inline-block">📁 ${en ? 'Upload a recording' : 'Unggah rekaman'}<input type="file" id="cbRekamBerkas" accept="audio/*" style="display:none"></label>`;
+  return isi + '</div>';
+}
+function gambarRekam() {
+  const q = cb.soal[cb.idx];
+  if (!q || q.tipe !== 'SPEAKING' || !$('cbRekam')) return;
+  $('cbRekam').outerHTML = htmlSpeaking(q);
+  gambarNomorCbt();
+}
+async function mulaiPersiapan(q) {
+  if (!q.persiapan) return mulaiRekam(q);
+  REKAM.aktif = 'siap:' + q.qid; REKAM.siapSisa = q.persiapan; gambarRekam();
+  clearInterval(REKAM.siapT);
+  REKAM.siapT = setInterval(() => {
+    REKAM.siapSisa--;
+    if (REKAM.siapSisa <= 0) { clearInterval(REKAM.siapT); mulaiRekam(q); return; }
+    if ($('cbRekamJam')) $('cbRekamJam').textContent = mmss(REKAM.siapSisa); else { clearInterval(REKAM.siapT); REKAM.aktif = null; REKAM.siapSisa = 0; }
+  }, 1000);
+}
+async function mulaiRekam(q) {
+  clearInterval(REKAM.siapT); REKAM.siapSisa = 0;
+  if (REKAM.rec) return;
+  REKAM.galat = '';
+  KUNCI.abaikanSampai = Date.now() + 15000;                 // dialog izin mikrofon bukan pelanggaran
+  let stream;
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) throw new Error('tidak didukung');
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+  } catch (e) {
+    REKAM.aktif = null; REKAM.galat = teksRekam('mic', EN()) + (e && e.name === 'NotAllowedError' ? (EN() ? ' (permission denied)' : ' (izin mikrofon ditolak — izinkan di pengaturan peramban lalu coba lagi)') : '');
+    gambarRekam(); return;
+  }
+  const mime = mimeRekam();
+  let rec;
+  try { rec = new MediaRecorder(stream, Object.assign({ audioBitsPerSecond: 32000 }, mime ? { mimeType: mime } : {})); }
+  catch (e) { try { rec = new MediaRecorder(stream); } catch (e2) { stream.getTracks().forEach(t => t.stop()); REKAM.galat = teksRekam('mic', EN()); REKAM.aktif = null; gambarRekam(); return; } }
+  REKAM.audioLanjut = false;
+  try { const a = $('cbAudio'); if (!a.paused) { REKAM.audioLanjut = true; AUDIO.jedaSendiri = true; a.pause(); setTimeout(() => { AUDIO.jedaSendiri = false; }, 400); } } catch (e) { }
+  REKAM.stream = stream; REKAM.rec = rec; REKAM.potong = []; REKAM.mime = rec.mimeType || mime || 'audio/webm';
+  REKAM.aktif = q.qid; REKAM.mulai = Date.now();
+  const qid = q.qid, maks = (q.durasi || 120) * 1000;
+  rec.ondataavailable = e => { if (e.data && e.data.size) REKAM.potong.push(e.data); };
+  rec.onstop = () => {
+    const blob = new Blob(REKAM.potong, { type: REKAM.mime });
+    const durasi = Math.round((Date.now() - REKAM.mulai) / 1000);
+    try { REKAM.stream.getTracks().forEach(t => t.stop()); } catch (e) { }
+    try { if (REKAM.ctx) REKAM.ctx.close(); } catch (e) { }
+    cancelAnimationFrame(REKAM.rafId);
+    REKAM.rec = null; REKAM.stream = null; REKAM.aktif = null; REKAM.ctx = null;
+    clearInterval(REKAM.timer);
+    simpanRekaman(qid, blob, durasi);
+    if (REKAM.audioLanjut && AUDIO.aktif >= 0 && !AUDIO.berhenti) { REKAM.audioLanjut = false; audioPutar(); }   // audio Listening yang dijeda dilanjutkan
+  };
+  rec.start(1000);
+  try {                                                     // indikator volume suara
+    const AC = window.AudioContext || window.webkitAudioContext;
+    REKAM.ctx = new AC(); const src = REKAM.ctx.createMediaStreamSource(stream); REKAM.analis = REKAM.ctx.createAnalyser(); REKAM.analis.fftSize = 256; src.connect(REKAM.analis);
+    const buf = new Uint8Array(REKAM.analis.frequencyBinCount);
+    const loop = () => { if (!REKAM.rec) return; REKAM.analis.getByteTimeDomainData(buf); let m = 0; for (let i = 0; i < buf.length; i++) m = Math.max(m, Math.abs(buf[i] - 128));
+      if ($('cbRekamLevel')) $('cbRekamLevel').style.width = Math.min(100, m / 64 * 100) + '%'; REKAM.rafId = requestAnimationFrame(loop); };
+    loop();
+  } catch (e) { }
+  clearInterval(REKAM.timer);
+  REKAM.timer = setInterval(() => {
+    const t = Date.now() - REKAM.mulai;
+    if ($('cbRekamJam') && REKAM.aktif === qid) $('cbRekamJam').textContent = mmss(t / 1000) + ' / ' + mmss(maks / 1000);
+    if (t >= maks) hentiRekam();
+  }, 500);
+  gambarRekam();
+}
+function hentiRekam() { try { if (REKAM.rec && REKAM.rec.state !== 'inactive') REKAM.rec.stop(); } catch (e) { } }
+function blobKeBase64(blob) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.onerror = () => rej(new Error('Rekaman tidak terbaca.')); r.readAsDataURL(blob); });
+}
+async function simpanRekaman(qid, blob, durasi) {
+  const sesi = cb.sesi;
+  if (!sesi) return;
+  const kunci = sesi + '|' + qid;
+  REKAM.tertunda[qid] = true;
+  await DB_REKAM.simpan(kunci, { blob: blob, mime: blob.type || REKAM.mime, durasi: durasi, sesi: sesi, qid: qid });
+  kirimRekaman(kunci, blob, blob.type || REKAM.mime, durasi, sesi, qid);
+}
+async function kirimRekaman(kunci, blob, mime, durasi, sesi, qid) {
+  if (REKAM.kirim[qid]) return;
+  REKAM.kirim[qid] = true; gambarRekam();
+  try {
+    const data = await blobKeBase64(blob);
+    const d = await api('cbtRekam', { sesiId: sesi, qid: qid, mime: mime, data: data, durasi: durasi }, { coba: 8, batasMs: 180000, diam: true });
+    if (cb.sesi === sesi) cb.rek = Object.assign({}, cb.rek, d.rekaman || {});
+    delete REKAM.tertunda[qid];
+    await DB_REKAM.hapus(kunci);
+    if (d.sudah) kabar(EN() ? 'This answer was already recorded.' : 'Jawaban soal ini sudah direkam sebelumnya.');
+  } catch (e) {
+    if (e.akhir) { delete REKAM.tertunda[qid]; await DB_REKAM.hapus(kunci); info(EN() ? 'Recording not saved' : 'Rekaman tidak tersimpan', e.message); }
+    else setTimeout(() => { if (cb.sesi === sesi && REKAM.tertunda[qid]) kirimRekaman(kunci, blob, mime, durasi, sesi, qid); }, 15000);
+  } finally { delete REKAM.kirim[qid]; gambarRekam(); }
+}
+/** Saat ujian dibuka lagi: kirim rekaman yang masih tersimpan di perangkat. */
+async function kirimRekamanTertunda() {
+  const semua = await DB_REKAM.semua();
+  semua.forEach(x => {
+    if (!x.v || x.v.sesi !== cb.sesi) return;
+    if (cb.rek && cb.rek[x.v.qid]) { DB_REKAM.hapus(x.k); return; }
+    REKAM.tertunda[x.v.qid] = true;
+    kirimRekaman(x.k, x.v.blob, x.v.mime, x.v.durasi, x.v.sesi, x.v.qid);
+  });
+}
+/** Sebelum mengirim ujian: tunggu rekaman yang sedang direkam/dikirim (maks. 60 detik). */
+async function tungguRekaman() {
+  if (REKAM.rec) hentiRekam();
+  for (let t = 0; t < 240 && (REKAM.rec || Object.keys(REKAM.kirim).length || Object.keys(REKAM.tertunda).length); t++) {
+    if (t === 4) kabar(EN() ? 'Saving your speaking recordings…' : 'Menyimpan rekaman Speaking… mohon tunggu.');
+    await tidur(250);
+  }
+}
+document.addEventListener('click', e => {
+  const q = cb.soal && cb.soal[cb.idx];
+  if (!q || q.tipe !== 'SPEAKING') return;
+  if (e.target.closest('#cbRekamMulai')) { if (REKAM.aktif === 'siap:' + q.qid) mulaiRekam(q); else mulaiPersiapan(q); }
+  else if (e.target.closest('#cbRekamStop')) hentiRekam();
+  else if (e.target.closest('#cbRekamUlang')) mulaiPersiapan(q);
+  else if (e.target.closest('#cbRekamKirimUlang')) kirimRekamanTertunda();
+});
+document.addEventListener('change', e => {
+  if (!e.target || e.target.id !== 'cbRekamBerkas') return;
+  const f = e.target.files[0], q = cb.soal[cb.idx];
+  if (!f || !q) return;
+  if (f.size > 12 * 1024 * 1024) { info('Berkas terlalu besar', 'Rekaman maksimal 12 MB.'); return; }
+  const el = new Audio(); el.preload = 'metadata';
+  el.onloadedmetadata = () => { simpanRekaman(q.qid, f, Math.round(el.duration || 0)); URL.revokeObjectURL(el.src); };
+  el.onerror = () => simpanRekaman(q.qid, f, 0);
+  el.src = URL.createObjectURL(f);
+});
+/* <</AUDIO-SISWA>> */
 function cbtMasuk(d) {
-  cb.d = d; cb.portal = d.ujian.portal || 'CBT'; cb.maks = d.ujian.maksPelanggaran || 5;
+  cb.d = d; cb.portal = d.ujian.portal || 'CBT'; cb.maks = typeof d.ujian.maksPelanggaran === 'number' ? d.ujian.maksPelanggaran : 6;
   layar('layarCbtInfo');
   $('ciKategori').textContent = d.ujian.kategori_test + (d.ujian.mapel ? ' · ' + d.ujian.mapel : '');
   $('ciJudul').textContent = d.ujian.judul_test;
   $('ciNama').textContent = d.siswa.nama + ' · ' + d.siswa.nisn + (d.siswa.kelas ? ' · ' + d.siswa.kelas : '');
   $('ciMaks').textContent = cb.maks;
+  $('ciAturanViol').innerHTML = cb.maks > 0 ? 'Menyalin/menempel, berpindah tab/aplikasi, keluar dari layar penuh, atau membuka jendela lain dicatat sebagai pelanggaran dan dilaporkan ke pengawas. Setiap pelanggaran memunculkan peringatan. Pada pelanggaran ke-<b>' + cb.maks + '</b>, sesi dikunci dan hanya dapat dibuka pengawas.'
+    : 'Menyalin/menempel, berpindah tab/aplikasi, keluar dari layar penuh, atau membuka jendela lain dicatat sebagai pelanggaran, memunculkan peringatan, dan dilaporkan ke pengawas.';
+  $('ciAturanWaktu').classList.toggle('sembunyi', d.ujian.kirimAwal !== false);
+  $('ciAturanSubtes').classList.toggle('sembunyi', !(d.ujian.subtes && d.ujian.subtes.length));
   $('ciRincian').innerHTML = `<span>Jumlah soal</span><b>${d.ujian.jumlah_soal}</b><span>Durasi</span><b>${d.ujian.durasi_menit} menit</b>
     <span>Jadwal</span><b>${teks(d.ujian.mulai_tampil)} – ${teks(d.ujian.selesai_tampil)}</b>` +
-    (d.ujian.bagian.length ? `<span>Bagian</span><b>${d.ujian.bagian.map(teks).join(', ')}</b>` : '');
+    (d.ujian.subtes && d.ujian.subtes.length ? `<span>Subtes berurutan</span><b>${d.ujian.subtes.map((t, i) => (i + 1) + '. ' + teks(t.nama) + ' — ' + t.jumlah + ' soal, ' + t.menit + ' menit').join('<br>')}</b>`
+      : (d.ujian.bagian.length ? `<span>Bagian</span><b>${d.ujian.bagian.map(teks).join(', ')}</b>` : '')) +
+    (d.ujian.kirimAwal === false ? '<span>Selesai</span><b>Tepat saat waktu habis (otomatis)</b>' : '');
   $('pesanCbt').className = 'pesan'; $('ciHasil').innerHTML = '';
   const st = d.sesi ? d.sesi.status : '';
+  $('ciMic').classList.toggle('sembunyi', !d.ujian.adaSpeaking || st === 'Submitted' || st === 'Terminated'); $('ciMicStatus').innerHTML = '';
   $('ciAturan').classList.toggle('sembunyi', st === 'Submitted' || st === 'Terminated');
   $('btnCbtMulai').classList.remove('sembunyi');
   if (st === 'In Progress') $('btnCbtMulai').textContent = 'Lanjutkan ujian (sisa ' + Math.ceil(d.sesi.sisaDetik / 60) + ' menit)';
   else if (st === 'Submitted' || st === 'Terminated') {
     $('btnCbtMulai').classList.add('sembunyi');
-    if (d.hasil && d.hasil.tampil) { $('btnCbtMulai').classList.remove('sembunyi'); $('btnCbtMulai').textContent = 'Lihat nilai dan pembahasan'; }
+    if (d.hasil && (d.hasil.tampil || d.hasil.nilaiTampil)) { $('btnCbtMulai').classList.remove('sembunyi'); $('btnCbtMulai').textContent = d.hasil.tampil ? 'Lihat hasil dan pembahasan' : 'Lihat hasil ujian'; }
     else $('ciHasil').innerHTML = `<div class="pesan ${st === 'Terminated' ? 'galat' : 'info'}" style="display:block">${teks(d.hasil ? d.hasil.pesan : '')}</div>`;
-    if (st === 'Terminated' && !(d.hasil && d.hasil.tampil)) $('ciHasil').innerHTML = '<div class="pesan galat" style="display:block">Sesi Anda dikunci karena mencapai batas pelanggaran. Hubungi pengawas untuk membuka kunci.</div>';
+    if (st === 'Terminated' && !(d.hasil && (d.hasil.tampil || d.hasil.nilaiTampil))) $('ciHasil').innerHTML = '<div class="pesan galat" style="display:block">Sesi Anda dikunci karena mencapai batas pelanggaran. Hubungi pengawas untuk membuka kunci.</div>';
   } else $('btnCbtMulai').textContent = 'Mulai ujian';
   if (!st || st === 'In Progress') {
     $('ciHasil').innerHTML = htmlSaranKunci();
@@ -2083,14 +2858,49 @@ function cbtMasuk(d) {
 }
 
 $('btnCbtMulai').onclick = function () {
-  if (cb.d && cb.d.hasil && cb.d.hasil.tampil) { gambarHasilCbt(cb.d.hasil); return; }
+  if (cb.d && cb.d.hasil && (cb.d.hasil.tampil || cb.d.hasil.nilaiTampil)) { gambarHasilCbt(cb.d.hasil); return; }
   kunciMasukFs();
+  audioBuka();                                   // izin putar otomatis audio Listening (diberikan oleh ketukan siswa)
   cbtMulai(false);
 };
 $('btnCbtKeluar').onclick = keluarCbt;
+/** Tes mikrofon sebelum ujian Speaking: rekam 3 detik, ukur level suara, putar ulang. */
+async function tesMikrofon() {
+  const st = $('ciMicStatus'), b = $('btnTesMic');
+  const gagal = t => { st.innerHTML = '<span style="color:var(--salah)">' + t + '</span> Saat Speaking Anda tetap dapat mengunggah berkas rekaman dari aplikasi perekam suara; beri tahu pengawas.'; b.disabled = false; };
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') return gagal('Peramban ini tidak mendukung perekaman langsung.');
+  b.disabled = true; st.textContent = 'Meminta izin mikrofon…';
+  try { if (typeof KUNCI !== 'undefined') KUNCI.abaikanSampai = Date.now() + 15000; } catch (e) { }
+  let stream;
+  try { stream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch (e) { return gagal('Mikrofon tidak diizinkan atau tidak tersedia di halaman ini' + (e && e.name ? ' (' + teks(e.name) + ')' : '') + '.'); }
+  let maks = -1, ac = null, iv = null;
+  try {
+    ac = new (window.AudioContext || window.webkitAudioContext)(); const an = ac.createAnalyser(); ac.createMediaStreamSource(stream).connect(an);
+    const buf = new Uint8Array(an.fftSize); maks = 0;
+    iv = setInterval(() => { an.getByteTimeDomainData(buf); for (let i = 0; i < buf.length; i++) maks = Math.max(maks, Math.abs(buf[i] - 128)); }, 100);
+  } catch (e) { maks = -1; }
+  const potong = [];
+  let rec;
+  try { rec = new MediaRecorder(stream); } catch (e) { stream.getTracks().forEach(t => t.stop()); return gagal('Perekam suara tidak dapat dijalankan.'); }
+  rec.ondataavailable = e => { if (e.data && e.data.size) potong.push(e.data); };
+  const selesai = new Promise(r => { rec.onstop = r; });
+  rec.start(); st.textContent = 'Merekam 3 detik… ucapkan "satu, dua, tiga".';
+  await tidur(3000);
+  try { rec.stop(); } catch (e) { }
+  await selesai;
+  stream.getTracks().forEach(t => t.stop()); if (iv) clearInterval(iv); try { if (ac) ac.close(); } catch (e) { }
+  const blob = new Blob(potong, { type: rec.mimeType || 'audio/webm' });
+  if (!blob.size) return gagal('Tidak ada suara yang terekam.');
+  const sunyi = maks >= 0 && maks < 4;
+  st.innerHTML = (sunyi ? '<span style="color:#B7791F">⚠ Suara sangat pelan/tidak terdengar — periksa mikrofon atau bicara lebih dekat.</span>'
+    : '<span style="color:var(--benar)">✓ Mikrofon berfungsi.</span>') + ' Dengarkan hasilnya:<br><audio controls style="width:100%;margin-top:6px" src="' + URL.createObjectURL(blob) + '"></audio>';
+  b.disabled = false;
+}
+$('btnTesMic').onclick = tesMikrofon;
 $('btnCbtHasilKeluar').onclick = keluarCbt;
 function keluarCbt() {
-  lepasPengawasCbt(); kunciSelesai();
+  lepasPengawasCbt(); kunciSelesai(); audioHenti(); if (REKAM.rec) hentiRekam();
   sessionStorage.clear();
   kred = null; cb.d = null; cb.sesi = null;
   $('inNisn').value = ''; $('inKode').value = ''; $('inPin').value = '';
@@ -2124,9 +2934,12 @@ async function cbtMulai(otomatis) {
 
 function cbtSiapkan(d) {
   cb.sesi = d.sesiId; cb.soal = d.soal; cb.jawaban = d.jawaban || {}; cb.ragu = d.ragu || {}; cb.idx = 0;
-  cb.deadline = Date.now() + d.sisaDetik * 1000; cb.total = d.total || 0; cb.maks = d.maks || cb.maks;
+  cb.deadline = Date.now() + d.sisaDetik * 1000; cb.total = d.total || 0; cb.maks = typeof d.maks === 'number' ? d.maks : cb.maks;
+  cb.subtes = d.subtes || null; cb.kirimAwal = !(d.ujian && d.ujian.kirimAwal === false); cb.lanjutJalan = false;
   cb.portal = d.ujian.portal || cb.portal; cb.kirim = false; cb.habis = false; cb.berubah = false; cb.terakhir = Date.now();
   try { cb.violTunda = JSON.parse(localStorage.getItem('cbt_viol_' + d.sesiId) || '[]'); } catch (e) { cb.violTunda = []; }
+  cb.rek = d.rekaman || {}; REKAM.tertunda = {}; REKAM.galat = '';
+  try { const ix = Number(localStorage.getItem(kunciIdx())); if (ix > 0 && ix < cb.soal.length) cb.idx = ix; } catch (e) { }   // kembali ke soal terakhir
   try {
     const lokal = JSON.parse(localStorage.getItem('cbt_jw_' + cb.sesi) || 'null');
     if (lokal && lokal.jawaban) { cb.jawaban = Object.assign({}, cb.jawaban, lokal.jawaban); cb.ragu = Object.assign({}, cb.ragu, lokal.ragu || {}); cb.berubah = true; }
@@ -2134,24 +2947,41 @@ function cbtSiapkan(d) {
   sessionStorage.setItem('cbt_aktif', '1');
   const el = $('layarCbt');
   el.dataset.portal = cb.portal;
-  $('cbJudul').textContent = d.ujian.judul_test;
+  $('cbJudul').textContent = d.ujian.judul_test + (cb.subtes ? (EN() ? ' — Section ' : ' — Subtes ') + (cb.subtes.i + 1) + '/' + cb.subtes.n + ': ' + cb.subtes.nama : '');
   $('cbNama').textContent = cb.d.siswa.nama + ' · ' + cb.d.siswa.nisn;
   $('cbLabelWaktu').textContent = T('sisa');
   $('cbSebelum').textContent = T('sebelum');
   $('cbLgBelum').textContent = T('belum'); $('cbLgSudah').textContent = T('sudah'); $('cbLgRagu').textContent = EN() ? 'For review' : T('ragu');
-  $('cbSelesai').textContent = T('selesai'); $('cbSelesai').disabled = false;
+  aturTombolSelesai();
   $('cbSimpan').textContent = T('simpanOto');
   const bolehRagu = cb.portal !== 'CBT';
   $('cbRagu').classList.toggle('sembunyi', !bolehRagu); $('cbLgRaguWadah').classList.toggle('sembunyi', !bolehRagu);
   $('cbPanel').style.pointerEvents = '';
   layar('layarCbt');
+  audioSiapkan(d.audio || []);
   gambarCbt(); gambarViol();
+  kirimRekamanTertunda();
   jalankanJamCbt(); jadwalSimpanCbt(); pasangPengawasCbt(); perbaruiPita();
   kunciMulai({ en: EN(), keluar: (jenis, detail) => laporViol(jenis, detail, true) });
   if (cb.berubah) tundaSimpanCbt();
-  if (d.sisaDetik <= 0 || adaTandaKirim('cbt', cb.sesi)) kirimCbt(d.sisaDetik <= 0);   // lanjutkan kiriman yang tertunda
+  if (d.sisaDetik <= 0 && subtesBelumAkhir()) lanjutSubtes(true);                     // waktu subtes habis saat terputus
+  else if (d.sisaDetik <= 0 || adaTandaKirim('cbt', cb.sesi)) kirimCbt(d.sisaDetik <= 0);   // lanjutkan kiriman yang tertunda
 }
 
+function kunciIdx() { return 'cbt_idx_' + cb.sesi + (cb.subtes ? '_s' + cb.subtes.i : ''); }
+function subtesBelumAkhir() { return !!(cb.subtes && cb.subtes.i < cb.subtes.n - 1); }
+/** Tombol Selesai: "Selesai subtes ini" (subtes berurutan) · dinonaktifkan bila ujian hanya selesai saat waktu habis. */
+function aturTombolSelesai() {
+  const b = $('cbSelesai');
+  if (!cb.kirimAwal) {
+    b.disabled = true;
+    b.textContent = EN() ? (subtesBelumAkhir() ? 'Next section starts when time is up' : 'Auto-submits when time is up') : (subtesBelumAkhir() ? 'Subtes berikutnya dimulai saat waktu habis' : 'Terkirim otomatis saat waktu habis');
+    b.title = EN() ? 'This test cannot be finished early.' : 'Ujian ini tidak dapat diselesaikan sebelum waktu habis.';
+  } else {
+    b.disabled = false; b.title = '';
+    b.textContent = subtesBelumAkhir() ? (EN() ? 'Finish this section' : 'Selesai subtes ini') : T('selesai');
+  }
+}
 function bagianDaftar() {
   const b = [];
   cb.soal.forEach(q => { if (q.bagian && b.indexOf(q.bagian) < 0) b.push(q.bagian); });
@@ -2159,6 +2989,7 @@ function bagianDaftar() {
 }
 
 function terjawabCbt(q) {
+  if (q.tipe === 'SPEAKING') return !!((cb.rek && cb.rek[q.qid]) || REKAM.tertunda[q.qid]);
   const j = cb.jawaban[q.qid];
   if (j === undefined || j === null) return false;
   if (q.tipe === 'TABEL_BS') return Array.isArray(j) && q.baris.every((_, i) => j[i]);
@@ -2205,12 +3036,12 @@ function gambarCbt() {
   } else if (q.tipe === 'ISIAN_SINGKAT') {
     isi += `<p class="petunjuk-tipe">${T('isian')}</p><input type="text" class="isian" id="cbIsian" autocomplete="off" maxlength="200" style="max-width:420px" value="${teks(j || '')}">`;
   } else if (q.tipe === 'ESSAY' || q.tipe === 'STUDI_KASUS') {
-    isi += `<textarea class="esai" id="cbEsai" placeholder="${teks(T('esai'))}" spellcheck="false">${teks(j || '')}</textarea>
+    isi += `<textarea class="esai" id="cbEsai" maxlength="20000" placeholder="${teks(T('esai'))}" spellcheck="false">${teks(j || '')}</textarea>
       <div class="hitung-kata" id="cbKata"></div>`;
   } else if (q.tipe === 'ESSAY_TERSTRUKTUR') {
     const arr = Array.isArray(j) ? j : [];
     isi += (q.bagianSoal || []).map((b, i) => `<div class="bagian-uraian"><div class="pertanyaan" style="margin:14px 0 6px"><b>${teks(b)}</b></div>
-      <textarea class="esai esai-bagian" data-b="${i}" style="min-height:130px" placeholder="${teks(T('esai'))}" spellcheck="false">${teks(arr[i] || '')}</textarea></div>`).join('') +
+      <textarea class="esai esai-bagian" data-b="${i}" maxlength="8000" style="min-height:130px" placeholder="${teks(T('esai'))}" spellcheck="false">${teks(arr[i] || '')}</textarea></div>`).join('') +
       '<div class="hitung-kata" id="cbKata"></div>';
   } else if (q.tipe === 'PG_1234') {
     const ket = EN() ? ['(1), (2), (3) true', '(1) and (3) true', '(2) and (4) true', 'only (4) true', 'all true']
@@ -2218,6 +3049,8 @@ function gambarCbt() {
     isi += `<ol class="pernyataan-1234">${(q.pernyataan || []).map(p => `<li>${teks(p)}</li>`).join('')}</ol><p class="petunjuk-tipe">${T('pilihSatu')}</p>` +
       ['A', 'B', 'C', 'D', 'E'].map((k, i) => `<label class="opsi ${j === k ? 'pilih' : ''}">
       <input type="radio" name="cj" value="${k}" ${j === k ? 'checked' : ''}><span class="abjad">${k}.</span><span>${ket[i]}</span></label>`).join('');
+  } else if (q.tipe === 'SPEAKING') {
+    isi += htmlSpeaking(q);
   } else if (q.tipe === 'TABEL_BS') {
     const arr = Array.isArray(j) ? j : [];
     isi += `<div class="tabel-gulir"><table class="tabel-kategori kategori-grid"><thead><tr><th>${T('pernyataan')}</th><th class="pilih-sel">${T('benar')}</th><th class="pilih-sel">${T('salah')}</th></tr></thead><tbody>` +
@@ -2230,6 +3063,7 @@ function gambarCbt() {
   $('cbLanjut').textContent = cb.idx === cb.soal.length - 1 ? T('periksa') : T('lanjut');
   $('cbRagu').textContent = cb.ragu[q.qid] ? T('batalRagu') : T('ragu');
   gambarNomorCbt();
+  audioUntukSoal(q.qid);
 }
 
 function hitungKata() {
@@ -2245,7 +3079,7 @@ function gambarNomorCbt() {
     return `<button class="${k}" data-i="${i}" title="${teks(q.bagian || '')}">${i + 1}</button>`;
   }).join('');
 }
-function gambarViol() { $('cbViol').innerHTML = teks(T('viol')) + ': <b>' + cb.total + '</b>/' + cb.maks; }
+function gambarViol() { $('cbViol').innerHTML = teks(T('viol')) + ': <b>' + cb.total + '</b>' + (cb.maks > 0 ? '/' + cb.maks : ''); }
 
 $('cbTabs').onclick = e => { const b = e.target.closest('button'); if (!b) return; const i = cb.soal.findIndex(q => q.bagian === b.dataset.b); if (i >= 0) pindahCbt(i); };
 $('cbNomor').onclick = e => { const b = e.target.closest('button'); if (b) pindahCbt(Number(b.dataset.i)); };
@@ -2253,7 +3087,10 @@ $('cbSebelum').onclick = () => { if (cb.idx > 0) pindahCbt(cb.idx - 1); };
 $('cbLanjut').onclick = () => { if (cb.idx < cb.soal.length - 1) pindahCbt(cb.idx + 1); else $('cbSelesai').click(); };
 $('cbRagu').onclick = () => { const q = cb.soal[cb.idx]; if (cb.ragu[q.qid]) delete cb.ragu[q.qid]; else cb.ragu[q.qid] = true; ubahCbt(true); };
 function pindahCbt(i) {
+  if (REKAM.rec) hentiRekam();                                   // pindah soal saat merekam: rekaman disimpan
+  if (REKAM.siapSisa > 0) { clearInterval(REKAM.siapT); REKAM.siapSisa = 0; REKAM.aktif = null; }
   cb.idx = i; gambarCbt(); gulirAtas();
+  try { localStorage.setItem(kunciIdx(), String(i)); } catch (e) { }
   if (cb.berubah && Date.now() - cb.terakhir > 8000) simpanCbt();       // simpan saat berpindah soal
 }
 
@@ -2316,13 +3153,14 @@ async function simpanCbt() {
   const violKirim = cb.violTunda.slice();
   $('cbSimpan').className = 'ket'; $('cbSimpan').textContent = EN() ? 'Saving…' : 'Menyimpan…';
   try {
-    const d = await api('cbtSimpan', { sesiId: cb.sesi, jawaban: cb.jawaban, ragu: cb.ragu, seq: seqBaru(), viol: violKirim }, { coba: 2, diam: true, batasMs: 25000 });
+    const d = await api('cbtSimpan', { sesiId: cb.sesi, jawaban: cb.jawaban, ragu: cb.ragu, seq: seqBaru(), viol: violKirim, subtes: cb.subtes ? cb.subtes.i : undefined }, { coba: 2, diam: true, batasMs: 25000 });
     if (violKirim.length) { cb.violTunda = cb.violTunda.filter(v => !violKirim.some(x => x.vid === v.vid)); simpanViolTunda(); }
     cb.terakhir = Date.now();
     if (d.status === 'Terminated') { cbtTerkunci(); return; }
     if (d.status === 'Submitted') { kirimCbt(true); return; }
     if (d.usang) cb.berubah = true;
-    if (d.waktuHabis) { kirimCbt(true); return; }
+    if (d.pindahSubtes) { sinkronUlangCbt(); return; }                 // server sudah di subtes berikutnya (mis. dari perangkat lain)
+    if (d.waktuHabis) { if (subtesBelumAkhir()) lanjutSubtes(true); else kirimCbt(true); return; }
     if (typeof d.sisaDetik === 'number') { const b = Date.now() + d.sisaDetik * 1000; if (Math.abs(b - cb.deadline) > 3000) cb.deadline = b; }
     if (typeof d.total === 'number') { cb.total = Math.max(cb.total, d.total); gambarViol(); }
     const w = new Date();
@@ -2338,6 +3176,16 @@ async function simpanCbt() {
   }
 }
 
+/** Simpanan terakhir saat waktu habis: memastikan jawaban detik-detik terakhir sudah di server walau kiriman final antre. */
+async function simpanAkhirCbt() {
+  if (!cb.sesi || cb.kirim) return;
+  for (let t = 0; cb.simpanJalan && t < 40; t++) await tidur(250);
+  if (!cb.berubah && !cb.violTunda.length) return;
+  try {
+    await api('cbtSimpan', { sesiId: cb.sesi, jawaban: cb.jawaban, ragu: cb.ragu, seq: seqBaru(), viol: cb.violTunda, subtes: cb.subtes ? cb.subtes.i : undefined }, { coba: 3, diam: true, batasMs: 20000 });
+    cb.berubah = false;
+  } catch (e) { }
+}
 function jalankanJamCbt() {
   clearInterval(cb.timer);
   const detak = () => {
@@ -2348,15 +3196,33 @@ function jalankanJamCbt() {
     if (sisa <= 0 && !cb.habis) {
       cb.habis = true; clearInterval(cb.timer);
       $('cbPanel').style.pointerEvents = 'none';
-      kabar(EN() ? 'Time is up. Submitting your answers…' : 'Waktu habis. Jawaban sedang dikirim…');
-      setTimeout(() => kirimCbt(true), Math.random() * CONFIG.jedaKirimMaks);
+      if (subtesBelumAkhir()) {                                 // subtes berikutnya: jeda acak singkat agar tidak serentak
+        kabar(EN() ? 'Section time is up. Saving your answers…' : 'Waktu subtes habis. Jawaban disimpan, subtes berikutnya disiapkan…');
+        setTimeout(() => lanjutSubtes(true), 500 + Math.random() * 5000);
+      } else {
+        kabar(EN() ? 'Time is up. Your answers are saved and being submitted…' : 'Waktu habis. Jawaban disimpan dan sedang dikirim (antre ±1 menit)…');
+        // 1) jawaban terakhir disimpan dulu (ringan, tanpa menulis sheet) · 2) kiriman final diacak agar 300+ peserta tidak serentak
+        setTimeout(async () => { await simpanAkhirCbt(); setTimeout(() => kirimCbt(true), Math.random() * CONFIG.jedaKirimMaks); }, Math.random() * 3000);
+      }
     }
   };
   detak(); cb.timer = setInterval(detak, 1000);
 }
 
 $('cbSelesai').onclick = async () => {
-  if (cb.kirim) return;
+  if (cb.kirim || !cb.kirimAwal) return;
+  if (subtesBelumAkhir()) {
+    const kosong = cb.soal.filter(q => !terjawabCbt(q)).length;
+    cb.konfirmasi = true;
+    const ya = await konfirmasi(EN() ? 'Finish this section?' : 'Akhiri subtes ini?',
+      (kosong ? (EN() ? kosong + ' question(s) unanswered. ' : 'Masih ada ' + kosong + ' soal belum dijawab. ') : '') +
+      (EN() ? 'You cannot return to this section. The next section (' + cb.subtes.daftar[cb.subtes.i + 1].nama + ', ' + cb.subtes.daftar[cb.subtes.i + 1].menit + ' minutes) starts right away.'
+        : 'Anda tidak dapat kembali ke subtes ini. Subtes berikutnya (' + cb.subtes.daftar[cb.subtes.i + 1].nama + ', ' + cb.subtes.daftar[cb.subtes.i + 1].menit + ' menit) langsung dimulai.'),
+      EN() ? 'Finish section' : 'Akhiri subtes');
+    cb.konfirmasi = false;
+    if (ya) lanjutSubtes(false);
+    return;
+  }
   const kosong = cb.soal.filter(q => !terjawabCbt(q)).length;
   const rg = Object.keys(cb.ragu).length;
   const pesan = EN()
@@ -2374,13 +3240,15 @@ async function kirimCbt(otomatis) {
   clearInterval(cb.timer); clearTimeout(cb.simpanH);
   for (let t = 0; cb.simpanJalan && t < 40; t++) await tidur(250);
   $('cbSelesai').disabled = true; $('cbSelesai').textContent = EN() ? 'Submitting…' : 'Mengirim…';
+  await tungguRekaman();
+  audioHenti();
   const sesiIni = cb.sesi;
   tandaKirim('cbt', sesiIni);
   try {
     const d = await kirimSampaiBerhasil('cbtKirim', () => ({ sesiId: sesiIni, jawaban: cb.jawaban, viol: cb.violTunda }),
       otomatis ? (EN() ? 'Time is up — submitting…' : 'Waktu habis — mengirim jawaban…') : (EN() ? 'Submitting…' : 'Mengirim jawaban…'));
     hapusTandaKirim();
-    try { localStorage.removeItem('cbt_jw_' + sesiIni); localStorage.removeItem('cbt_viol_' + sesiIni); } catch (e) { }
+    bersihkanLokalCbt(sesiIni);
     sessionStorage.removeItem('cbt_aktif');
     lepasPengawasCbt();
     if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
@@ -2390,19 +3258,124 @@ async function kirimCbt(otomatis) {
   } catch (e) {                                   // hanya galat pasti dari server (sangat jarang)
     hapusTandaKirim();
     cb.kirim = false;
+    if (e.kode === 'BELUM' || e.kode === 'SUBTES') { pulihkanUjianCbt(e.message); return; }
     $('cbSelesai').disabled = false; $('cbSelesai').textContent = T('selesai');
     info(EN() ? 'Please ask the proctor' : 'Perlu bantuan pengawas', e.message + (EN() ? '\n\nYour answers are kept on this device.' : '\n\nJawaban Anda tetap tersimpan di perangkat ini. Tunjukkan layar ini kepada pengawas.'));
   }
 }
 
+function bersihkanLokalCbt(sesiId) {
+  try {
+    ['cbt_jw_', 'cbt_viol_', 'cbt_audio_', 'cbt_idx_', 'cbt_dua_'].forEach(k => localStorage.removeItem(k + sesiId));
+    Object.keys(localStorage).filter(k => k.indexOf('cbt_idx_' + sesiId + '_s') === 0).forEach(k => localStorage.removeItem(k));
+  } catch (e) { }
+}
+/** Server menolak kiriman (belum waktunya / masih ada subtes): kembali ke ujian tanpa kehilangan apa pun. */
+async function pulihkanUjianCbt(pesan) {
+  cb.habis = false; $('cbPanel').style.pointerEvents = ''; aturTombolSelesai();
+  if (pesan) kabar(pesan);
+  await sinkronUlangCbt();
+}
+/** Ambil ulang keadaan ujian dari server (subtes & sisa waktu yang berlaku). */
+async function sinkronUlangCbt() {
+  try { const d = await api('cbtMulai', Object.assign({ ua: navigator.userAgent }, kred), { coba: 4, diam: true }); cbtSiapkan(d); }
+  catch (e) { jalankanJamCbt(); jadwalSimpanCbt(); }
+}
+/** Subtes berurutan: akhiri subtes ini → layar jeda singkat → subtes berikutnya. Dicoba ulang otomatis bila server sibuk. */
+async function lanjutSubtes(otomatis) {
+  if (cb.kirim || !cb.sesi || !cb.subtes || cb.lanjutJalan) return;
+  if (!subtesBelumAkhir()) return kirimCbt(otomatis);
+  cb.lanjutJalan = true; cb.kirim = true;
+  clearInterval(cb.timer); clearTimeout(cb.simpanH); clearTimeout(cb.jedaH);
+  for (let t = 0; cb.simpanJalan && t < 40; t++) await tidur(250);
+  $('cbPanel').style.pointerEvents = 'none'; $('cbSelesai').disabled = true;
+  if (REKAM.rec) hentiRekam();
+  await tungguRekaman();
+  audioHenti();
+  const sesiIni = cb.sesi, dari = cb.subtes.i, namaLama = cb.subtes.nama;
+  try {
+    const d = await kirimSampaiBerhasil('cbtLanjut', () => ({ sesiId: sesiIni, dari: dari, jawaban: cb.jawaban, viol: cb.violTunda }),
+      otomatis ? (EN() ? 'Section time is up — saving…' : 'Waktu subtes habis — menyimpan jawaban…') : (EN() ? 'Finishing the section…' : 'Mengakhiri subtes…'));
+    cb.violTunda = []; simpanViolTunda();
+    if (d.status === 'Terminated') { cb.lanjutJalan = false; cbtTerkunci(); return; }
+    if (d.status !== 'In Progress') {                          // subtes terakhir ternyata sudah selesai di server
+      bersihkanLokalCbt(sesiIni); sessionStorage.removeItem('cbt_aktif'); lepasPengawasCbt();
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
+      cb.sesi = null; cb.lanjutJalan = false;
+      gambarHasilCbt(d.hasil, otomatis); return;
+    }
+    await jedaSubtes(namaLama, d);
+    cb.lanjutJalan = false;
+    cbtSiapkan(d);
+  } catch (e) {
+    cb.lanjutJalan = false; cb.kirim = false;
+    if (e.kode === 'BELUM' || e.kode === 'SUBTES') { pulihkanUjianCbt(e.message); return; }
+    $('cbPanel').style.pointerEvents = ''; aturTombolSelesai(); jalankanJamCbt(); jadwalSimpanCbt();
+    info(EN() ? 'Please ask the proctor' : 'Perlu bantuan pengawas', e.message + (EN() ? '\n\nYour answers are kept on this device.' : '\n\nJawaban Anda tetap tersimpan di perangkat ini. Tunjukkan layar ini kepada pengawas.'));
+  }
+}
+/** Layar jeda antarsubtes (10 detik; waktu subtes berikutnya sudah termasuk jeda ini). */
+function jedaSubtes(namaLama, d) {
+  return new Promise(res => {
+    const t = d.subtes, berikut = t.daftar[t.i];
+    let el = $('jedaSubtes');
+    if (!el) { el = document.createElement('div'); el.id = 'jedaSubtes'; document.body.appendChild(el); }
+    el.className = 'jeda-subtes';
+    let sisa = 10, h = null;
+    const selesai = () => { clearInterval(h); el.classList.add('sembunyi'); res(); };
+    const gambar = () => {
+      el.innerHTML = `<div class="kartu-jeda"><div class="ok">✓ ${EN() ? 'Section finished' : 'Subtes selesai'}: <b>${teks(namaLama)}</b></div>
+        <div class="ket">${EN() ? 'Your answers are saved and locked.' : 'Jawaban subtes ini tersimpan dan dikunci.'}</div>
+        <h2>${EN() ? 'Next: Section ' : 'Berikutnya: Subtes '}${t.i + 1} ${EN() ? 'of' : 'dari'} ${t.n}</h2>
+        <div class="nama">${teks(berikut.nama)}</div>
+        <div class="ket">${berikut.jumlah} ${EN() ? 'questions' : 'soal'} · ${berikut.menit} ${EN() ? 'minutes' : 'menit'}</div>
+        <button type="button" class="tombol" id="jsMulai">${EN() ? 'Start now' : 'Mulai sekarang'} (${sisa})</button></div>`;
+      $('jsMulai').onclick = selesai;
+    };
+    gambar();
+    h = setInterval(() => { sisa--; if (sisa <= 0) selesai(); else gambar(); }, 1000);
+  });
+}
+/** Report card resmi try out UTBK-SNBT (lanskap A4, logo, QR verifikasi, tanda tangan). */
+async function cetakReportCardTO(r) {
+  const rc = {
+    skema: 'UTBK', lembaga: BOOT.namaLembaga || 'SMA IT Al-Ittihad Pekanbaru', nama: r.siswa.nama, nisn: r.siswa.nisn,
+    kelas: [r.siswa.kelas || r.siswa.tingkat, r.siswa.jurusan].filter(Boolean).join(' · '), judul: r.paket.nama_paket, tanggal: '', labelTanggal: 'Tanggal terbit', nilai: r.skorTotal,
+    komponen: r.subtes.map(x => ({ nama: x.subtes_nama, nilai: x.skor, min: 200, maks: 1000, sub: x.catatan === 'DIAKHIRI' ? 'tidak dikerjakan' : (x.benar === null ? '-' : x.benar + ' / ' + x.jumlah_soal) })),
+    sertifikat: r.reportCard
+  };
+  let ttd = {};
+  if (r.reportCard.ttd && (r.reportCard.ttd.kepala || r.reportCard.ttd.penguji)) {
+    try { ttd = (await api('sertifikatTtd', Object.assign({ paketId: r.paket.paket_id }, kred))).ttd || {}; } catch (e) { }
+  }
+  await cetakSertifikat([rc], 'Report card ' + r.siswa.nama, ttd);
+}
+async function unduhSertifikatSiswa(r) {
+  let ttd = {};
+  const sesi = cb.sesi || (cb.d && cb.d.sesi && cb.d.sesi.id);
+  if (r.sertifikat.ttd && (r.sertifikat.ttd.kepala || r.sertifikat.ttd.penguji) && sesi) {
+    try { ttd = (await api('sertifikatTtd', { sesiId: sesi })).ttd || {}; } catch (e) { }
+  }
+  await cetakSertifikat([r], (jenisDokumenHasil(r.skema) === 'reportcard' ? 'Report card ' : 'Sertifikat ') + r.nama, ttd);
+}
 function gambarHasilCbt(h, otomatis) {
   layar('layarCbtHasil');
   $('chNama').textContent = cb.d.siswa.nama + ' · ' + cb.d.siswa.nisn;
   $('chInfo').textContent = cb.d.ujian.judul_test + ' · ' + cb.d.ujian.kategori_test;
-  if (!h || !h.tampil) {
+  const tombolCetak = h && h.rapor ? `<div class="aksi-rapor"><button type="button" class="tombol netral" id="btnCetakRapor">🖨 Cetak / simpan PDF</button>${h.rapor.sertifikat
+    ? ' <button type="button" class="tombol" id="btnSertifikat">' + (jenisDokumenHasil(h.rapor.skema) === 'reportcard' ? '📄 Unduh report card (PDF)' : '🏅 Unduh sertifikat (PDF)') + '</button>' : ''}</div>` : '';
+  if (!h || (!h.tampil && !h.rapor)) {
     $('isiCbtHasil').innerHTML = `<div class="kartu blok" style="max-width:640px;margin:20px auto;text-align:center">
       <h2 style="margin:0 0 10px">${otomatis ? 'Waktu habis — jawaban terkirim' : 'Jawaban terkirim'}</h2>
       <p class="ket" style="margin:0">${teks(h ? h.pesan : 'Terima kasih.')}</p></div>`;
+    return;
+  }
+  if (!h.tampil) {                                   // nilai tampil, pembahasan belum dibuka
+    $('isiCbtHasil').innerHTML = `${otomatis ? '<div class="kartu pengumuman"><p>Waktu habis — jawaban Anda sudah terkirim otomatis.</p></div>' : ''}
+      ${htmlRapor(h.rapor)}${h.esaiMenunggu ? '<div class="kartu pengumuman"><p>Sebagian jawaban dinilai guru; nilai akan diperbarui. Masuk kembali nanti dengan NISN dan token yang sama. Sertifikat/report card dapat diunduh setelah semua bagian dinilai.</p></div>' : ''}
+      <p class="ket" style="text-align:center">${teks(h.pesan || '')}</p>${tombolCetak}`;
+    if ($('btnCetakRapor')) $('btnCetakRapor').onclick = () => cetakRapor([htmlRapor(h.rapor)], 'Hasil ' + h.rapor.nama);
+    if ($('btnSertifikat')) $('btnSertifikat').onclick = () => unduhSertifikatSiswa(h.rapor).catch(e => info('Sertifikat', e.message));
     return;
   }
   const lbl = { benar: 'Benar', salah: 'Salah', sebagian: 'Sebagian', kosong: 'Tidak dijawab', esai: 'Dinilai guru' };
@@ -2426,11 +3399,11 @@ function gambarHasilCbt(h, otomatis) {
       ? `<div class="tabel-gulir"><table class="tabel-hasil"><thead><tr><th>Pernyataan</th><th>Jawaban Anda</th><th>Kunci</th></tr></thead><tbody>${r.opsi.map((o, i) => { const a = Array.isArray(r.jawaban) ? r.jawaban[i] : ''; const k = String(r.kunci).split(',')[i]; return `<tr><td>${teks(o.text)}</td><td class="${a === k ? 'ok' : 'no'}">${a === 'B' ? 'Benar' : a === 'S' ? 'Salah' : '—'}</td><td>${k === 'B' ? 'Benar' : 'Salah'}</td></tr>`; }).join('')}</tbody></table></div>`
       : (r.opsi.length && r.tipe !== 'TABEL_BS' ? r.opsi.map(o => { const kunciL = String(r.kunci).split(','); const dipilih = (Array.isArray(r.jawaban) ? r.jawaban : [r.jawaban]).indexOf(o.key) >= 0; const kn = kunciL.indexOf(o.key) >= 0;
           return `<div class="opsi-hasil ${kn ? 'kunci' : (dipilih ? 'pilihan-salah' : '')}"><b>${o.key}.</b><span>${teks(o.text)}${kn ? ' <b style="color:var(--benar)">— kunci</b>' : ''}${dipilih ? ' <b>(jawaban Anda)</b>' : ''}</span></div>`; }).join('')
-        : `<div class="isian-hasil"><div><small>Jawaban Anda</small><b style="font-size:15px;white-space:pre-wrap">${teks(fmtJw(r, r.jawaban))}</b></div>${['ESSAY', 'STUDI_KASUS'].indexOf(r.tipe) < 0 ? `<div><small>Kunci</small><b>${teks(String(r.kunci).split('|').join(' / '))}</b></div>` : ''}</div>`)}
+        : `<div class="isian-hasil ${['ESSAY', 'STUDI_KASUS', 'SPEAKING'].indexOf(r.tipe) >= 0 ? 'penuh' : ''}"><div><small>Jawaban Anda</small><b style="font-size:15px;white-space:pre-wrap">${teks(fmtJw(r, r.jawaban))}</b></div>${['ESSAY', 'STUDI_KASUS', 'SPEAKING'].indexOf(r.tipe) < 0 ? `<div><small>Kunci</small><b>${teks(String(r.kunci).split('|').join(' / '))}</b></div>` : ''}</div>`)}
     ${r.pembahasan ? `<div class="pembahasan"><b>Pembahasan</b>${teks(r.pembahasan)}</div>` : ''}
   </div>`).join('');
-  $('isiCbtHasil').innerHTML = `
-    <div class="skor-panel">
+  $('isiCbtHasil').innerHTML = (h.rapor ? htmlRapor(h.rapor) + tombolCetak : '') + `
+    <div class="skor-panel ${h.rapor ? 'sembunyi' : ''}">
       <div><div class="label">${h.skala ? teks(h.skala.label) : 'Nilai'}</div>
         <div class="skor-angka">${h.skala ? teks(h.skala.tampil) : (h.nilai_persen === null ? '—' : h.nilai_persen)}</div>
         <div class="label" style="margin-top:6px">${h.skala && h.skala.huruf ? 'Nilai huruf ' + teks(h.skala.huruf) + ' · bobot mutu ' + Number(h.skala.mutu).toFixed(2) : (h.skala ? 'persentase ' + h.nilai_persen : 'skala 0–100')}</div></div>
@@ -2441,12 +3414,14 @@ function gambarHasilCbt(h, otomatis) {
         <div><b>${h.skor_akhir}</b><span>Skor akhir dari ${h.total_bobot}</span></div>`}
       </div>
     </div>
-    ${h.skala && h.skala.catatan ? `<div class="kartu pengumuman"><p>${teks(h.skala.catatan)}${h.esaiMenunggu ? ' Nilai akan diperbarui setelah guru menilai.' : ''}</p></div>` : (h.esaiMenunggu ? '<div class="kartu pengumuman"><p>Esai menunggu penilaian guru; nilai akan diperbarui.</p></div>' : '')}
+    ${h.rapor ? '' : h.skala && h.skala.catatan ? `<div class="kartu pengumuman"><p>${teks(h.skala.catatan)}${h.esaiMenunggu ? ' Nilai akan diperbarui setelah guru menilai.' : ''}</p></div>` : (h.esaiMenunggu ? '<div class="kartu pengumuman"><p>Esai menunggu penilaian guru; nilai akan diperbarui.</p></div>' : '')}
     ${h.status === 'Terminated' ? '<div class="kartu pengumuman"><p>Sesi dikunci karena mencapai batas pelanggaran. Jawaban yang sudah ada tetap dinilai.</p></div>' : ''}
     <h2 class="judul-bagian" style="margin-top:26px">Pembahasan</h2>
     <div class="saring" id="saringCbt"><button class="aktif" data-s="semua">Semua (${h.review.length})</button>
       <button data-s="perlu">Perlu dipelajari (${h.review.filter(r => r.status !== 'benar').length})</button></div>
     <div id="daftarCbt">${kartu}</div>`;
+  if ($('btnCetakRapor')) $('btnCetakRapor').onclick = () => cetakRapor([htmlRapor(h.rapor)], 'Hasil ' + h.rapor.nama);
+  if ($('btnSertifikat')) $('btnSertifikat').onclick = () => unduhSertifikatSiswa(h.rapor).catch(e => info('Sertifikat', e.message));
   $('saringCbt').onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
     $('saringCbt').querySelectorAll('button').forEach(x => x.classList.toggle('aktif', x === b));
@@ -2456,7 +3431,7 @@ function gambarHasilCbt(h, otomatis) {
 
 function cbtTerkunci() {
   cb.kirim = true; clearInterval(cb.timer); clearTimeout(cb.simpanH);
-  lepasPengawasCbt(); kunciSelesai();
+  lepasPengawasCbt(); kunciSelesai(); audioHenti(); if (REKAM.rec) hentiRekam();
   sessionStorage.removeItem('cbt_aktif');
   $('tiraiViol').classList.add('sembunyi');
   if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
@@ -2473,18 +3448,19 @@ function cbtTerkunci() {
 /* -------------------- pengawasan & pelanggaran CBT -------------------- */
 let pgCbt = null;
 function infoViolKunci() {
+  if (!(cb.maks > 0)) return EN() ? 'Violation ' + cb.total + ' recorded and reported to the proctor.' : 'Pelanggaran ke-' + cb.total + ' dicatat dan dilaporkan ke pengawas.';
   return EN() ? 'Violation ' + cb.total + ' of ' + cb.maks + ' recorded. At ' + cb.maks + ' your session will be locked.'
-    : 'Pelanggaran ' + cb.total + ' dari ' + cb.maks + ' dicatat. Pada pelanggaran ke-' + cb.maks + ' sesi dikunci.';
+    : 'Pelanggaran ' + cb.total + ' dari ' + cb.maks + ' dicatat. Pada pelanggaran ke-' + cb.maks + ' sesi dikunci.' + (cb.total === cb.maks - 1 ? ' PERINGATAN TERAKHIR.' : '');
 }
 function laporViol(jenis, detail, diKunci) {
   if (!cb.sesi || cb.kirim || cb.habis) return;
   const kini = Date.now();
   if (kini - cb.violT < 2500) return;                    // satu kejadian dihitung sekali dalam 2,5 detik
   cb.violT = kini;
-  cb.total = Math.min(cb.maks, cb.total + 1);
+  cb.total = cb.maks > 0 ? Math.min(cb.maks, cb.total + 1) : cb.total + 1;
   gambarViol();
   if (diKunci) { $('tiraiViol').classList.add('sembunyi'); kunciInfo(infoViolKunci()); } else tampilViol(jenis);
-  const kirimJawaban = cb.total >= cb.maks ? cb.jawaban : undefined;
+  const kirimJawaban = cb.maks > 0 && cb.total >= cb.maks ? cb.jawaban : undefined;
   const v = { vid: kini.toString(36) + Math.random().toString(36).slice(2, 8), jenis: jenis, detail: detail || '' };
   cb.violTunda.push(v); simpanViolTunda();                       // disimpan dulu di perangkat; ID unik mencegah hitungan ganda
   const sesiIni = cb.sesi;
@@ -2502,10 +3478,13 @@ function tampilViol(jenis, perbarui) {
   if (perbarui && $('tiraiViol').classList.contains('sembunyi')) return;
   const l = LABEL_VIOL[jenis] || LABEL_VIOL.MULTITASK;
   $('vJudul').textContent = EN() ? 'Violation warning' : 'Peringatan pelanggaran';
-  $('vHitung').textContent = cb.total + ' / ' + cb.maks;
-  $('vPesan').textContent = (EN() ? l[1] : l[0]) + '. ' + (EN()
-    ? 'This has been recorded. When violations reach ' + cb.maks + ', your session will be locked.'
-    : 'Kejadian ini dicatat. Bila pelanggaran mencapai ' + cb.maks + ', sesi Anda dikunci.');
+  $('vHitung').textContent = cb.maks > 0 ? cb.total + ' / ' + cb.maks : String(cb.total);
+  const terakhir = cb.maks > 0 && cb.total === cb.maks - 1;
+  $('vPesan').textContent = (EN() ? l[1] : l[0]) + '. ' + (!(cb.maks > 0)
+    ? (EN() ? 'This has been recorded and reported to the proctor.' : 'Kejadian ini dicatat dan dilaporkan ke pengawas.')
+    : terakhir ? (EN() ? 'FINAL WARNING: one more violation and your session will be locked.' : 'PERINGATAN TERAKHIR: satu pelanggaran lagi, sesi Anda dikunci.')
+    : (EN() ? 'This has been recorded. When violations reach ' + cb.maks + ', your session will be locked.' : 'Kejadian ini dicatat. Bila pelanggaran mencapai ' + cb.maks + ', sesi Anda dikunci.'));
+  $('tiraiViol').classList.toggle('viol-terakhir', terakhir);
   $('vKembali').textContent = EN() ? 'Back to the test' : 'Kembali ke ujian';
   $('tiraiViol').classList.remove('sembunyi');
 }
@@ -2516,8 +3495,8 @@ function pasangPengawasCbt() {
   const larang = e => { e.preventDefault(); laporViol('COPY_PASTE', e.type); };
   const salinCek = e => { if (salinSendiri(e)) return; larang(e); };            // salin/potong teks jawaban sendiri: boleh
   const tempelCek = e => { if (tempelSendiri(e)) return; larang(e); };          // tempel teks dari luar: pelanggaran
-  // tekan lama di tablet/HP memicu contextmenu/drag → cukup dicegah, BUKAN pelanggaran
-  const cegahSaja = e => { e.preventDefault(); if (!PERANGKAT.sentuh) laporViol('COPY_PASTE', e.type); };
+  // klik kanan / tekan lama / seret: cukup dicegah (menunya tidak muncul), BUKAN pelanggaran — sering tidak sengaja (touchpad, tablet)
+  const cegahSaja = e => { e.preventDefault(); };
   let tLebar = 0;
   pgCbt = {
     salin: salinCek, tempel: tempelCek, potong: salinCek, kanan: cegahSaja, seret: cegahSaja, jatuh: larang,
@@ -2543,7 +3522,11 @@ function pasangPengawasCbt() {
       clearTimeout(pgCbt.hUkuran);
       pgCbt.hUkuran = setTimeout(() => { if (pgCbt && sempit() && Date.now() - tLebar >= 5000) { tLebar = Date.now(); laporViol('MULTITASK', 'Layar terbagi / jendela diperkecil'); } }, 1500);
     },
-    layarDua: () => { if (window.screen && window.screen.isExtended) laporViol('MULTITASK', 'Dua layar terdeteksi'); }
+    layarDua: () => {                                       // layar kedua dihitung sekali per sesi (tidak berulang setiap muat ulang)
+      if (!(window.screen && window.screen.isExtended) || !cb.sesi) return;
+      try { if (localStorage.getItem('cbt_dua_' + cb.sesi)) return; localStorage.setItem('cbt_dua_' + cb.sesi, '1'); } catch (e) { }
+      laporViol('MULTITASK', 'Dua layar terdeteksi');
+    }
   };
   document.addEventListener('copy', pgCbt.salin); document.addEventListener('paste', pgCbt.tempel); document.addEventListener('cut', pgCbt.potong);
   document.addEventListener('contextmenu', pgCbt.kanan); document.addEventListener('dragstart', pgCbt.seret); document.addEventListener('drop', pgCbt.jatuh);
@@ -2564,7 +3547,6 @@ function lepasPengawasCbt() {
 
 /* ===================== PEMULIHAN SESI ============================ */
 (async function () {
-  if (BOOT.namaLembaga) $('lencanaLembaga').textContent = BOOT.namaLembaga;
 
   const simpan = sessionStorage.getItem('to_login');
   if (!simpan) return;
@@ -2613,4 +3595,4 @@ function lepasPengawasCbt() {
 <script>window.__berkasUtuh = true;</script>
 </body>
 </html>
-<!-- AKHIR BERKAS Index · 155128 -->
+<!-- AKHIR BERKAS Index · 279831 -->
