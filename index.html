@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<!-- AWAL BERKAS Index · CBT & Try Out SMAIT Al-Ittihad v5 · build v5-2026-10-21b · hapus semua isi lama, tempel SATU kali -->
+<!-- AWAL BERKAS Index · CBT & Try Out SMAIT Al-Ittihad v5 · build v5-2026-10-21c · hapus semua isi lama, tempel SATU kali -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>CBT-SMAIT</title>
 <style>
 :root{
@@ -838,7 +841,7 @@ let BOOT = {};
 try { BOOT = JSON.parse(document.getElementById('dataAwal').textContent); } catch (e) { BOOT = {}; }
 if (!BOOT.url) BOOT.url = URL_GAS;
 const DI_GAS = !!(window.google && google.script && google.script.run);
-const BUILD_HALAMAN = 'v5-2026-10-21b';      // diperbarui otomatis saat paket dibuat; harus sama dengan BUILD di Code.gs
+const BUILD_HALAMAN = 'v5-2026-10-21c';      // diperbarui otomatis saat paket dibuat; harus sama dengan BUILD di Code.gs
 /** Halaman yang dipasang di hosting luar: beri peringatan bila versinya tidak sama dengan server (Code.gs). */
 if (!DI_GAS) setTimeout(function () {
   fetch((typeof BOOT !== 'undefined' && BOOT.url) || URL_GAS, { method: 'POST', body: JSON.stringify({ action: 'ping' }), headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow' })
@@ -957,10 +960,14 @@ const PERANGKAT = (function () {
   const iphone = /iPhone|iPod/.test(ua);
   const android = /Android/.test(ua);
   const cros = /CrOS/.test(ua);
-  const kasar = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
-  const sentuh = ipad || iphone || android || (navigator.maxTouchPoints > 0 && kasar);
+  const mm = q => !!(window.matchMedia && matchMedia(q).matches);
+  const kasar = mm('(pointer: coarse)');
+  // tablet Android "mode desktop" (UA tanpa kata Android) & Windows tablet tanpa keyboard: layar sentuh tanpa penunjuk halus
+  const tanpaPenunjukHalus = mm('(any-pointer: coarse)') && !mm('(any-pointer: fine)');
+  const sentuh = ipad || iphone || android || (navigator.maxTouchPoints > 0 && (kasar || tanpaPenunjukHalus));
   const jenis = ipad ? 'ipad' : iphone ? 'iphone' : android ? 'android' : cros ? 'chromebook' : /Mac OS X|Macintosh/.test(ua) ? 'mac' : /Windows/.test(ua) ? 'windows' : 'lain';
-  return { jenis: jenis, sentuh: sentuh, seb: /\bSEB\b|SafeExamBrowser/i.test(ua) };
+  const mandiri = navigator.standalone === true || mm('(display-mode: standalone)') || mm('(display-mode: fullscreen)');
+  return { jenis: jenis, sentuh: sentuh, mandiri: mandiri, seb: /\bSEB\b|SafeExamBrowser/i.test(ua) };
 })();
 /* Salin/tempel di kotak jawaban: teks milik siswa sendiri boleh dipindah (bukan pelanggaran);
    menempel teks dari luar (aplikasi lain/internet) tetap dicegah. */
@@ -999,14 +1006,34 @@ function kunciMasukFs() {
   const d = document.documentElement;
   try {
     const p = d.requestFullscreen ? d.requestFullscreen({ navigationUI: 'hide' }) : d.webkitRequestFullscreen();
-    if (p && p.then) return p.then(() => { KUNCI.fs = true; KUNCI.ditolak = false; kunciTombolSistem(); return true; }).catch(() => { KUNCI.ditolak = true; return false; });
+    if (p && p.then) return p.then(() => { KUNCI.fs = true; KUNCI.fsPernah = true; KUNCI.ditolak = false; kunciTombolSistem(); return true; }).catch(() => { if (!KUNCI.fsPernah) KUNCI.ditolak = true; return false; });
     return new Promise(res => setTimeout(() => { KUNCI.fs = !!fsEl(); if (!KUNCI.fs) KUNCI.ditolak = true; res(KUNCI.fs); }, 500));
   } catch (e) { KUNCI.ditolak = true; return Promise.resolve(false); }
 }
 function kunciTombolSistem() {       // Chrome/Edge desktop: tombol Esc harus ditahan untuk keluar layar penuh (bila diizinkan)
   try { if (navigator.keyboard && navigator.keyboard.lock) navigator.keyboard.lock(['Escape']).catch(() => { }); } catch (e) { }
 }
+/* Cadangan Wake Lock: video hitam 16 px tanpa suara diputar berulang. iPad/iPhone & Android tidak mematikan layar selama video
+   berputar. Diperlukan karena Wake Lock ditolak di dalam bingkai Google Apps Script (dan di iOS < 16.4). */
+const VIDEO_TERJAGA = ['data:video/mp4;base64,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b21hX21lPTEgdHJlbGxpcz0xIDh4OGRjdD0wIGNxbT0wIGRlYWR6b25lPTIxLDExIGZhc3RfcHNraXA9MSBjaHJvbWFfcXBfb2Zmc2V0PS0yIHRocmVhZHM9MSBsb29rYWhlYWRfdGhyZWFkcz0xIHNsaWNlZF90aHJlYWRzPTAgbnI9MCBkZWNpbWF0ZT0xIGludGVybGFjZWQ9MCBibHVyYXlfY29tcGF0PTAgY29uc3RyYWluZWRfaW50cmE9MCBiZnJhbWVzPTAgd2VpZ2h0cD0wIGtleWludD0yNTAga2V5aW50X21pbj0xIHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAADmWIhAW///8PRQABT3+AARggBwEYIAcBGCAHARggBwEYIAcBGCAHARggBwEYIAcAAAAGQZo4CvqAARggBwEYIAcBGCAHARggBwEYIAcBGCAHARggBwEYIAc=', 'data:video/webm;base64,GkXfo59ChoEBQveBAULygQRC84EIQoKEd2VibUKHgQJChYECGFOAZwEAAAAAAAH9EU2bdLpNu4tTq4QVSalmU6yBoU27i1OrhBZUrmtTrIHYTbuMU6uEElTDZ1OsggEeTbuMU6uEHFO7a1OsggHn7AEAAAAAAABZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVSalmsirXsYMPQkBNgI1MYXZmNjAuMTYuMTAwV0GNTGF2ZjYwLjE2LjEwMESJiECfQAAAAAAAFlSua8GuAQAAAAAAADjXgQFzxYgAoLFaRT9TlJyBACK1nIN1bmSIgQCGhVZfVlA4g4EBI+ODhDuaygDgibCBELqBEJqBAhJUw2f8c3OgY8CAZ8iaRaOHRU5DT0RFUkSHjUxhdmY2MC4xNi4xMDBzc9ZjwItjxYgAoLFaRT9TlGfIoUWjh0VOQ09ERVJEh5RMYXZjNjAuMzEuMTAyIGxpYnZweGfIoUWjiERVUkFUSU9ORIeTMDA6MDA6MDIuMDAwMDAwMDAwAB9DtnXD54EAo6OBAACAEAIAnQEqEAAQAABHCIWFiJmEiAICAAwNYAD+/6tQgKOZgQPoALEBAAEQEAAYADA/9AwAAAD+/6tQgBxTu2uRu4+zgQC3iveBAfGCAZ/wgQM='];
+function videoTerjaga() {
+  if (!PERANGKAT.sentuh || !document.body) return;
+  let v = KUNCI.vid;
+  if (!v) {
+    v = KUNCI.vid = document.createElement('video');
+    v.muted = true; v.loop = true; v.setAttribute('muted', ''); v.setAttribute('playsinline', ''); v.setAttribute('webkit-playsinline', '');
+    v.setAttribute('aria-hidden', 'true'); v.tabIndex = -1; v.disablePictureInPicture = true;
+    v.style.cssText = 'position:fixed;left:0;bottom:0;width:2px;height:2px;opacity:0.01;pointer-events:none;z-index:-1';
+    [['video/mp4', VIDEO_TERJAGA[0]], ['video/webm', VIDEO_TERJAGA[1]]].forEach(x => { const sc = document.createElement('source'); sc.type = x[0]; sc.src = x[1]; v.appendChild(sc); });
+    document.body.appendChild(v);
+  }
+  if (v.paused) { try { const p = v.play(); if (p && p.catch) p.catch(() => { }); } catch (e) { } }
+}
+function videoTerjagaHenti() { try { if (KUNCI.vid) { KUNCI.vid.pause(); KUNCI.vid.remove(); } } catch (e) { } KUNCI.vid = null; }
+/** true bila layar dijamin tidak mati sendiri (Wake Lock aktif atau video penjaga sedang berputar). */
+function layarTerjaga() { return !!KUNCI.wl || !!(KUNCI.vid && !KUNCI.vid.paused && KUNCI.vid.readyState >= 2); }
 async function kunciNyala() {         // layar tidak meredup/terkunci otomatis saat siswa membaca lama
+  videoTerjaga();
   try {
     if ('wakeLock' in navigator && !KUNCI.wl && document.visibilityState === 'visible') {
       KUNCI.wl = await navigator.wakeLock.request('screen');
@@ -1017,6 +1044,7 @@ async function kunciNyala() {         // layar tidak meredup/terkunci otomatis s
 const TEKS_KUNCI = {
   mulai: ['Kunci layar ujian', 'Ketuk tombol di bawah agar ujian tampil layar penuh dan terkunci sampai selesai.', 'Lock the test screen', 'Tap the button below to show the test in full screen, locked until you finish.'],
   fs: ['Layar ujian terkunci', 'Anda keluar dari layar penuh. Soal ditutup sampai Anda kembali ke ujian.', 'Test screen locked', 'You left full screen. Questions are hidden until you return.'],
+  fsSentuh: ['Kembali ke layar penuh', 'Layar penuh tertutup. Soal disembunyikan sampai Anda kembali. Ini TIDAK dihitung pelanggaran.', 'Return to full screen', 'Full screen was closed. Questions are hidden until you return. This is NOT counted as a violation.'],
   tab: ['Layar ujian terkunci', 'Anda meninggalkan halaman ujian (pindah tab/aplikasi). Soal ditutup sampai Anda kembali.', 'Test screen locked', 'You left the test page (switched tab/app). Questions are hidden until you return.'],
   fokus: ['Layar ujian terkunci', 'Jendela ujian tidak aktif (Anda membuka jendela/aplikasi lain). Soal ditutup sampai Anda kembali.', 'Test screen locked', 'The test window lost focus (another window/app was opened). Questions are hidden until you return.'],
   mundur: ['Tetap di halaman ujian', 'Tombol kembali dinonaktifkan selama ujian. Selesaikan ujian dengan tombol Selesai.', 'Stay on the test page', 'The back button is disabled during the test. Finish with the Submit button.']
@@ -1033,7 +1061,13 @@ function kunciTampil(alasan) {
   $('tiraiKunci').classList.remove('sembunyi');
 }
 function kunciInfo(teksInfo) { $('kuInfo').textContent = teksInfo || ''; }
-$('kuTombol').onclick = () => { kunciMasukFs(); kunciNyala(); $('tiraiKunci').classList.add('sembunyi'); };
+$('kuTombol').onclick = () => {
+  const alasan = $('tiraiKunci').dataset.alasan;
+  const p = kunciMasukFs(); kunciNyala();
+  // layar penuh yang tertutup sendiri di tablet: tirai baru dibuka setelah layar penuh kembali (atau bila peramban menolaknya)
+  if (alasan === 'fsSentuh' && bisaFs() && !KUNCI.ditolak) { p.then(ok => { if (ok || !bisaFs() || KUNCI.ditolak || fsEl()) $('tiraiKunci').classList.add('sembunyi'); }); return; }
+  $('tiraiKunci').classList.add('sembunyi');
+};
 
 /** opsi: { en: label Inggris, keluar(jenis, detail): dipanggil saat siswa benar-benar meninggalkan layar ujian } */
 function kunciMulai(opsi) {
@@ -1049,11 +1083,15 @@ function kunciMulai(opsi) {
   const h = KUNCI.h = {
     fs: () => {
       if (!KUNCI.aktif) return;
-      if (fsEl()) { KUNCI.fs = true; return; }
+      if (fsEl()) { KUNCI.fs = true; KUNCI.fsPernah = true; if ($('tiraiKunci').dataset.alasan === 'fsSentuh') $('tiraiKunci').classList.add('sembunyi'); return; }
       if (KUNCI.fs) {
         KUNCI.fs = false;
-        // tablet/HP: layar penuh dapat keluar sendiri (keyboard layar, sapuan, tombol kembali) → tanpa layar kunci, tanpa pelanggaran
-        if (PERANGKAT.sentuh) return;
+        // tablet/HP: layar penuh dapat keluar sendiri (tombol/gerakan kembali, dialog sistem) → soal ditutup sampai siswa
+        // mengetuk "Kembali ke layar penuh", TANPA pelanggaran. Keluar aplikasi sungguhan tetap terdeteksi lewat 'lihat'.
+        if (PERANGKAT.sentuh) {
+          setTimeout(() => { if (KUNCI.aktif && !KUNCI.pergi && !fsEl() && !document.hidden && Date.now() >= (KUNCI.abaikanSampai || 0)) kunciTampil('fsSentuh'); }, 700);
+          return;
+        }
         // ditunda sebentar: muat ulang/menutup halaman juga keluar dari layar penuh — itu bukan pelanggaran
         setTimeout(() => { if (!KUNCI.aktif || KUNCI.pergi || fsEl() || Date.now() < (KUNCI.abaikanSampai || 0)) return; kunciTampil('fs'); lapor('MULTITASK', 'Keluar dari layar penuh'); }, 450);
       }
@@ -1062,23 +1100,37 @@ function kunciMulai(opsi) {
       if (!KUNCI.aktif) return;
       if (document.hidden) {
         KUNCI.sembunyiSejak = Date.now();
+        KUNCI.terjagaSaatPergi = layarTerjaga();                                    // dicatat sebelum Wake Lock dilepas sistem
         KUNCI.sembunyiSejakAbaikan = Date.now() < (KUNCI.abaikanSampai || 0);      // pemilih berkas / izin mikrofon
         if (!PERANGKAT.sentuh) setTimeout(() => { if (KUNCI.aktif && !KUNCI.pergi && document.hidden && Date.now() >= (KUNCI.abaikanSampai || 0)) { kunciTampil('tab'); lapor('TAB_SWITCH', 'Pindah tab atau aplikasi'); } }, 450);
         return;
       }
       KUNCI.wl = null; kunciNyala();
       if (PERANGKAT.sentuh && KUNCI.sembunyiSejak) {
-        // tablet/HP: (1) sapuan tak sengaja yang langsung kembali (< 2 detik) tidak dihitung;
-        // (2) layar yang mati sendiri (Kunci Otomatis) setelah siswa diam ≥ 100 detik tidak dihitung —
-        //     siswa yang sedang membaca lama tidak boleh dianggap pindah aplikasi.
+        // tablet/HP — dihitung HANYA bila semuanya terpenuhi:
+        // (1) halaman tersembunyi ≥ 3 detik (sapuan/tekanan tak sengaja yang langsung kembali tidak dihitung);
+        // (2) siswa baru saja menyentuh layar sebelum pergi: berpindah aplikasi selalu diawali sentuhan/gerakan, sedangkan
+        //     layar yang mati sendiri (Kunci Otomatis) terjadi setelah siswa diam. Batas diam: 12 detik, atau 60 detik bila
+        //     layar dijaga tetap menyala (Wake Lock/video penjaga) sehingga Kunci Otomatis tidak mungkin terjadi;
+        // (3) bukan karena pemilih berkas / izin mikrofon.
         const lama = Date.now() - KUNCI.sembunyiSejak;
         const diamSebelum = KUNCI.sembunyiSejak - (KUNCI.interaksi || 0);
+        const batasDiam = KUNCI.terjagaSaatPergi ? 60000 : 12000;
         KUNCI.sembunyiSejak = 0;
-        if (lama >= 2000 && diamSebelum < 100000 && KUNCI.sembunyiSejakAbaikan !== true) { kunciTampil('tab'); lapor('TAB_SWITCH', 'Keluar dari peramban/aplikasi ' + Math.round(lama / 1000) + ' detik'); }
-        else if (lama >= 2000) kabar(KUNCI.en ? 'The screen turned off for a moment. Continue your test.' : 'Layar perangkat sempat mati. Silakan lanjutkan mengerjakan.');
+        if (lama >= 3000 && diamSebelum < batasDiam && KUNCI.sembunyiSejakAbaikan !== true) { kunciTampil('tab'); lapor('TAB_SWITCH', 'Keluar dari peramban/aplikasi ' + Math.round(lama / 1000) + ' detik'); }
+        else if (lama >= 3000) kabar(KUNCI.en ? 'The screen turned off for a moment — not counted. Continue your test.' : 'Layar perangkat sempat mati — tidak dihitung. Silakan lanjutkan mengerjakan.');
       }
     },
-    sentuhan: () => { KUNCI.interaksi = Date.now(); },
+    sentuhan: () => { KUNCI.interaksi = Date.now(); if (KUNCI.vid && KUNCI.vid.paused) videoTerjaga(); },
+    // layar penuh dipulihkan otomatis pada ketukan/klik/tombol berikutnya (peristiwa yang diizinkan peramban untuk layar penuh)
+    pulihFs: e => {
+      if (!KUNCI.aktif || !KUNCI.fsPernah || KUNCI.ditolak || fsEl() || document.hidden || !bisaFs()) return;
+      if (Date.now() < (KUNCI.abaikanSampai || 0)) return;
+      if (e && e.type === 'keydown' && e.key === 'Escape') return;
+      const t = e && e.target && e.target.closest ? e.target.closest('input[type=file], label, #kuTombol') : null;
+      if (t) return;                                                // pemilih berkas & tombol layar kunci punya alurnya sendiri
+      kunciMasukFs();
+    },
     fokusMasuk: e => {
       // keyboard layar: kotak jawaban diletakkan di bagian atas layar SEBELUM keyboard muncul,
       // sehingga Safari tidak perlu menggeser seluruh halaman ke atas (bilah judul & timer tetap di tempat)
@@ -1151,6 +1203,7 @@ function kunciMulai(opsi) {
   document.addEventListener('focusout', h.fokusKeluar);
   document.addEventListener('focusin', h.fokusMasuk);
   ['touchstart', 'keydown', 'input', 'pointerdown'].forEach(n => document.addEventListener(n, h.sentuhan, { capture: true, passive: true }));
+  ['pointerup', 'touchend', 'keydown'].forEach(n => document.addEventListener(n, h.pulihFs, { capture: true, passive: true }));
   document.addEventListener('scroll', h.sentuhan, { capture: true, passive: true });
   window.addEventListener('scroll', h.tetapDiTempat, { passive: true });
   if (window.visualViewport) { visualViewport.addEventListener('resize', h.tetapDiTempat); visualViewport.addEventListener('scroll', h.tetapDiTempat); }
@@ -1170,6 +1223,8 @@ function kunciSelesai() {
   document.removeEventListener('focusout', h.fokusKeluar);
   document.removeEventListener('focusin', h.fokusMasuk);
   ['touchstart', 'keydown', 'input', 'pointerdown', 'scroll'].forEach(n => document.removeEventListener(n, h.sentuhan, { capture: true }));
+  ['pointerup', 'touchend', 'keydown'].forEach(n => document.removeEventListener(n, h.pulihFs, { capture: true }));
+  videoTerjagaHenti();
   window.removeEventListener('scroll', h.tetapDiTempat);
   if (window.visualViewport) { visualViewport.removeEventListener('resize', h.tetapDiTempat); visualViewport.removeEventListener('scroll', h.tetapDiTempat); }
   document.documentElement.classList.remove('kunci-layar');
@@ -1187,10 +1242,13 @@ function htmlSaranKunci() {
   const s = {
     ipad: ['iPad: kunci dengan Akses Terpandu', ['Pengaturan › Aksesibilitas › Akses Terpandu → aktifkan, buat kode sandi (dipegang pengawas).',
       'Pengaturan › Tampilan & Kecerahan › Kunci Otomatis → Jangan Pernah.', 'Di halaman ujian ini, klik tombol samping/atas 3× → Mulai. Keluar hanya dengan kode pengawas.',
-      'Alternatif: aplikasi Safe Exam Browser dari App Store.']],
+      'Tanpa Akses Terpandu: siswa tetap bisa berpindah aplikasi (tercatat sebagai pelanggaran). Safari di iPad tidak mengizinkan situs mengunci layar penuh.',
+      'Alternatif terkuat: aplikasi Safe Exam Browser (gratis, App Store) dengan link ujian ini.',
+      'Opsional: Safari › Bagikan › Tambahkan ke Layar Utama, lalu buka ujian dari ikon itu (tampil tanpa bilah alamat & tab).']],
     iphone: ['iPhone: kunci dengan Akses Terpandu', ['Pengaturan › Aksesibilitas › Akses Terpandu → aktifkan, buat kode sandi.', 'Di halaman ujian, klik tombol samping 3× → Mulai.']],
     android: ['Android: kunci dengan Penyematan Aplikasi', ['Setelan › Keamanan (atau Keamanan & privasi › Setelan lainnya) › Penyematan aplikasi → aktifkan, minta PIN sebelum melepas.',
-      'Buka Ringkasan (tombol kotak / geser ke atas lalu tahan) → ketuk ikon Chrome → Sematkan.', 'Setelan › Layar › Waktu tunggu layar → paling lama.']],
+      'Buka Ringkasan (tombol kotak / geser ke atas lalu tahan) → ketuk ikon Chrome → Sematkan.', 'Setelan › Layar › Waktu tunggu layar → paling lama.',
+      'Chrome/Samsung Internet: ujian otomatis layar penuh; bila tertutup, soal disembunyikan sampai Anda mengetuk "Kembali ke layar penuh" (tidak dihitung pelanggaran).']],
     chromebook: ['Chromebook', ['Chromebook sekolah (terkelola): minta admin membuka ujian dalam mode kios/locked mode.', 'Tanpa itu: ujian berjalan layar penuh; keluar layar penuh atau membuka jendela lain menutup soal dan dicatat.']],
     windows: ['Laptop Windows', ['Kunci terkuat: Safe Exam Browser (gratis, safeexambrowser.org) dengan link ujian ini sebagai halaman awal.', 'Tanpa SEB: ujian berjalan layar penuh; Alt+Tab atau keluar layar penuh menutup soal dan dicatat.']],
     mac: ['Mac', ['Kunci terkuat: Safe Exam Browser untuk macOS (gratis, safeexambrowser.org).', 'Tanpa SEB: ujian berjalan layar penuh; Cmd+Tab atau keluar layar penuh menutup soal dan dicatat.']],
@@ -1935,7 +1993,7 @@ function pasangPengawas() {
     salin: e => { if (salinSendiri(e)) return; e.preventDefault(); catat('salin', 'Ctrl/Cmd+C atau menu salin'); },
     tempel: e => { if (tempelSendiri(e)) return; e.preventDefault(); catat('tempel', 'Menempel teks ke halaman ujian'); },
     potong: e => { if (salinSendiri(e)) return; e.preventDefault(); catat('potong', ''); },
-    klikKanan: e => { e.preventDefault(); if (!PERANGKAT.sentuh) catat('klik_kanan', ''); },   // tekan lama di tablet bukan pelanggaran
+    klikKanan: e => { e.preventDefault(); },                       // klik kanan / tekan lama hanya dicegah, bukan pelanggaran
     tombol: e => {
       const k = (e.key || '').toLowerCase();
       if ((e.ctrlKey || e.metaKey) && k === 'p') { e.preventDefault(); catat('cetak', 'Ctrl/Cmd+P'); }
@@ -2833,8 +2891,11 @@ function cbtMasuk(d) {
   $('ciJudul').textContent = d.ujian.judul_test;
   $('ciNama').textContent = d.siswa.nama + ' · ' + d.siswa.nisn + (d.siswa.kelas ? ' · ' + d.siswa.kelas : '');
   $('ciMaks').textContent = cb.maks;
-  $('ciAturanViol').innerHTML = cb.maks > 0 ? 'Menyalin/menempel, berpindah tab/aplikasi, keluar dari layar penuh, atau membuka jendela lain dicatat sebagai pelanggaran dan dilaporkan ke pengawas. Setiap pelanggaran memunculkan peringatan. Pada pelanggaran ke-<b>' + cb.maks + '</b>, sesi dikunci dan hanya dapat dibuka pengawas.'
-    : 'Menyalin/menempel, berpindah tab/aplikasi, keluar dari layar penuh, atau membuka jendela lain dicatat sebagai pelanggaran, memunculkan peringatan, dan dilaporkan ke pengawas.';
+  const aturViol = PERANGKAT.sentuh
+    ? 'Menempel teks dari luar, keluar dari peramban/aplikasi 3 detik atau lebih (termasuk menekan tombol daya), atau membagi layar dicatat sebagai pelanggaran. Mengetik, memutar perangkat, notifikasi, dan layar yang mati sendiri karena lama tidak disentuh <b>tidak</b> dihitung'
+    : 'Menyalin/menempel, berpindah tab/aplikasi, keluar dari layar penuh, atau membuka jendela lain dicatat sebagai pelanggaran';
+  $('ciAturanViol').innerHTML = cb.maks > 0 ? aturViol + '. Setiap pelanggaran memunculkan peringatan dan dilaporkan ke pengawas. Pada pelanggaran ke-<b>' + cb.maks + '</b>, sesi dikunci dan hanya dapat dibuka pengawas.'
+    : aturViol + '. Setiap pelanggaran memunculkan peringatan dan dilaporkan ke pengawas.';
   $('ciAturanWaktu').classList.toggle('sembunyi', d.ujian.kirimAwal !== false);
   $('ciAturanSubtes').classList.toggle('sembunyi', !(d.ujian.subtes && d.ujian.subtes.length));
   $('ciRincian').innerHTML = `<span>Jumlah soal</span><b>${d.ujian.jumlah_soal}</b><span>Durasi</span><b>${d.ujian.durasi_menit} menit</b>
@@ -3504,9 +3565,32 @@ function pasangPengawasCbt() {
   const tempelCek = e => { if (tempelSendiri(e)) return; larang(e); };          // tempel teks dari luar: pelanggaran
   // klik kanan / tekan lama / seret: cukup dicegah (menunya tidak muncul), BUKAN pelanggaran — sering tidak sengaja (touchpad, tablet)
   const cegahSaja = e => { e.preventDefault(); };
+  // seret-lepas: teks milik siswa sendiri (dari kotak jawabannya) tidak dihitung; teks/berkas dari luar = pelanggaran
+  const jatuhCek = e => {
+    e.preventDefault();
+    let t = '', nBerkas = 0;
+    try { t = ((e.dataTransfer && e.dataTransfer.getData('text')) || '').trim(); nBerkas = (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) || 0; } catch (er) { }
+    if (!t && !nBerkas) return;
+    if (t && ((SALINAN.teks && SALINAN.teks.trim() === t) || tempelSendiri({ target: diKotakJawaban(e.target) ? e.target : document.querySelector('#cbSoal textarea, #cbSoal input[type=text]'), clipboardData: { getData: () => t } }))) return;
+    laporViol('COPY_PASTE', 'Seret-lepas dari luar');
+  };
   let tLebar = 0;
+  // lebar normal perangkat ini per orientasi (rasio lebar jendela : lebar layar), sebagai pembanding layar terbagi
+  const dasar = { tegak: 0, datar: 0 };
+  const rasioLebar = () => {
+    if (!window.screen) return 1;
+    const lanskap = window.matchMedia && matchMedia('(orientation: landscape)').matches;
+    if (PERANGKAT.sentuh) {
+      // lebar TATA LETAK (clientWidth) tidak berubah saat dicubit/zoom sementara; dibandingkan dengan sisi layar sesuai orientasi
+      const lebarLayar = lanskap ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+      const lebar = document.documentElement.clientWidth || window.innerWidth;
+      return { r: lebarLayar ? lebar / lebarLayar : 1, o: lanskap ? 'datar' : 'tegak' };
+    }
+    return { r: screen.availWidth ? (window.outerWidth || window.innerWidth) / screen.availWidth : 1, o: lanskap ? 'datar' : 'tegak' };
+  };
+  const catatDasar = () => { const x = rasioLebar(); if (x.r > (dasar[x.o] || 0)) dasar[x.o] = Math.min(1, x.r); };
   pgCbt = {
-    salin: salinCek, tempel: tempelCek, potong: salinCek, kanan: cegahSaja, seret: cegahSaja, jatuh: larang,
+    salin: salinCek, tempel: tempelCek, potong: salinCek, kanan: cegahSaja, seret: cegahSaja, jatuh: jatuhCek, seretAtas: cegahSaja,
     tombol: e => {
       const k = (e.key || '').toLowerCase();
       // di kotak jawaban: pilih semua/salin/potong/tempel teks sendiri diperbolehkan (tempel dinilai oleh event paste)
@@ -3516,14 +3600,14 @@ function pasangPengawasCbt() {
     },
     lepas: e => { if (e.key === 'PrintScreen') laporViol('COPY_PASTE', 'PrintScreen'); },
     ukuran: () => {
-      // hanya LEBAR yang diperiksa (keyboard layar mengubah tinggi, bukan lebar; outerWidth tidak terpengaruh zoom).
-      // Dihitung hanya bila jendela tetap sempit ≥ 1,5 detik — memutar tablet tidak dianggap layar terbagi.
+      // hanya LEBAR yang diperiksa (keyboard layar mengubah tinggi, bukan lebar). Dihitung hanya bila jendela tetap sempit
+      // ≥ 1,5 detik — memutar tablet tidak dianggap layar terbagi. Perangkat sentuh: harus < 55% lebar layar DAN < 72% dari lebar
+      // normal perangkat itu sendiri pada orientasi yang sama → tampilan yang diperbesar (zoom aksesibilitas) tidak dianggap layar terbagi.
       const sempit = () => {
-        if (!window.screen) return false;
-        const lanskap = window.matchMedia && matchMedia('(orientation: landscape)').matches;
-        const lebarLayar = PERANGKAT.sentuh ? (lanskap ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height)) : screen.availWidth;
-        const lebar = PERANGKAT.sentuh ? window.innerWidth : (window.outerWidth || window.innerWidth);
-        return !!lebarLayar && lebar < lebarLayar * 0.55;
+        if (document.hidden) return false;
+        const x = rasioLebar();
+        if (x.r >= 0.55) { catatDasar(); return false; }
+        return !PERANGKAT.sentuh || !dasar[x.o] || x.r < dasar[x.o] * 0.72;
       };
       if (Date.now() - tLebar < 5000 || !sempit()) return;
       clearTimeout(pgCbt.hUkuran);
@@ -3537,8 +3621,12 @@ function pasangPengawasCbt() {
   };
   document.addEventListener('copy', pgCbt.salin); document.addEventListener('paste', pgCbt.tempel); document.addEventListener('cut', pgCbt.potong);
   document.addEventListener('contextmenu', pgCbt.kanan); document.addEventListener('dragstart', pgCbt.seret); document.addEventListener('drop', pgCbt.jatuh);
+  document.addEventListener('dragover', pgCbt.seretAtas);
   document.addEventListener('keydown', pgCbt.tombol); document.addEventListener('keyup', pgCbt.lepas);
   window.addEventListener('resize', pgCbt.ukuran);
+  catatDasar();
+  if (PERANGKAT.sentuh && rasioLebar().r < 0.55)                  // mulai dalam layar terbagi: cukup diingatkan (tidak dihitung)
+    setTimeout(() => kabar(EN() ? 'Close Split View / other windows and use the full screen for the test.' : 'Tutup layar terbagi / jendela lain dan gunakan layar penuh untuk ujian.'), 1200);
   try { if (window.screen && 'onchange' in window.screen) window.screen.addEventListener('change', pgCbt.layarDua); } catch (e) { }
   setTimeout(pgCbt.layarDua, 1500);
 }
@@ -3546,6 +3634,7 @@ function lepasPengawasCbt() {
   if (!pgCbt) return;
   document.removeEventListener('copy', pgCbt.salin); document.removeEventListener('paste', pgCbt.tempel); document.removeEventListener('cut', pgCbt.potong);
   document.removeEventListener('contextmenu', pgCbt.kanan); document.removeEventListener('dragstart', pgCbt.seret); document.removeEventListener('drop', pgCbt.jatuh);
+  document.removeEventListener('dragover', pgCbt.seretAtas);
   document.removeEventListener('keydown', pgCbt.tombol); document.removeEventListener('keyup', pgCbt.lepas);
   window.removeEventListener('resize', pgCbt.ukuran);
   try { window.screen.removeEventListener('change', pgCbt.layarDua); } catch (e) { }
@@ -3602,4 +3691,4 @@ function lepasPengawasCbt() {
 <script>window.__berkasUtuh = true;</script>
 </body>
 </html>
-<!-- AKHIR BERKAS Index · 280465 -->
+<!-- AKHIR BERKAS Index · 291815 -->
