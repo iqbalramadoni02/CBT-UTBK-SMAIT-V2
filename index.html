@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- AWAL BERKAS Index · CBT & Try Out SMAIT Al-Ittihad v5 · build v5-2026-10-21c · hapus semua isi lama, tempel SATU kali -->
+<!-- AWAL BERKAS Index · CBT & Try Out SMAIT Al-Ittihad v5 · build v5-2026-10-22 · hapus semua isi lama, tempel SATU kali -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -454,19 +454,30 @@ body.mode-kunci img{-webkit-user-drag:none}
 .rapor .rp-kaki{font-size:11.5px;color:#6F8196;margin:12px 0 0}
 #areaCetak{display:none}
 body.sedang-cetak>*:not(#areaCetak){display:none!important}
-body.sedang-cetak #areaCetak{display:block;background:#fff;padding:16px}
-#areaCetak .tutup-cetak{position:fixed;top:10px;right:10px;z-index:5;border:1px solid #DCE3EC;background:#fff;border-radius:8px;padding:8px 12px;font-weight:600;cursor:pointer}
+body.sedang-cetak #areaCetak{display:block;background:#E9EDF2;padding:0 0 24px;overflow-x:auto}
+/* halaman berukuran tetap (lebar & tinggi diatur skrip sesuai kertas) → selalu tepat satu halaman */
+body.sedang-cetak #areaCetak .halaman-cetak{box-sizing:border-box;overflow:hidden;background:#fff;margin:14px auto;position:relative;display:block}
+body.sedang-cetak #areaCetak .halaman-cetak>.rapor{max-width:none;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body.sedang-cetak #areaCetak .halaman-cetak>.grid-kartu{width:100%}
+body.sedang-cetak.cetak-sertifikat #areaCetak .halaman-cetak{display:flex;align-items:center;justify-content:center}
+body.sedang-cetak #areaCetak .halaman-cetak>.sertifikat{margin:0;flex:none}
+#areaCetak .bilah-cetak{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;background:#fff;border-bottom:1px solid #DCE3EC;padding:10px 14px;font-size:13px}
+#areaCetak .bilah-cetak small{flex-basis:100%;color:#43556B;font-size:12px}
+#areaCetak .bilah-cetak button{border:1px solid #C9D3DE;background:#fff;border-radius:8px;padding:6px 12px;font-weight:600;cursor:pointer;font-size:13px}
+#areaCetak .bilah-cetak button.aktif{background:#15803D;border-color:#15803D;color:#fff}
+#areaCetak .bilah-cetak .bc-cetak{background:#0F4C81;border-color:#0F4C81;color:#fff}
+#areaCetak .bilah-cetak .bc-kertas{display:inline-flex;gap:6px;align-items:center}
+@media screen{body.sedang-cetak #areaCetak .halaman-cetak{box-shadow:0 1px 3px rgba(20,32,46,.18),0 0 0 1px #DCE3EC}}
 @media print{
-  body.sedang-cetak{background:#fff!important}
-  body.sedang-cetak #areaCetak{padding:0}
-  #areaCetak .tutup-cetak{display:none}
-  .halaman-cetak{break-after:page;page-break-after:always}
-  .halaman-cetak:last-child{break-after:auto;page-break-after:auto}
-  .rapor{border-color:#999;max-width:none;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  @page{size:A4;margin:14mm}
+  html,body.sedang-cetak{background:#fff!important;margin:0!important;padding:0!important}
+  body.sedang-cetak #areaCetak{padding:0;background:#fff;overflow:visible}
+  #areaCetak .bilah-cetak{display:none!important}
+  body.sedang-cetak #areaCetak .halaman-cetak{margin:0 auto;box-shadow:none;break-after:page;page-break-after:always;break-inside:avoid;page-break-inside:avoid}
+  body.sedang-cetak #areaCetak .halaman-cetak:last-child{break-after:auto;page-break-after:auto}
+  .rapor{border-color:#999}
 }
 .aksi-rapor{text-align:center;margin:-4px 0 20px}
-.sertifikat{--rp:#15803D;width:281mm;height:194mm;box-sizing:border-box;margin:0 auto 10mm;padding:3.2mm;background:#fff;border:2.4mm solid var(--rp);color:#14202E;
+.sertifikat{--rp:#15803D;width:279mm;height:191mm;box-sizing:border-box;margin:0 auto 10mm;padding:3.2mm;background:#fff;border:2.4mm solid var(--rp);color:#14202E;
   font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact;page-break-inside:avoid;break-inside:avoid;overflow:hidden}
 .sertifikat .sr-dalam{isolation:isolate;position:relative;height:100%;box-sizing:border-box;border:.5mm solid var(--rp);padding:7mm 14mm 5mm;display:flex;flex-direction:column;align-items:center;text-align:center;
   background:radial-gradient(circle at 50% 42%,rgba(0,0,0,.035) 0,rgba(0,0,0,0) 62%),repeating-linear-gradient(45deg,rgba(0,0,0,.012) 0 2mm,rgba(0,0,0,0) 2mm 4mm)}
@@ -522,8 +533,7 @@ body.sedang-cetak #areaCetak{display:block;background:#fff;padding:16px}
 .sertifikat .rc-catat{border:.35mm solid #C9D3DE;border-radius:2.5mm;padding:2mm 3mm;font-size:3mm;background:rgba(255,255,255,.9)}
 .sertifikat .rc-catat span{display:block;color:#6F8196}.sertifikat .rc-catat b{font-size:3.3mm}
 .sertifikat.sr-reportcard .sr-catatan{text-align:center}
-body.cetak-sertifikat #areaCetak{overflow-x:auto}
-@media print{body.cetak-sertifikat #areaCetak .halaman-cetak{display:flex;justify-content:center}.sertifikat{margin:0;border-width:2.4mm}}
+@media print{.sertifikat{margin:0;border-width:2.4mm}}
 .kop-sekolah{display:flex;gap:12px;align-items:center;margin:0 0 16px;text-align:left}
 .kop-sekolah img{height:50px;width:auto;flex:none}.kop-sekolah b{display:block;font-size:15px;line-height:1.25}.kop-sekolah small{display:block;font-size:11.5px;color:#6F8196;line-height:1.3}
 img.logo-bar{height:36px;width:auto;flex:none}
@@ -533,6 +543,10 @@ img.logo-bar{height:36px;width:auto;flex:none}
 .jeda-subtes .ok{color:var(--benar);font-weight:700}.jeda-subtes h2{margin:16px 0 4px;font-size:19px}.jeda-subtes .nama{font-size:22px;font-weight:800;color:var(--biru)}
 .jeda-subtes .tombol{margin-top:16px;width:100%}
 #tiraiViol.viol-terakhir .modal{border:3px solid var(--salah)}
+.rm-frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 .12em;line-height:1.2;font-size:.95em}
+.rm-frac .rm-atas{border-bottom:1.5px solid currentColor;padding:0 .25em .05em}.rm-frac .rm-bawah{padding:.05em .25em 0}
+.rm-akar{white-space:nowrap}.rm-akar .rm-akar-isi{border-top:1.5px solid currentColor;padding:0 .1em;margin-left:.04em}
+sup.rm-sup,sub.rm-sub{font-size:.72em;line-height:0}
 </style>
 <script>
 /* Pemeriksa keutuhan berkas: mendeteksi berkas yang tertempel dua kali / terpotong di editor Apps Script */
@@ -841,7 +855,7 @@ let BOOT = {};
 try { BOOT = JSON.parse(document.getElementById('dataAwal').textContent); } catch (e) { BOOT = {}; }
 if (!BOOT.url) BOOT.url = URL_GAS;
 const DI_GAS = !!(window.google && google.script && google.script.run);
-const BUILD_HALAMAN = 'v5-2026-10-21c';      // diperbarui otomatis saat paket dibuat; harus sama dengan BUILD di Code.gs
+const BUILD_HALAMAN = 'v5-2026-10-22';      // diperbarui otomatis saat paket dibuat; harus sama dengan BUILD di Code.gs
 /** Halaman yang dipasang di hosting luar: beri peringatan bila versinya tidak sama dengan server (Code.gs). */
 if (!DI_GAS) setTimeout(function () {
   fetch((typeof BOOT !== 'undefined' && BOOT.url) || URL_GAS, { method: 'POST', body: JSON.stringify({ action: 'ping' }), headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow' })
@@ -1372,12 +1386,45 @@ function kolomBS(s, bawaan) {
   return m ? [m[1], m[2]] : (bawaan || ['Benar', 'Salah']);
 }
 /** Teks bacaan/soal: baris diawali "|" menjadi tabel, sisanya paragraf. */
+/** Notasi matematika di teks soal (masukan SUDAH di-escape HTML): a^{b} pangkat · a_{b} indeks · \frac{a}{b} pecahan · \sqrt{x} akar. */
+function rumusHtml(s) {
+  s = String(s);
+  if (s.indexOf('\\frac{') < 0 && s.indexOf('\\sqrt{') < 0 && s.indexOf('^{') < 0 && s.indexOf('_{') < 0) return s;
+  let i = 0, out = '';
+  const kurung = () => {                                   // s[i] === '{' → isi sampai kurung tutup pasangannya
+    let d = 0, j = i;
+    for (; j < s.length; j++) { if (s[j] === '{') d++; else if (s[j] === '}') { d--; if (d === 0) break; } }
+    if (j >= s.length) return null;
+    const isi = s.slice(i + 1, j); i = j + 1; return rumusHtml(isi);
+  };
+  while (i < s.length) {
+    const i0 = i;
+    if (s.startsWith('\\frac{', i)) {
+      i += 5; const a = kurung();
+      if (a !== null && s[i] === '{') { const b = kurung(); if (b !== null) { out += '<span class="rm-frac"><span class="rm-atas">' + a + '</span><span class="rm-bawah">' + b + '</span></span>'; continue; } }
+      i = i0; out += s[i++]; continue;
+    }
+    if (s.startsWith('\\sqrt{', i)) {
+      i += 5; const a = kurung();
+      if (a !== null) { out += '<span class="rm-akar">√<span class="rm-akar-isi">' + a + '</span></span>'; continue; }
+      i = i0; out += s[i++]; continue;
+    }
+    if ((s[i] === '^' || s[i] === '_') && s[i + 1] === '{') {
+      const tag = s[i] === '^' ? 'sup' : 'sub'; i += 1; const a = kurung();
+      if (a !== null) { out += '<' + tag + ' class="rm-' + tag + '">' + a + '</' + tag + '>'; continue; }
+      i = i0; out += s[i++]; continue;
+    }
+    out += s[i++];
+  }
+  return out;
+}
+function teksR(s) { return rumusHtml(teks(s)); }
 function renderTeks(s) {
   const baris = String(s === undefined || s === null ? '' : s).replace(/\r\n?/g, '\n').split('\n');
   let html = '', para = [], tabel = [];
   const tutupPara = () => {
     const t = para.join('\n').replace(/^\n+|\n+$/g, '');
-    if (t.trim()) html += '<div class="para">' + teks(t) + '</div>';
+    if (t.trim()) html += '<div class="para">' + teksR(t) + '</div>';
     para = [];
   };
   const tutupTabel = () => { if (tabel.length) html += tabelHTML(tabel); tabel = []; };
@@ -1401,8 +1448,8 @@ function tabelHTML(rows) {
   const kepala = sel[0] || [], isi = sel.slice(1);
   const angka = c => /^[−\-]?(Rp)?\s?[\d.,]+\s?%?$/.test(c);
   return '<div class="tabel-gulir"><table class="tabel-data"><thead><tr>' +
-    kepala.map(c => '<th>' + teks(c) + '</th>').join('') + '</tr></thead><tbody>' +
-    isi.map(r => '<tr>' + r.map(c => '<td' + (angka(c) ? ' class="angka"' : '') + '>' + teks(c) + '</td>').join('') + '</tr>').join('') +
+    kepala.map(c => '<th>' + teksR(c) + '</th>').join('') + '</tr></thead><tbody>' +
+    isi.map(r => '<tr>' + r.map(c => '<td' + (angka(c) ? ' class="angka"' : '') + '>' + teksR(c) + '</td>').join('') + '</tr>').join('') +
     '</tbody></table></div>';
 }
 
@@ -1743,25 +1790,25 @@ function gambarSoal() {
   if (s.tipe === 'mcq') {
     isi += s.opsi.map(o => `<label class="opsi ${j === o.key ? 'pilih' : ''}">
       <input type="radio" name="jw" value="${o.key}" ${j === o.key ? 'checked' : ''}>
-      <span class="abjad">${o.key}.</span><span>${teks(o.text)}</span></label>`).join('');
+      <span class="abjad">${o.key}.</span><span>${teksR(o.text)}</span></label>`).join('');
   } else if (s.tipe === 'mcma') {
     const pilih = Array.isArray(j) ? j : [];
     isi += '<p class="petunjuk-tipe">Pilih semua jawaban yang benar (bisa lebih dari satu).</p>';
     isi += s.opsi.map(o => `<label class="opsi ${pilih.indexOf(o.key) >= 0 ? 'pilih' : ''}">
       <input type="checkbox" name="jw" value="${o.key}" ${pilih.indexOf(o.key) >= 0 ? 'checked' : ''}>
-      <span class="abjad">${o.key}.</span><span>${teks(o.text)}</span></label>`).join('');
+      <span class="abjad">${o.key}.</span><span>${teksR(o.text)}</span></label>`).join('');
   } else if (s.tipe === 'kategori') {
     const arr = Array.isArray(j) ? j : [];
     if (s.kategori.length <= 3) {
       isi += '<p class="petunjuk-tipe">Tentukan pilihan yang tepat untuk setiap pernyataan.</p>';
       isi += `<div class="tabel-gulir"><table class="tabel-kategori kategori-grid"><thead><tr><th>Pernyataan</th>${s.kategori.map(k => `<th class="pilih-sel">${teks(k)}</th>`).join('')}</tr></thead><tbody>` +
-        s.baris.map((b, i) => `<tr><td>${teks(b)}</td>${s.kategori.map(k =>
+        s.baris.map((b, i) => `<tr><td>${teksR(b)}</td>${s.kategori.map(k =>
           `<td class="pilih-sel"><input type="radio" name="kat${i}" data-baris="${i}" value="${teks(k)}" aria-label="${teks(k)}" ${arr[i] === k ? 'checked' : ''}></td>`).join('')}</tr>`).join('') +
         '</tbody></table></div>';
     } else {
       isi += '<p class="petunjuk-tipe">Pilih kategori yang tepat untuk setiap pernyataan.</p>';
       isi += '<table class="tabel-kategori"><thead><tr><th>Pernyataan</th><th style="width:40%">Jawaban</th></tr></thead><tbody>' +
-        s.baris.map((b, i) => `<tr><td>${teks(b)}</td><td><select data-baris="${i}"><option value="">— pilih —</option>${s.kategori.map(k =>
+        s.baris.map((b, i) => `<tr><td>${teksR(b)}</td><td><select data-baris="${i}"><option value="">— pilih —</option>${s.kategori.map(k =>
           `<option ${arr[i] === k ? 'selected' : ''}>${teks(k)}</option>`).join('')}</select></td></tr>`).join('') +
         '</tbody></table>';
     }
@@ -2127,14 +2174,14 @@ function kartuTinjau(x, psgMap) {
       const kelas = kunci ? 'kunci' : (dipilih ? 'pilihan-salah' : '');
       const tanda = kunci ? ' <b style="color:var(--benar)">— kunci</b>' : '';
       const milik = dipilih ? ' <b style="color:' + (kunci ? 'var(--benar)' : 'var(--salah)') + '">(jawaban Anda)</b>' : '';
-      return `<div class="opsi-hasil ${kelas}"><b>${o.key}.</b><span>${teks(o.text)}${tanda}${milik}${o.alasan ? `<span class="ket-opsi">${teks(o.alasan)}</span>` : ''}</span></div>`;
+      return `<div class="opsi-hasil ${kelas}"><b>${o.key}.</b><span>${teksR(o.text)}${tanda}${milik}${o.alasan ? `<span class="ket-opsi">${teks(o.alasan)}</span>` : ''}</span></div>`;
     }).join('');
   } else if (x.tipe === 'kategori') {
     const jw = Array.isArray(x.jawabanSiswa) ? x.jawabanSiswa : [];
     isi += `<div class="tabel-gulir"><table class="tabel-hasil"><thead><tr><th>Pernyataan</th><th>Jawaban Anda</th><th>Kunci</th></tr></thead><tbody>
       ${(x.baris || []).map((b, i) => {
         const ok = String(jw[i] || '').toLowerCase() === String(x.kunciList[i] || '').toLowerCase();
-        return `<tr><td>${teks(b)}</td><td class="${ok ? 'ok' : 'no'}">${teks(jw[i] || '—')}</td><td>${teks(x.kunciList[i] || '')}</td></tr>`;
+        return `<tr><td>${teksR(b)}</td><td class="${ok ? 'ok' : 'no'}">${teks(jw[i] || '—')}</td><td>${teks(x.kunciList[i] || '')}</td></tr>`;
       }).join('')}</tbody></table></div>`;
   } else if (x.tipe === 'isian') {
     const jw = Array.isArray(x.jawabanSiswa) ? x.jawabanSiswa[0] : x.jawabanSiswa;
@@ -2305,6 +2352,7 @@ function sumberMedia(u) {
   u = String(u || '').trim();
   const id = idDrive(u);
   if (!id) return [u.split('#')[0]];
+  if (/#gambar-privat/.test(u)) return ['data:,'];                 // berkas tidak boleh dibagikan publik → jalur server
   return jenisMedia(u) === 'audio'
     ? ['https://drive.google.com/uc?export=download&id=' + id, 'https://docs.google.com/uc?export=open&id=' + id, 'https://drive.usercontent.google.com/download?id=' + id + '&export=download']
     : ['https://lh3.googleusercontent.com/d/' + id, 'https://drive.google.com/uc?export=view&id=' + id, 'https://drive.google.com/thumbnail?id=' + id + '&sz=w2000'];
@@ -2312,7 +2360,7 @@ function sumberMedia(u) {
 function mediaCadangan(el) {
   try {
     const s = JSON.parse(el.getAttribute('data-cadangan') || '[]');
-    if (!s.length) { const p = el.parentNode; if (p && !p.querySelector('.media-gagal')) p.insertAdjacentHTML('beforeend', '<div class="media-gagal">Media belum dapat dimuat. Periksa koneksi lalu ketuk Muat ulang.</div>'); return; }
+    if (!s.length) { if (mediaLewatServer(el)) return; const p = el.parentNode; if (p && !p.querySelector('.media-gagal')) p.insertAdjacentHTML('beforeend', '<div class="media-gagal">Media belum dapat dimuat. Periksa koneksi lalu ketuk Muat ulang.</div>'); return; }
     el.setAttribute('data-cadangan', JSON.stringify(s.slice(1)));
     el.src = s[0];
     if (el.load) el.load();
@@ -2323,8 +2371,22 @@ function htmlMedia(u) {
   const src = sumberMedia(u), cad = teks(JSON.stringify(src.slice(1)));
   if (jenisMedia(u) === 'audio')
     return `<div class="cbt-media"><audio controls controlsList="nodownload" preload="metadata" src="${teks(src[0])}" data-cadangan="${cad}" onerror="mediaCadangan(this)"></audio></div>`;
-  return `<div class="cbt-media"><img src="${teks(src[0])}" alt="Gambar soal" loading="lazy" referrerpolicy="no-referrer" data-cadangan="${cad}" onerror="mediaCadangan(this)"></div>`;
+  return `<div class="cbt-media"><img src="${teks(src[0])}" alt="Gambar soal" loading="lazy" referrerpolicy="no-referrer" data-mid="${teks(idDrive(u))}" data-cadangan="${cad}" onerror="mediaCadangan(this)"></div>`;
 }
+/* Cadangan terakhir: gambar dibaca server dari Google Drive (bila tautan Drive tidak dapat dibuka di perangkat ini) */
+const MEDIA_PROKSI = {};
+function mediaLewatServer(el) {
+  const id = el.getAttribute('data-mid');
+  if (!id || el.tagName !== 'IMG' || el.getAttribute('data-proksi')) return false;
+  el.setAttribute('data-proksi', '1');
+  const req = typeof cb !== 'undefined' && cb.sesi ? { sesiId: cb.sesi, id: id } : null;
+  if (!req) return false;
+  MEDIA_PROKSI[id] = MEDIA_PROKSI[id] || api('mediaSoal', req, { coba: 4, diam: true }).then(d => 'data:' + d.mime + ';base64,' + d.data);
+  MEDIA_PROKSI[id].then(src => { el.src = src; const g = el.parentNode && el.parentNode.querySelector('.media-gagal'); if (g) g.remove(); })
+    .catch(() => { delete MEDIA_PROKSI[id]; const p = el.parentNode; if (p && !p.querySelector('.media-gagal')) p.insertAdjacentHTML('beforeend', '<div class="media-gagal">Gambar belum dapat dimuat. Periksa koneksi lalu ketuk Muat ulang.</div>'); });
+  return true;
+}
+
 
 /* <<RAPOR>> — laporan hasil per jenis tes (sama persis di portal siswa & portal guru) */
 /** Logo resmi YKPI Al-Ittihad (PNG transparan, ±16 KB) — dipakai di portal, rapor, sertifikat, kartu peserta, dan naskah soal. */
@@ -2393,18 +2455,95 @@ function htmlRapor(r, opsi) {
     ${resmi ? '<p class="rp-kaki">Hasil simulasi untuk latihan; bukan sertifikat resmi lembaga penyelenggara tes.</p>' : ''}
   </article>`;
 }
-/** Cetak satu atau banyak rapor (simpan sebagai PDF lewat dialog cetak). */
-function cetakRapor(daftarHtml, judul) {
+/* ======================= CETAK: SATU HALAMAN A4 / F4 =======================
+   Setiap lembar (rapor, sertifikat, report card, kartu peserta) dimasukkan ke kotak berukuran tetap yang LEBIH KECIL dari area
+   cetak kertas pilihan, lalu isinya diperkecil otomatis bila terlalu panjang → selalu tepat satu halaman, tidak ada yang terpotong. */
+const KERTAS_CETAK = {
+  A4: { nama: 'A4', w: 210, h: 297 },
+  F4: { nama: 'F4 / Folio', w: 215, h: 330 }
+};
+const CETAK = { daftar: null, judul: '', orientasi: 'portrait', judulLama: '' };
+function kertasCetak() { let k = 'A4'; try { k = localStorage.getItem('kertas_cetak') || 'A4'; } catch (e) { } return KERTAS_CETAK[k] ? k : 'A4'; }
+/** Ukuran kotak halaman (mm): area cetak dikurangi cadangan 2–3 mm agar pembulatan peramban tidak memunculkan halaman kosong. */
+function _kotakCetak(k, orientasi) {
+  const p = KERTAS_CETAK[k], lanskap = orientasi === 'landscape';
+  const m = lanskap ? 7 : 10;                                              // margin halaman (mm)
+  const W = lanskap ? p.h : p.w, H = lanskap ? p.w : p.h;
+  // ukuran ditulis eksplisit "lebar tinggi" (gabungan ukuran mm + kata orientasi tidak sah dan diabaikan peramban)
+  return { w: W - 2 * m - 2, h: H - 2 * m - 3, margin: m, page: W + 'mm ' + H + 'mm' };
+}
+function _skalaCetak(el, z, penuh) {
+  if (z >= 0.999) { el.style.transform = ''; el.style.transformOrigin = ''; el.style.width = ''; if (penuh) el.style.height = ''; return; }
+  el.style.transformOrigin = 'top left'; el.style.transform = 'scale(' + z + ')';
+  el.style.width = (100 / z) + '%'; if (penuh) el.style.height = (100 / z) + '%';
+}
+/** Cari skala terbesar (≤ 1) agar isi muat; pencarian biner, tiap langkah diukur ulang (teks dapat membungkus berbeda). */
+function _pasSkala(muat, terapkan) {
+  terapkan(1); if (muat(1)) return 1;
+  let lo = 0.4, hi = 1;
+  for (let i = 0; i < 8; i++) { const m = (lo + hi) / 2; terapkan(m); if (muat(m)) lo = m; else hi = m; }
+  terapkan(lo); return lo;
+}
+async function _tungguAsetCetak(wadah) {
+  const gambar = Array.from(wadah.querySelectorAll('img')).filter(i => !i.complete);
+  const tunggu = Promise.all(gambar.map(i => new Promise(r => { i.addEventListener('load', r, { once: true }); i.addEventListener('error', r, { once: true }); })))
+    .then(() => (document.fonts && document.fonts.ready) || null);
+  await Promise.race([tunggu, new Promise(r => setTimeout(r, 4000))]);
+}
+/** Ukur & perkecil isi tiap halaman sampai muat di kotaknya. */
+function sesuaikanHalamanCetak(wadah) {
+  wadah.querySelectorAll('.halaman-cetak').forEach(h => {
+    const anak = h.firstElementChild; if (!anak) return;
+    if (anak.classList.contains('sertifikat')) {
+      const d = anak.querySelector('.sr-dalam'); if (!d) return;
+      const z = _pasSkala(() => d.scrollHeight <= d.clientHeight + 1 && d.scrollWidth <= d.clientWidth + 1, x => _skalaCetak(d, x, true));
+      h.dataset.skala = z.toFixed(2);
+    } else {
+      const z = _pasSkala(x => anak.offsetHeight * x <= h.clientHeight + 1 && anak.scrollWidth <= anak.clientWidth + 1, x => _skalaCetak(anak, x, false));
+      h.dataset.skala = z.toFixed(2);
+    }
+  });
+}
+function _gayaCetak(kotak) {
+  let g = document.getElementById('gayaCetakHalaman');
+  if (!g) { g = document.createElement('style'); g.id = 'gayaCetakHalaman'; document.head.appendChild(g); }
+  g.textContent = '@media print{@page{size:' + kotak.page + ';margin:' + kotak.margin + 'mm}}' +
+    'body.sedang-cetak #areaCetak .halaman-cetak{width:' + kotak.w + 'mm;height:' + kotak.h + 'mm}';
+}
+function tutupCetak() {
+  document.body.classList.remove('sedang-cetak', 'cetak-sertifikat');
+  const el = document.getElementById('areaCetak'); if (el) el.innerHTML = '';
+  const g = document.getElementById('gayaCetakHalaman'); if (g) g.textContent = '';
+  if (CETAK.judulLama) document.title = CETAK.judulLama;
+  CETAK.daftar = null;
+}
+async function _tampilCetak(cetakSekarang) {
+  const el = document.getElementById('areaCetak');
+  const k = kertasCetak(), kotak = _kotakCetak(k, CETAK.orientasi);
+  _gayaCetak(kotak);
+  const pilih = Object.keys(KERTAS_CETAK).map(x => `<button type="button" data-kertas="${x}" class="${x === k ? 'aktif' : ''}">${KERTAS_CETAK[x].nama}</button>`).join('');
+  el.innerHTML = `<div class="bilah-cetak"><b>Pratinjau cetak · ${CETAK.daftar.length} halaman</b>
+      <span class="bc-kertas">Kertas: ${pilih}</span>
+      <button type="button" class="bc-cetak">🖨 Cetak / simpan PDF</button><button type="button" class="tutup-cetak">✕ Tutup</button>
+      <small>Di dialog cetak pilih ukuran kertas <b>${KERTAS_CETAK[k].nama}</b>, tata letak <b>${CETAK.orientasi === 'landscape' ? 'Lanskap' : 'Potret'}</b>, margin <b>Default</b>, skala <b>100%</b>. Setiap lembar dijamin pas satu halaman.</small></div>` +
+    CETAK.daftar.map(hh => `<div class="halaman-cetak">${hh}</div>`).join('');
+  el.querySelector('.tutup-cetak').onclick = tutupCetak;
+  el.querySelector('.bc-cetak').onclick = () => window.print();
+  el.querySelectorAll('[data-kertas]').forEach(b => b.onclick = () => { try { localStorage.setItem('kertas_cetak', b.dataset.kertas); } catch (e) { } _tampilCetak(true); });
+  document.body.classList.add('sedang-cetak');
+  await _tungguAsetCetak(el);
+  sesuaikanHalamanCetak(el);
+  if (cetakSekarang) setTimeout(() => window.print(), 120);
+}
+/** Cetak satu atau banyak lembar (rapor, kartu peserta, sertifikat) → tiap lembar tepat satu halaman A4/F4. */
+function cetakRapor(daftarHtml, judul, opsi) {
   let el = document.getElementById('areaCetak');
   if (!el) { el = document.createElement('div'); el.id = 'areaCetak'; document.body.appendChild(el); }
-  el.innerHTML = '<button type="button" class="tutup-cetak" onclick="document.body.classList.remove(\'sedang-cetak\')">✕ Tutup tampilan cetak</button>' +
-    daftarHtml.map(h => `<div class="halaman-cetak">${h}</div>`).join('');
-  const lama = document.title;
+  if (!CETAK.daftar) CETAK.judulLama = document.title;
+  CETAK.daftar = daftarHtml; CETAK.orientasi = (opsi && opsi.orientasi) || 'portrait';
   if (judul) document.title = judul;
-  document.body.classList.add('sedang-cetak');
-  const selesai = () => { document.body.classList.remove('sedang-cetak'); el.innerHTML = ''; document.title = lama; window.removeEventListener('afterprint', selesai); };
-  window.addEventListener('afterprint', selesai);
-  setTimeout(() => window.print(), 150);
+  document.body.classList.toggle('cetak-sertifikat', CETAK.orientasi === 'landscape');
+  return _tampilCetak(true);
 }
 /* ---------------- SERTIFIKAT HASIL TES (lanskap A4) ---------------- */
 const JUDUL_SERT = {
@@ -2552,18 +2691,12 @@ function htmlReportCard(r, ttd) {
     catatan: utbk ? 'Skor berskala 200–1000 dihitung dari hasil try out berbasis komputer di sekolah; bukan hasil resmi UTBK-SNBT.'
       : 'Skor berskala 200–1000 dihitung dari hasil tes berbasis komputer di sekolah; bukan hasil resmi TKA.' });
 }
-/** Cetak banyak sertifikat (lanskap A4, satu halaman per siswa) → simpan sebagai PDF lewat dialog cetak. */
+/** Cetak banyak sertifikat/report card (lanskap A4 atau F4, tepat satu halaman per siswa) → simpan sebagai PDF lewat dialog cetak. */
 async function cetakSertifikat(daftarR, judul, ttd) {
   const ada = (daftarR || []).filter(r => r && r.sertifikat);
   if (!ada.length) throw new Error('Belum ada sertifikat/report card yang dapat diterbitkan (nilai harus final dan sudah dinilai semua).');
   if (ada.some(r => r.sertifikat.urlVerifikasi)) await _muatQr();
-  let g = document.getElementById('gayaCetakSertifikat');
-  if (!g) { g = document.createElement('style'); g.id = 'gayaCetakSertifikat'; document.head.appendChild(g); }
-  g.textContent = '@media print{@page{size:A4 landscape;margin:7mm}}';
-  document.body.classList.add('cetak-sertifikat');
-  cetakRapor(ada.map(r => htmlSertifikat(r, ttd)), judul || ('Sertifikat ' + ada[0].nama));
-  const lepas = () => { g.textContent = ''; document.body.classList.remove('cetak-sertifikat'); window.removeEventListener('afterprint', lepas); };
-  window.addEventListener('afterprint', lepas);
+  await cetakRapor(ada.map(r => htmlSertifikat(r, ttd)), judul || ('Sertifikat ' + ada[0].nama), { orientasi: 'landscape' });
   return ada.length;
 }
 /* <</RAPOR>> */
@@ -3093,11 +3226,11 @@ function gambarCbt() {
   const hurufIdx = i => 'ABCDE'.charAt(i);
   if (q.tipe === 'PG_TUNGGAL' || q.tipe === 'SAB') {
     isi += `<p class="petunjuk-tipe">${T('pilihSatu')}</p>` + (q.opsi || []).map((o, i) => `<label class="opsi ${j === o.key ? 'pilih' : ''}">
-      <input type="radio" name="cj" value="${o.key}" ${j === o.key ? 'checked' : ''}><span class="abjad">${hurufIdx(i)}.</span><span>${teks(o.text)}</span></label>`).join('');
+      <input type="radio" name="cj" value="${o.key}" ${j === o.key ? 'checked' : ''}><span class="abjad">${hurufIdx(i)}.</span><span>${teksR(o.text)}</span></label>`).join('');
   } else if (q.tipe === 'PG_KOMPLEKS') {
     const pilih = Array.isArray(j) ? j : [];
     isi += `<p class="petunjuk-tipe">${T('pilihBanyak')}</p>` + (q.opsi || []).map((o, i) => `<label class="opsi ${pilih.indexOf(o.key) >= 0 ? 'pilih' : ''}">
-      <input type="checkbox" name="cj" value="${o.key}" ${pilih.indexOf(o.key) >= 0 ? 'checked' : ''}><span class="abjad">${hurufIdx(i)}.</span><span>${teks(o.text)}</span></label>`).join('');
+      <input type="checkbox" name="cj" value="${o.key}" ${pilih.indexOf(o.key) >= 0 ? 'checked' : ''}><span class="abjad">${hurufIdx(i)}.</span><span>${teksR(o.text)}</span></label>`).join('');
   } else if (q.tipe === 'TRUE_FALSE_NOT_GIVEN') {
     isi += '<div class="tf-pilih">' + [['True', T('tfT')], ['False', T('tfF')], ['Not Given', T('tfN')]].map(p => `<label class="opsi ${j === p[0] ? 'pilih' : ''}">
       <input type="radio" name="cj" value="${p[0]}" ${j === p[0] ? 'checked' : ''}><span>${teks(p[1])}</span></label>`).join('') + '</div>';
@@ -3122,7 +3255,7 @@ function gambarCbt() {
   } else if (q.tipe === 'TABEL_BS') {
     const arr = Array.isArray(j) ? j : [];
     isi += `<div class="tabel-gulir"><table class="tabel-kategori kategori-grid"><thead><tr><th>${T('pernyataan')}</th>${kolomBS(q.teks, [T('benar'), T('salah')]).map(l => `<th class="pilih-sel">${teks(l)}</th>`).join('')}</tr></thead><tbody>` +
-      q.baris.map((b, i) => `<tr><td>${teks(b)}</td>${['B', 'S'].map(k => `<td class="pilih-sel"><input type="radio" name="cb${i}" data-baris="${i}" value="${k}" ${arr[i] === k ? 'checked' : ''}></td>`).join('')}</tr>`).join('') +
+      q.baris.map((b, i) => `<tr><td>${teksR(b)}</td>${['B', 'S'].map(k => `<td class="pilih-sel"><input type="radio" name="cb${i}" data-baris="${i}" value="${k}" ${arr[i] === k ? 'checked' : ''}></td>`).join('')}</tr>`).join('') +
       '</tbody></table></div>';
   }
   $('cbSoal').innerHTML = isi;
@@ -3460,15 +3593,15 @@ function gambarHasilCbt(h, otomatis) {
     ${htmlMedia(r.media)}
     <div class="pertanyaan">${renderTeks(r.teks)}</div>
     ${r.tipe === 'PG_1234'
-      ? `<ol class="pernyataan-1234">${r.opsi.map(o => `<li>${teks(o.text)}</li>`).join('')}</ol><div class="isian-hasil"><div><small>Jawaban Anda</small><b>${teks(r.jawaban || '—')}</b></div><div><small>Kunci</small><b>${teks(r.kunci)}</b> <span class="ket">(A: 1,2,3 · B: 1,3 · C: 2,4 · D: 4 · E: semua)</span></div></div>`
+      ? `<ol class="pernyataan-1234">${r.opsi.map(o => `<li>${teksR(o.text)}</li>`).join('')}</ol><div class="isian-hasil"><div><small>Jawaban Anda</small><b>${teks(r.jawaban || '—')}</b></div><div><small>Kunci</small><b>${teks(r.kunci)}</b> <span class="ket">(A: 1,2,3 · B: 1,3 · C: 2,4 · D: 4 · E: semua)</span></div></div>`
       : r.tipe === 'ESSAY_TERSTRUKTUR'
-      ? r.opsi.map((o, i) => `<div class="isian-hasil"><div><small>${teks(o.text)}</small><b style="font-size:15px;white-space:pre-wrap">${teks((Array.isArray(r.jawaban) ? r.jawaban[i] : '') || '—')}</b></div></div>`).join('')
+      ? r.opsi.map((o, i) => `<div class="isian-hasil"><div><small>${teksR(o.text)}</small><b style="font-size:15px;white-space:pre-wrap">${teks((Array.isArray(r.jawaban) ? r.jawaban[i] : '') || '—')}</b></div></div>`).join('')
       : r.tipe === 'TABEL_BS'
-      ? `<div class="tabel-gulir"><table class="tabel-hasil"><thead><tr><th>Pernyataan</th><th>Jawaban Anda</th><th>Kunci</th></tr></thead><tbody>${r.opsi.map((o, i) => { const kl = kolomBS(r.teks), a = Array.isArray(r.jawaban) ? r.jawaban[i] : ''; const k = String(r.kunci).split(',')[i]; return `<tr><td>${teks(o.text)}</td><td class="${a === k ? 'ok' : 'no'}">${teks(a === 'B' ? kl[0] : a === 'S' ? kl[1] : '—')}</td><td>${teks(k === 'B' ? kl[0] : kl[1])}</td></tr>`; }).join('')}</tbody></table></div>`
+      ? `<div class="tabel-gulir"><table class="tabel-hasil"><thead><tr><th>Pernyataan</th><th>Jawaban Anda</th><th>Kunci</th></tr></thead><tbody>${r.opsi.map((o, i) => { const kl = kolomBS(r.teks), a = Array.isArray(r.jawaban) ? r.jawaban[i] : ''; const k = String(r.kunci).split(',')[i]; return `<tr><td>${teksR(o.text)}</td><td class="${a === k ? 'ok' : 'no'}">${teks(a === 'B' ? kl[0] : a === 'S' ? kl[1] : '—')}</td><td>${teks(k === 'B' ? kl[0] : kl[1])}</td></tr>`; }).join('')}</tbody></table></div>`
       : (r.opsi.length && r.tipe !== 'TABEL_BS' ? r.opsi.map(o => { const kunciL = String(r.kunci).split(','); const dipilih = (Array.isArray(r.jawaban) ? r.jawaban : [r.jawaban]).indexOf(o.key) >= 0; const kn = kunciL.indexOf(o.key) >= 0;
-          return `<div class="opsi-hasil ${kn ? 'kunci' : (dipilih ? 'pilihan-salah' : '')}"><b>${o.key}.</b><span>${teks(o.text)}${kn ? ' <b style="color:var(--benar)">— kunci</b>' : ''}${dipilih ? ' <b>(jawaban Anda)</b>' : ''}</span></div>`; }).join('')
+          return `<div class="opsi-hasil ${kn ? 'kunci' : (dipilih ? 'pilihan-salah' : '')}"><b>${o.key}.</b><span>${teksR(o.text)}${kn ? ' <b style="color:var(--benar)">— kunci</b>' : ''}${dipilih ? ' <b>(jawaban Anda)</b>' : ''}</span></div>`; }).join('')
         : `<div class="isian-hasil ${['ESSAY', 'STUDI_KASUS', 'SPEAKING'].indexOf(r.tipe) >= 0 ? 'penuh' : ''}"><div><small>Jawaban Anda</small><b style="font-size:15px;white-space:pre-wrap">${teks(fmtJw(r, r.jawaban))}</b></div>${['ESSAY', 'STUDI_KASUS', 'SPEAKING'].indexOf(r.tipe) < 0 ? `<div><small>Kunci</small><b>${teks(String(r.kunci).split('|').join(' / '))}</b></div>` : ''}</div>`)}
-    ${r.pembahasan ? `<div class="pembahasan"><b>Pembahasan</b>${teks(r.pembahasan)}</div>` : ''}
+    ${r.pembahasan ? `<div class="pembahasan"><b>Pembahasan</b>${teksR(r.pembahasan)}</div>` : ''}
   </div>`).join('');
   $('isiCbtHasil').innerHTML = (h.rapor ? htmlRapor(h.rapor) + tombolCetak : '') + `
     <div class="skor-panel ${h.rapor ? 'sembunyi' : ''}">
@@ -3691,4 +3824,4 @@ function lepasPengawasCbt() {
 <script>window.__berkasUtuh = true;</script>
 </body>
 </html>
-<!-- AKHIR BERKAS Index · 291815 -->
+<!-- AKHIR BERKAS Index · 300991 -->
