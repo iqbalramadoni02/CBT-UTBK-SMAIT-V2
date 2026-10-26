@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- AWAL BERKAS Index · CBT & Try Out SMAIT Al-Ittihad v5 · build v5-2026-10-22 · hapus semua isi lama, tempel SATU kali -->
+<!-- AWAL BERKAS Index · CBT & Try Out SMAIT Al-Ittihad v5 · build v5-2026-10-28 · hapus semua isi lama, tempel SATU kali -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -311,6 +311,21 @@ html.kunci-layar .sedang-mengetik{padding-bottom:60vh !important}   /* ruang di 
 .audio-bar button{border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer}
 .audio-bar .audio-putar{background:#fff;color:#14202E;font-size:15px;padding:9px 18px;animation:denyut 1.4s ease-in-out infinite}
 @keyframes denyut{50%{box-shadow:0 0 0 6px rgba(255,255,255,.25)}}
+.audio-bar .audio-alur{flex-basis:100%;font-size:13.5px;background:rgba(255,255,255,.14);border-radius:8px;padding:7px 12px;line-height:1.45}
+.audio-bar .audio-alur[data-fase=baca]{background:#FBBF24;color:#1F1600}
+.audio-bar .audio-alur[data-fase=cek],.audio-bar .audio-alur[data-fase=akhir]{background:#BAE6FD;color:#0C2A3D}
+.audio-bar .audio-alur[data-fase=selesai]{background:#BBF7D0;color:#0B3B22}
+/* ============ Speaking di website lain ============ */
+.rekam.luar .luar-langkah{margin:0 0 12px;padding-left:20px;font-size:14px;color:var(--tinta-2);line-height:1.6}
+.rekam.luar .aksi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.rekam.luar a.tombol{text-decoration:none;display:inline-flex;align-items:center}
+.rekam.luar .luar-frame{width:100%;height:min(70vh,640px);border:1px solid var(--garis);border-radius:10px;background:#fff;margin:4px 0 6px}
+.rekam.luar .luar-isi{display:grid;gap:8px;max-width:520px;margin-top:12px}
+.rekam.luar .luar-isi label{font-weight:700;font-size:13.5px}
+.rekam.luar .luar-isi select,.rekam.luar .luar-isi input[type=text]{font:inherit;padding:9px 10px;border:1px solid var(--garis);border-radius:8px;background:#fff}
+.rekam.luar .luar-pilih{justify-self:start;cursor:pointer}
+.rekam.luar .luar-pratinjau{max-width:100%;max-height:320px;border:1px solid var(--garis);border-radius:8px;object-fit:contain;background:#fff}
+.rekam.luar .ket{font-size:12.5px;color:var(--tinta-2);margin:6px 0}
 /* ============ perekam Speaking ============ */
 .rekam{border:1px solid var(--garis);border-radius:12px;padding:16px;margin-top:12px;background:#FBFCFE}
 .rekam .rekam-info{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--tinta-2);margin-bottom:10px}
@@ -759,6 +774,7 @@ sup.rm-sup,sub.rm-sub{font-size:.72em;line-height:0}
     <button type="button" id="cbAudioJeda" class="sembunyi">❚❚</button>
     <button type="button" id="cbAudioUlang" class="sembunyi" title="Putar ulang dari awal">↺</button>
     <button type="button" id="cbAudioPutar" class="audio-putar sembunyi">▶ Putar audio</button>
+    <div id="cbAudioAlur" class="audio-alur sembunyi" aria-live="polite"></div>
   </div></div>
   <audio id="cbAudio" preload="auto" playsinline></audio>
   <div class="ruang">
@@ -855,7 +871,7 @@ let BOOT = {};
 try { BOOT = JSON.parse(document.getElementById('dataAwal').textContent); } catch (e) { BOOT = {}; }
 if (!BOOT.url) BOOT.url = URL_GAS;
 const DI_GAS = !!(window.google && google.script && google.script.run);
-const BUILD_HALAMAN = 'v5-2026-10-22';      // diperbarui otomatis saat paket dibuat; harus sama dengan BUILD di Code.gs
+const BUILD_HALAMAN = 'v5-2026-10-28';      // diperbarui otomatis saat paket dibuat; harus sama dengan BUILD di Code.gs
 /** Halaman yang dipasang di hosting luar: beri peringatan bila versinya tidak sama dengan server (Code.gs). */
 if (!DI_GAS) setTimeout(function () {
   fetch((typeof BOOT !== 'undefined' && BOOT.url) || URL_GAS, { method: 'POST', body: JSON.stringify({ action: 'ping' }), headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow' })
@@ -1084,6 +1100,8 @@ $('kuTombol').onclick = () => {
 };
 
 /** opsi: { en: label Inggris, keluar(jenis, detail): dipanggil saat siswa benar-benar meninggalkan layar ujian } */
+/** Soal Speaking yang dikerjakan di website lain sedang terbuka → aturan pengawasan "tetap di halaman" ditangguhkan. */
+function bebasLuar() { try { return typeof sedangTesLuar === 'function' && sedangTesLuar(); } catch (e) { return false; } }
 function kunciMulai(opsi) {
   KUNCI.cb = opsi || {}; KUNCI.en = !!(opsi && opsi.en);
   if (KUNCI.aktif) return;
@@ -1093,13 +1111,14 @@ function kunciMulai(opsi) {
   document.body.classList.add('mode-kunci');
   kunciNyala();
   try { history.pushState({ kunciUjian: 1 }, ''); history.pushState({ kunciUjian: 2 }, ''); } catch (e) { }
-  const lapor = (j, d) => { try { if (KUNCI.cb.keluar) KUNCI.cb.keluar(j, d); } catch (e) { } };
+  const lapor = (j, d) => { try { if (bebasLuar()) return; if (KUNCI.cb.keluar) KUNCI.cb.keluar(j, d); } catch (e) { } };
   const h = KUNCI.h = {
     fs: () => {
       if (!KUNCI.aktif) return;
       if (fsEl()) { KUNCI.fs = true; KUNCI.fsPernah = true; if ($('tiraiKunci').dataset.alasan === 'fsSentuh') $('tiraiKunci').classList.add('sembunyi'); return; }
       if (KUNCI.fs) {
         KUNCI.fs = false;
+        if (bebasLuar()) return;                                       // tes Speaking di website lain: keluar layar penuh diizinkan
         // tablet/HP: layar penuh dapat keluar sendiri (tombol/gerakan kembali, dialog sistem) → soal ditutup sampai siswa
         // mengetuk "Kembali ke layar penuh", TANPA pelanggaran. Keluar aplikasi sungguhan tetap terdeteksi lewat 'lihat'.
         if (PERANGKAT.sentuh) {
@@ -1113,10 +1132,11 @@ function kunciMulai(opsi) {
     lihat: () => {
       if (!KUNCI.aktif) return;
       if (document.hidden) {
+        if (bebasLuar()) { KUNCI.sembunyiSejak = 0; return; }            // pergi ke website tes Speaking: bukan pelanggaran
         KUNCI.sembunyiSejak = Date.now();
         KUNCI.terjagaSaatPergi = layarTerjaga();                                    // dicatat sebelum Wake Lock dilepas sistem
         KUNCI.sembunyiSejakAbaikan = Date.now() < (KUNCI.abaikanSampai || 0);      // pemilih berkas / izin mikrofon
-        if (!PERANGKAT.sentuh) setTimeout(() => { if (KUNCI.aktif && !KUNCI.pergi && document.hidden && Date.now() >= (KUNCI.abaikanSampai || 0)) { kunciTampil('tab'); lapor('TAB_SWITCH', 'Pindah tab atau aplikasi'); } }, 450);
+        if (!PERANGKAT.sentuh) setTimeout(() => { if (KUNCI.aktif && !KUNCI.pergi && document.hidden && !bebasLuar() && Date.now() >= (KUNCI.abaikanSampai || 0)) { kunciTampil('tab'); lapor('TAB_SWITCH', 'Pindah tab atau aplikasi'); } }, 450);
         return;
       }
       KUNCI.wl = null; kunciNyala();
@@ -1141,6 +1161,7 @@ function kunciMulai(opsi) {
       if (!KUNCI.aktif || !KUNCI.fsPernah || KUNCI.ditolak || fsEl() || document.hidden || !bisaFs()) return;
       if (Date.now() < (KUNCI.abaikanSampai || 0)) return;
       if (e && e.type === 'keydown' && e.key === 'Escape') return;
+      if (bebasLuar() && e && e.target && e.target.closest && e.target.closest('.rekam.luar')) return;   // tombol tes Speaking tidak memaksa layar penuh
       const t = e && e.target && e.target.closest ? e.target.closest('input[type=file], label, #kuTombol') : null;
       if (t) return;                                                // pemilih berkas & tombol layar kunci punya alurnya sendiri
       kunciMasukFs();
@@ -1183,9 +1204,9 @@ function kunciMulai(opsi) {
     kabur: () => {
       // Tablet/HP: keyboard layar, dikte, pusat notifikasi dapat memicu blur → TIDAK dihitung.
       // Keluar sungguhan dari peramban tetap terdeteksi lewat 'lihat' (halaman tersembunyi).
-      if (!KUNCI.aktif || PERANGKAT.sentuh || Date.now() < (KUNCI.abaikanSampai || 0)) return;
+      if (!KUNCI.aktif || PERANGKAT.sentuh || bebasLuar() || Date.now() < (KUNCI.abaikanSampai || 0)) return;
       setTimeout(() => {
-        if (!KUNCI.aktif || document.hidden || document.hasFocus() || Date.now() < (KUNCI.abaikanSampai || 0)) return;
+        if (!KUNCI.aktif || document.hidden || document.hasFocus() || bebasLuar() || Date.now() < (KUNCI.abaikanSampai || 0)) return;
         kunciTampil('fokus');                                       // soal langsung ditutup (ketat)
         // dihitung pelanggaran bila jendela lain tetap aktif > 1,5 detik; sentuhan sekejap (notifikasi sistem) hanya diperingatkan
         setTimeout(() => {
@@ -1430,6 +1451,7 @@ function renderTeks(s) {
   const tutupTabel = () => { if (tabel.length) html += tabelHTML(tabel); tabel = []; };
   baris.forEach(b => {
     if (/^\s*\[KOLOM\s*:[^\]\n]*\]\s*$/i.test(b)) return;                 // label kolom tabel B/S, bukan teks
+    if (/^\s*\[TES LUAR\s*:[^\]\n]*\]\s*$/i.test(b)) return;              // tautan tes Speaking (ditampilkan sebagai tombol)
     // gambar/audio di dalam teks: baris "[GAMBAR: https://…]" atau "[AUDIO: https://…]"
     const m = b.match(/^\s*\[(GAMBAR|AUDIO)\s*:\s*(https:\/\/[^\s\]]+)\s*\]\s*$/i);
     if (m) { tutupPara(); tutupTabel(); html += htmlMedia(m[2].replace(/#(audio|gambar)$/, '') + (m[1].toUpperCase() === 'AUDIO' ? '#audio' : '#gambar')); return; }
@@ -2352,7 +2374,7 @@ function sumberMedia(u) {
   u = String(u || '').trim();
   const id = idDrive(u);
   if (!id) return [u.split('#')[0]];
-  if (/#gambar-privat/.test(u)) return ['data:,'];                 // berkas tidak boleh dibagikan publik → jalur server
+  if (/#(gambar|audio)-privat/.test(u)) return ['data:,'];         // berkas tidak boleh dibagikan publik → jalur server
   return jenisMedia(u) === 'audio'
     ? ['https://drive.google.com/uc?export=download&id=' + id, 'https://docs.google.com/uc?export=open&id=' + id, 'https://drive.usercontent.google.com/download?id=' + id + '&export=download']
     : ['https://lh3.googleusercontent.com/d/' + id, 'https://drive.google.com/uc?export=view&id=' + id, 'https://drive.google.com/thumbnail?id=' + id + '&sz=w2000'];
@@ -2370,15 +2392,24 @@ function htmlMedia(u) {
   if (!u) return '';
   const src = sumberMedia(u), cad = teks(JSON.stringify(src.slice(1)));
   if (jenisMedia(u) === 'audio')
-    return `<div class="cbt-media"><audio controls controlsList="nodownload" preload="metadata" src="${teks(src[0])}" data-cadangan="${cad}" onerror="mediaCadangan(this)"></audio></div>`;
+    return `<div class="cbt-media"><audio controls controlsList="nodownload" preload="metadata" src="${teks(src[0])}" data-mid="${teks(idDrive(u))}" data-cadangan="${cad}" onerror="mediaCadangan(this)"></audio></div>`;
   return `<div class="cbt-media"><img src="${teks(src[0])}" alt="Gambar soal" loading="lazy" referrerpolicy="no-referrer" data-mid="${teks(idDrive(u))}" data-cadangan="${cad}" onerror="mediaCadangan(this)"></div>`;
 }
 /* Cadangan terakhir: gambar dibaca server dari Google Drive (bila tautan Drive tidak dapat dibuka di perangkat ini) */
 const MEDIA_PROKSI = {};
 function mediaLewatServer(el) {
   const id = el.getAttribute('data-mid');
-  if (!id || el.tagName !== 'IMG' || el.getAttribute('data-proksi')) return false;
+  if (!id || (el.tagName !== 'IMG' && el.tagName !== 'AUDIO') || el.getAttribute('data-proksi')) return false;
   el.setAttribute('data-proksi', '1');
+  if (el.tagName === 'AUDIO') {                                     // audio di dalam soal: unduh lewat server → putar dari memori
+    const dasar = typeof cb !== 'undefined' && cb.sesi ? { sesiId: cb.sesi } : null;
+    if (!dasar) return false;
+    MEDIA_PROKSI['a' + id] = MEDIA_PROKSI['a' + id] || unduhAudioServer(id, dasar);
+    MEDIA_PROKSI['a' + id].then(src => { el.src = src; const g = el.parentNode && el.parentNode.querySelector('.media-gagal'); if (g) g.remove(); })
+      .catch(e => { delete MEDIA_PROKSI['a' + id]; el.removeAttribute('data-proksi'); try { laporGalat('audio', 'Audio soal gagal dimuat lewat server: ' + e.message, 'mediaLewatServer'); } catch (x) { }
+        const p = el.parentNode; if (p && !p.querySelector('.media-gagal')) p.insertAdjacentHTML('beforeend', '<div class="media-gagal">Audio belum dapat dimuat. Periksa koneksi lalu ketuk Muat ulang.</div>'); });
+    return true;
+  }
   const req = typeof cb !== 'undefined' && cb.sesi ? { sesiId: cb.sesi, id: id } : null;
   if (!req) return false;
   MEDIA_PROKSI[id] = MEDIA_PROKSI[id] || api('mediaSoal', req, { coba: 4, diam: true }).then(d => 'data:' + d.mime + ';base64,' + d.data);
@@ -2705,8 +2736,16 @@ async function cetakSertifikat(daftarR, judul, ttd) {
    AUDIO LISTENING OTOMATIS — satu pemutar tetap untuk seluruh ujian.
    Diputar otomatis saat siswa membuka soal dalam rentangnya; bagian berikutnya menunggu giliran;
    "putar sekali" = tanpa jeda/ulang (seperti tes asli); posisi tersimpan bila halaman dimuat ulang.
+   TAHAN GANGGUAN:
+   · beberapa alamat Google Drive dicoba bergantian; bila semuanya gagal (diblokir jaringan, kuota unduhan Drive habis,
+     berbagi publik dilarang) audio diunduh LEWAT SERVER per potongan 1 MB lalu diputar dari memori perangkat;
+   · pengawas macet: audio yang berhenti maju > 12 detik (sinyal hilang) dimuat ulang dari posisi terakhir;
+   · audio yang berakhir sebelum waktunya (unduhan terpotong) dilanjutkan, bukan dianggap selesai;
+   · sebelum diputar, setiap Part diuji dulu (pra-pemeriksaan) sehingga jalur cadangan sudah siap saat dibutuhkan;
+   · gangguan dicatat otomatis untuk admin (Kesehatan sistem → Catatan galat).
    ===================================================================== */
-const AUDIO = { daftar: [], peta: {}, aktif: -1, antre: -1, status: {}, sumber: [], diblok: false, berhenti: false, simpanT: 0, lanjut: 0 };
+const AUDIO = { daftar: [], peta: {}, aktif: -1, antre: -1, status: {}, sumber: [], diblok: false, berhenti: false, simpanT: 0, lanjut: 0,
+  blob: {}, unduh: {}, srcPart: '', paksaServer: {}, durasi: {}, info: '', coba: {}, tPos: 0, tMaju: 0, hUlang: 0, pulih: 0, jalur: '', terlapor: {} };
 const SUNYI = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
 const mmss = d => { d = Math.max(0, Math.floor(d || 0)); return Math.floor(d / 60) + ':' + String(d % 60).padStart(2, '0'); };
 /** Dipanggil saat siswa mengetuk "Mulai ujian": membuka izin putar otomatis (wajib di Safari iPad). */
@@ -2715,15 +2754,94 @@ function audioBuka() {
   try { a.muted = true; a.src = SUNYI; const p = a.play(); if (p && p.then) p.then(() => { a.pause(); a.muted = false; }).catch(() => { a.muted = false; }); else a.muted = false; } catch (e) { a.muted = false; }
 }
 function audioSimpanStatus() { try { localStorage.setItem('cbt_audio_' + cb.sesi, JSON.stringify(AUDIO.status)); } catch (e) { } }
-function audioSiapkan(daftar) {
-  AUDIO.daftar = daftar || []; AUDIO.peta = {}; AUDIO.aktif = -1; AUDIO.antre = -1; AUDIO.diblok = false; AUDIO.berhenti = false;
+function audioLapor(x, pesan) {
+  const k = x.id + '|' + pesan;
+  if (AUDIO.terlapor[k]) return; AUDIO.terlapor[k] = 1;
+  try { if (typeof laporGalat === 'function') laporGalat('audio', 'Audio "' + x.judul + '": ' + pesan, 'audio', 'jalur ' + (AUDIO.jalur || '-')); } catch (e) { }
+}
+/** Satu rekaman berisi beberapa Part: indeks penanda Part yang sedang berjalan pada detik t (-1 = sebelum Part pertama). */
+function bagianAudio(x, t) {
+  let b = -1;
+  (x.bagian || []).forEach((g, j) => { if (t + 0.05 >= g.mulai) b = j; });
+  return b;
+}
+/** Rekaman sampai di penanda Part berikutnya → siswa dipindah ke soal pertama Part itu (sekali per Part; tidak diulang saat muat ulang). */
+function audioCekBagian(x, t) {
+  if (!x.bagian || !x.bagian.length) return;
+  const b = bagianAudio(x, t), st = AUDIO.status[x.id] || {}, lalu = st.b === undefined ? -1 : st.b;
+  if (b < 0 || b <= lalu) return;
+  AUDIO.status[x.id] = Object.assign({}, st, { b: b }); audioSimpanStatus();
+  const g = x.bagian[b], i = cb.soal.findIndex(q => (g.qids || []).indexOf(q.qid) >= 0);
+  if (i >= 0 && i !== cb.idx && typeof pindahCbt === 'function') pindahCbt(i);
+  if (typeof gambarAlur === 'function') gambarAlur();
+}
+/** Alamat pemutaran sebuah Part: rekaman di memori (sudah diunduh) → alamat Drive langsung; kosong = harus lewat server. */
+function sumberAudio(x) {
+  if (AUDIO.blob[x.id]) return [AUDIO.blob[x.id]];
+  if (AUDIO.paksaServer[x.id] || /#audio-privat/.test(x.url || '')) return [];
+  return sumberMedia(x.url).filter(u => !/^data:/.test(u));
+}
+function audioSiapkan(daftar, alur) {
+  AUDIO.daftar = daftar || []; AUDIO.peta = {}; AUDIO.aktif = -1; AUDIO.antre = -1; AUDIO.diblok = false; AUDIO.berhenti = false; AUDIO.info = '';
+  clearTimeout(AUDIO.hUlang);
+  clearInterval(ALUR.h); ALUR.aktif = false; ALUR.cfg = alur || null; ALUR.st = null;
   AUDIO.daftar.forEach((x, i) => (x.qids || []).forEach(q => { AUDIO.peta[q] = i; }));
-  try { AUDIO.status = JSON.parse(localStorage.getItem('cbt_audio_' + cb.sesi) || '{}'); } catch (e) { AUDIO.status = {}; }
+  try { AUDIO.status = JSON.parse(localStorage.getItem('cbt_audio_' + cb.sesi) || '{}') || {}; } catch (e) { AUDIO.status = {}; }
+  if (typeof AUDIO.status !== 'object') AUDIO.status = {};
+  audioPraPeriksa();
   // halaman dimuat ulang di tengah rekaman → rekaman itu langsung dilanjutkan dari posisinya (seperti tes asli, rekaman terus berjalan)
   const terputus = AUDIO.daftar.findIndex(x => { const st = AUDIO.status[x.id] || {}; return st.posisi > 0 && !st.selesai; });
-  if (terputus >= 0) audioMulai(terputus); else gambarAudio();
+  if (ALUR.cfg) alurSiapkan();
+  else if (terputus >= 0) audioMulai(terputus); else gambarAudio();
+}
+/** Pra-pemeriksaan: setiap Part yang belum selesai dicoba dimuat (metadata saja). Gagal di semua alamat → diunduh lewat server lebih dulu. */
+function audioPraPeriksa() {
+  const sesi = cb.sesi;
+  AUDIO.daftar.forEach(function (x, i) {
+    if ((AUDIO.status[x.id] || {}).selesai || AUDIO.blob[x.id]) return;
+    const daftar = sumberAudio(x);
+    if (!daftar.length) { setTimeout(() => { if (cb.sesi === sesi) audioUnduh(x).catch(() => { }); }, Math.random() * 15000 + i * 2000); return; }
+    let k = 0;
+    const uji = new Audio(); uji.preload = 'metadata'; uji.muted = true;
+    const coba = () => {
+      if (k >= daftar.length) {                                    // semua alamat Drive gagal di perangkat ini → siapkan jalur server
+        AUDIO.paksaServer[x.id] = true; audioLapor(x, 'tidak dapat dimuat langsung dari Google Drive di perangkat ini; memakai jalur server');
+        try { uji.removeAttribute('src'); uji.load(); } catch (e) { }
+        if (cb.sesi === sesi) audioUnduh(x).catch(() => { });
+        return;
+      }
+      uji.src = daftar[k++]; try { uji.load(); } catch (e) { coba(); }
+    };
+    // tanpa respons ≠ gagal: Safari iPhone/iPad tidak memuat media sebelum diketuk → biarkan jalur langsung; hanya galat nyata yang memindah ke server
+    const h = setTimeout(() => { uji.onerror = uji.onloadedmetadata = null; try { uji.removeAttribute('src'); uji.load(); } catch (e) { } }, 20000);
+    uji.onloadedmetadata = () => { clearTimeout(h); if (isFinite(uji.duration) && uji.duration > 0) AUDIO.durasi[x.id] = uji.duration; try { uji.removeAttribute('src'); uji.load(); } catch (e) { } };
+    uji.onerror = () => { coba(); };
+    coba();
+  });
+}
+/** Unduh audio lewat server (potongan 1 MB, masing-masing dicoba ulang) → Blob di memori perangkat. Dipakai bersama (sekali per Part). */
+function audioUnduh(x) {
+  if (AUDIO.blob[x.id]) return Promise.resolve(AUDIO.blob[x.id]);
+  if (AUDIO.unduh[x.id]) return AUDIO.unduh[x.id];
+  const id = idDrive(x.url), sesi = cb.sesi;
+  if (!id) return Promise.reject(new Error('bukan berkas Google Drive'));
+  AUDIO.unduh[x.id] = (async () => {
+    const ambil = i => api('mediaAudio', { sesiId: sesi, id: id, i: i }, { coba: 8, diam: true, batasMs: 90000 });
+    const d0 = await ambil(0), bagian = [d0.data];
+    for (let i = 1; i < d0.k; i++) {
+      if (AUDIO.aktif >= 0 && AUDIO.daftar[AUDIO.aktif] === x) { AUDIO.info = (EN() ? 'Loading audio via server… ' : 'Memuat audio lewat server… ') + Math.round(i / d0.k * 100) + '%'; gambarAudio(); }
+      bagian.push((await ambil(i)).data);
+    }
+    const bytes = bagian.map(b => Uint8Array.from(atob(b), c => c.charCodeAt(0)));
+    const url = URL.createObjectURL(new Blob(bytes, { type: d0.mime || 'audio/mpeg' }));
+    AUDIO.blob[x.id] = url; AUDIO.info = '';
+    return url;
+  })();
+  AUDIO.unduh[x.id].catch(() => { delete AUDIO.unduh[x.id]; });
+  return AUDIO.unduh[x.id];
 }
 function audioUntukSoal(qid) {
+  if (ALUR.aktif) return gambarAudio();                          // alur IELTS: audio diatur oleh alur, bukan oleh soal yang dibuka
   const i = AUDIO.peta[qid];
   if (i === undefined || AUDIO.berhenti) return gambarAudio();
   const x = AUDIO.daftar[i], st = AUDIO.status[x.id] || {}, a = $('cbAudio');
@@ -2732,85 +2850,175 @@ function audioUntukSoal(qid) {
   if (AUDIO.aktif >= 0 && !a.ended) { AUDIO.antre = i; return gambarAudio(); }   // rekaman aktif belum selesai → antre
   audioMulai(i);
 }
-function audioMulai(i) {
+function audioMulai(i, posisi) {
   const x = AUDIO.daftar[i], a = $('cbAudio'), st = AUDIO.status[x.id] || {};
+  clearTimeout(AUDIO.hUlang);
   AUDIO.aktif = i; if (AUDIO.antre === i) AUDIO.antre = -1;
-  AUDIO.sumber = sumberMedia(x.url);
-  AUDIO.lanjut = st.posisi && !st.selesai ? st.posisi : 0;
-  a.onloadedmetadata = () => { if (AUDIO.lanjut && AUDIO.lanjut < (a.duration || Infinity) - 1) { try { a.currentTime = AUDIO.lanjut; } catch (e) { } } AUDIO.lanjut = 0; };
-  a.src = AUDIO.sumber.shift(); a.load();
+  AUDIO.sumber = sumberAudio(x);
+  AUDIO.lanjut = posisi !== undefined ? posisi : (st.posisi && !st.selesai ? st.posisi : 0);
+  AUDIO.tMaju = Date.now(); AUDIO.tPos = AUDIO.lanjut || 0;
+  a.onloadedmetadata = () => {
+    if (isFinite(a.duration) && a.duration > 0 && (!AUDIO.durasi[x.id] || AUDIO.blob[x.id] === a.src)) AUDIO.durasi[x.id] = a.duration;   // rekaman utuh di memori = panjang pasti
+    if (AUDIO.lanjut && AUDIO.lanjut < (a.duration || Infinity) - 1) { try { a.currentTime = AUDIO.lanjut; } catch (e) { } }
+    AUDIO.lanjut = 0;
+  };
+  if (!AUDIO.sumber.length) return audioLewatServer(i);
+  AUDIO.jalur = AUDIO.blob[x.id] ? 'memori' : 'langsung';
+  AUDIO.srcPart = x.id; a.src = AUDIO.sumber.shift(); a.load();
   audioPutar();
   gambarAudio();
+}
+/** Semua alamat langsung gagal → unduh lewat server, lalu putar dari memori pada posisi terakhir. */
+function audioLewatServer(i) {
+  const x = AUDIO.daftar[i], a = $('cbAudio');
+  const pos = Math.max(AUDIO.lanjut || 0, AUDIO.srcPart === x.id ? a.currentTime || 0 : 0, (AUDIO.status[x.id] || {}).posisi || 0);
+  if (!idDrive(x.url)) return audioCobaLagi(i, 'tautan audio tidak dapat dibuka');
+  AUDIO.paksaServer[x.id] = true; AUDIO.jalur = 'server';
+  if (pos > 0) AUDIO.pulih++;                                       // pemulihan di tengah rekaman (bukan pra-pemeriksaan)
+  try { a.pause(); } catch (e) { }
+  AUDIO.info = EN() ? 'Loading audio via server…' : 'Memuat audio lewat server…'; gambarAudio();
+  audioUnduh(x).then(() => { if (AUDIO.aktif === i && !AUDIO.berhenti) { AUDIO.info = ''; audioMulai(i, pos); } })
+    .catch(e => { AUDIO.info = ''; audioLapor(x, 'gagal diunduh lewat server: ' + e.message); if (AUDIO.aktif === i) audioCobaLagi(i, e.message); });
+}
+/** Gagal total sementara (jaringan putus) → dicoba lagi otomatis dengan jeda bertambah; siswa juga dapat mengetuk "Coba sekarang". */
+function audioCobaLagi(i, alasan) {
+  const x = AUDIO.daftar[i]; if (!x) return;
+  const n = AUDIO.coba[x.id] = (AUDIO.coba[x.id] || 0) + 1, jeda = Math.min(20, 3 * Math.pow(2, Math.min(3, n - 1)));
+  AUDIO.lanjut = Math.max(AUDIO.lanjut || 0, (AUDIO.status[x.id] || {}).posisi || 0);
+  AUDIO.info = (EN() ? 'Audio interrupted — retrying in ' : 'Audio terputus — mencoba lagi dalam ') + jeda + (EN() ? ' s' : ' detik');
+  audioLapor(x, 'terputus, dicoba ulang otomatis (' + String(alasan || '').slice(0, 80) + ')');
+  clearTimeout(AUDIO.hUlang);
+  AUDIO.hUlang = setTimeout(() => { AUDIO.hUlang = 0; if (AUDIO.aktif === i && !AUDIO.berhenti) { AUDIO.info = ''; delete AUDIO.paksaServer[x.id]; audioMulai(i, AUDIO.lanjut); } }, jeda * 1000);
+  gambarAudio();
+}
+/** Pemulihan di tengah pemutaran (macet / berakhir sebelum waktunya): muat ulang dari posisi terakhir; berulang → lewat server. */
+function audioPulihkan(alasan) {
+  const i = AUDIO.aktif; if (i < 0) return;
+  const x = AUDIO.daftar[i], a = $('cbAudio');
+  const pos = Math.max(AUDIO.srcPart === x.id ? a.currentTime || 0 : 0, (AUDIO.status[x.id] || {}).posisi || 0);
+  AUDIO.pulih++;
+  audioLapor(x, alasan);
+  const n = AUDIO.coba[x.id] = (AUDIO.coba[x.id] || 0) + 1;
+  if (!AUDIO.blob[x.id] && n >= 2 && idDrive(x.url)) { AUDIO.lanjut = pos; return audioLewatServer(i); }
+  audioMulai(i, pos);
 }
 function audioPutar() {
   const a = $('cbAudio');
   if (AUDIO.lanjut && a.readyState >= 1) { try { a.currentTime = AUDIO.lanjut; } catch (e) { } AUDIO.lanjut = 0; }
   try {
     const p = a.play();
-    if (p && p.then) p.then(() => { AUDIO.diblok = false; gambarAudio(); }).catch(() => { AUDIO.diblok = true; gambarAudio(); });
+    if (p && p.then) p.then(() => { AUDIO.diblok = false; gambarAudio(); }).catch(e => {
+      if (e && e.name === 'NotAllowedError') { AUDIO.diblok = true; return gambarAudio(); }     // perlu ketukan siswa (kebijakan peramban)
+      if (e && e.name === 'AbortError') return;                                                   // sumber diganti sebelum sempat diputar
+      audioGalatSumber();                                                                         // format/berkas tidak dapat diputar
+    });
   } catch (e) { AUDIO.diblok = true; gambarAudio(); }
 }
+/** Alamat ini gagal → alamat berikutnya → jalur server → coba lagi otomatis. */
+function audioGalatSumber() {
+  const a = $('cbAudio'), i = AUDIO.aktif;
+  if (i < 0 || AUDIO.berhenti || /^data:/.test(a.currentSrc || a.src || '')) return;
+  const x = AUDIO.daftar[i];
+  if (AUDIO.sumber.length) { AUDIO.srcPart = x.id; a.src = AUDIO.sumber.shift(); a.load(); return audioPutar(); }
+  if (AUDIO.blob[x.id] && a.src === AUDIO.blob[x.id]) { URL.revokeObjectURL(AUDIO.blob[x.id]); delete AUDIO.blob[x.id]; delete AUDIO.unduh[x.id]; audioLapor(x, 'rekaman di memori tidak dapat diputar (berkas rusak/format tidak didukung perangkat ini)'); return audioCobaLagi(i, 'format'); }
+  if (idDrive(x.url) && !AUDIO.paksaServer[x.id]) { audioLapor(x, 'semua alamat Google Drive gagal; beralih ke jalur server'); return audioLewatServer(i); }
+  audioCobaLagi(i, 'semua alamat gagal');
+}
+/** Part selesai diputar sampai habis. */
+function audioSelesai() {
+  const a = $('cbAudio');
+  if (AUDIO.aktif < 0 || /^data:/.test(a.currentSrc || a.src || '')) return;
+  const x = AUDIO.daftar[AUDIO.aktif];
+  AUDIO.status[x.id] = { selesai: true, posisi: 0 }; audioSimpanStatus();
+  delete AUDIO.coba[x.id];
+  const lanjut = AUDIO.antre;
+  AUDIO.aktif = -1; AUDIO.antre = -1; AUDIO.info = '';
+  try { a.pause(); } catch (e) { }
+  if (AUDIO.blob[x.id] && x.sekali) { const u = AUDIO.blob[x.id]; delete AUDIO.blob[x.id]; setTimeout(() => URL.revokeObjectURL(u), 2000); }   // hemat memori
+  if (lanjut >= 0 && !AUDIO.berhenti) audioMulai(lanjut); else gambarAudio();
+}
 function audioHenti() {
-  AUDIO.berhenti = true; AUDIO.aktif = -1; AUDIO.antre = -1;
+  AUDIO.berhenti = true; AUDIO.aktif = -1; AUDIO.antre = -1; AUDIO.info = '';
+  clearTimeout(AUDIO.hUlang);
+  clearInterval(ALUR.h); ALUR.aktif = false; if ($('cbAudioAlur')) $('cbAudioAlur').classList.add('sembunyi');
   const a = $('cbAudio'); try { a.pause(); a.removeAttribute('src'); a.load(); } catch (e) { }
   $('cbAudioBar').classList.add('sembunyi');
 }
 function gambarAudio(iTampil) {
   const bar = $('cbAudioBar'), a = $('cbAudio');
   const q = cb.soal && cb.soal[cb.idx];
-  let i = AUDIO.aktif >= 0 ? AUDIO.aktif : (iTampil !== undefined ? iTampil : (q ? AUDIO.peta[q.qid] : undefined));
+  let i = AUDIO.aktif >= 0 ? AUDIO.aktif : (ALUR.aktif && ALUR.st && ALUR.st.fase !== 'selesai' ? ALUR.parts[ALUR.st.k] : (iTampil !== undefined ? iTampil : (q ? AUDIO.peta[q.qid] : undefined)));
   if (i === undefined || i < 0 || AUDIO.berhenti || !AUDIO.daftar[i]) { bar.classList.add('sembunyi'); return; }
   const x = AUDIO.daftar[i], st = AUDIO.status[x.id] || {}, en = EN();
   const main = AUDIO.aktif === i && !a.paused && !a.ended;
   let status;
-  if (AUDIO.aktif === i && AUDIO.diblok) status = en ? 'Tap the button to start the audio' : 'Ketuk tombol untuk memutar audio';
+  if (AUDIO.aktif === i && AUDIO.info) status = AUDIO.info;
+  else if (AUDIO.aktif === i && AUDIO.diblok) status = en ? 'Tap the button to start the audio' : 'Ketuk tombol untuk memutar audio';
+  else if (main && a.readyState < 3 && Date.now() - AUDIO.tMaju > 2500) status = en ? 'Loading… (slow connection)' : 'Memuat… (koneksi lambat)';
   else if (main) status = en ? 'Playing' : 'Sedang diputar';
   else if (AUDIO.aktif === i && a.paused && !a.ended) status = en ? 'Paused' : 'Dijeda';
   else if (st.selesai) status = en ? 'Finished' : 'Selesai diputar';
+  else if (ALUR.aktif && ALUR.st && ALUR.st.fase === 'baca') status = en ? 'Starts automatically after the reading time' : 'Diputar otomatis setelah waktu membaca soal';
   else status = en ? 'Starting…' : 'Menyiapkan…';
   const antreX = AUDIO.antre >= 0 ? AUDIO.daftar[AUDIO.antre] : null;
-  const dur = AUDIO.aktif === i ? a.duration : 0, pos = AUDIO.aktif === i ? a.currentTime : (st.selesai ? 1 : 0);
-  $('cbAudioJudul').textContent = '🔊 ' + x.judul + ' · ' + (en ? 'Questions ' : 'Soal ') + x.dari + '–' + x.sampai;
+  const dur = AUDIO.aktif === i ? (isFinite(a.duration) && a.duration > 0 ? a.duration : AUDIO.durasi[x.id] || 0) : 0, pos = AUDIO.aktif === i ? a.currentTime : (st.selesai ? 1 : 0);
+  const bg = AUDIO.aktif === i && x.bagian ? x.bagian[bagianAudio(x, a.currentTime)] : null;
+  $('cbAudioJudul').textContent = '🔊 ' + (bg ? bg.judul + ' · ' + (en ? 'Questions ' : 'Soal ') + bg.dari + '–' + bg.sampai : x.judul + ' · ' + (en ? 'Questions ' : 'Soal ') + x.dari + '–' + x.sampai);
   $('cbAudioStatus').textContent = status + (antreX ? (en ? ' · next: ' : ' · berikutnya: ') + antreX.judul + (en ? ' (plays automatically)' : ' (otomatis menyusul)') : '') +
     (x.sekali ? (en ? ' · plays once' : ' · diputar sekali') : '');
-  $('cbAudioWaktu').textContent = AUDIO.aktif === i && isFinite(dur) && dur > 0 ? mmss(pos) + ' / ' + mmss(dur) : (st.selesai ? '✓' : '');
+  $('cbAudioWaktu').textContent = AUDIO.aktif === i && dur > 0 ? mmss(pos) + ' / ' + mmss(dur) : (st.selesai ? '✓' : '');
   $('cbAudioIsi').style.width = (AUDIO.aktif === i && dur > 0 ? Math.min(100, pos / dur * 100) : (st.selesai ? 100 : 0)) + '%';
-  $('cbAudioPutar').classList.toggle('sembunyi', !(AUDIO.aktif === i && AUDIO.diblok));
-  $('cbAudioPutar').textContent = en ? '▶ Play audio' : '▶ Putar audio';
-  const kendali = !x.sekali && AUDIO.aktif === i && !AUDIO.diblok;
-  $('cbAudioJeda').classList.toggle('sembunyi', !kendali); $('cbAudioUlang').classList.toggle('sembunyi', x.sekali || !(AUDIO.aktif === i || st.selesai));
+  const ulangi = AUDIO.aktif === i && !!AUDIO.hUlang && /terputus|interrupted/i.test(AUDIO.info);
+  $('cbAudioPutar').classList.toggle('sembunyi', !(AUDIO.aktif === i && (AUDIO.diblok || ulangi)));
+  $('cbAudioPutar').textContent = ulangi ? (en ? '↻ Try now' : '↻ Coba sekarang') : (en ? '▶ Play audio' : '▶ Putar audio');
+  const kendali = !ALUR.aktif && !x.sekali && AUDIO.aktif === i && !AUDIO.diblok;
+  $('cbAudioJeda').classList.toggle('sembunyi', !kendali); $('cbAudioUlang').classList.toggle('sembunyi', ALUR.aktif || x.sekali || !(AUDIO.aktif === i || st.selesai));
   $('cbAudioJeda').textContent = main ? '❚❚' : '▶';
   bar.classList.remove('sembunyi');
 }
 (function () {
   const a = $('cbAudio');
-  a.addEventListener('error', () => { if (AUDIO.aktif < 0 || AUDIO.berhenti || /^data:/.test(a.currentSrc || a.src || '')) return; if (AUDIO.sumber.length) { a.src = AUDIO.sumber.shift(); a.load(); audioPutar(); } else { AUDIO.diblok = true; gambarAudio(); } });
-  a.addEventListener('playing', () => { if (AUDIO.aktif >= 0) { AUDIO.diblok = false; gambarAudio(); } });
+  a.addEventListener('error', audioGalatSumber);
+  a.addEventListener('playing', () => { if (AUDIO.aktif >= 0) { AUDIO.diblok = false; AUDIO.tMaju = Date.now(); gambarAudio(); } });
+  a.addEventListener('waiting', () => { if (AUDIO.aktif >= 0) gambarAudio(); });
   a.addEventListener('timeupdate', () => {
     if (AUDIO.aktif < 0) return;
     const x = AUDIO.daftar[AUDIO.aktif];
+    if (a.currentTime > AUDIO.tPos + 0.05) { AUDIO.tPos = a.currentTime; AUDIO.tMaju = Date.now(); }
     // posisi disimpan hanya saat audio benar-benar berputar (bukan saat baru dimuat di detik 0 sebelum melompat ke posisi tersimpan)
     const lama = (AUDIO.status[x.id] || {}).posisi || 0;
     if (!a.paused && a.currentTime > 0.3 && a.currentTime >= lama - 1.5 && Date.now() - AUDIO.simpanT > 2000) {
       AUDIO.simpanT = Date.now(); AUDIO.status[x.id] = Object.assign({}, AUDIO.status[x.id], { posisi: a.currentTime }); audioSimpanStatus();
     }
+    if (!a.paused && AUDIO.srcPart === x.id) audioCekBagian(x, a.currentTime);
     gambarAudio();
   });
   a.addEventListener('ended', () => {
     if (AUDIO.aktif < 0 || /^data:/.test(a.currentSrc || a.src || '')) return;
-    const x = AUDIO.daftar[AUDIO.aktif];
-    AUDIO.status[x.id] = { selesai: true, posisi: 0 }; audioSimpanStatus();
-    const lanjut = AUDIO.antre;
-    AUDIO.aktif = -1; AUDIO.antre = -1;
-    if (lanjut >= 0 && !AUDIO.berhenti) audioMulai(lanjut); else gambarAudio();
+    const x = AUDIO.daftar[AUDIO.aktif], penuh = AUDIO.durasi[x.id] || 0;
+    // berakhir jauh sebelum panjang rekaman yang diketahui → unduhan terpotong, bukan selesai: lanjutkan dari posisi itu
+    const dariMemori = AUDIO.blob[x.id] && a.src === AUDIO.blob[x.id];               // rekaman utuh di memori: "ended" selalu sah
+    if (penuh && a.currentTime < penuh - 1.5 && !dariMemori && (AUDIO.coba[x.id] || 0) < 3) return audioPulihkan('berhenti di ' + mmss(a.currentTime) + ' dari ' + mmss(penuh) + ' (unduhan terpotong)');
+    audioSelesai();
   });
   a.addEventListener('pause', () => {
     // "putar sekali": jeda dari luar (mis. kontrol sistem) langsung dilanjutkan
     if (AUDIO.aktif < 0 || AUDIO.berhenti || a.ended || cb.kirim || REKAM.aktif) return gambarAudio();
-    if (AUDIO.daftar[AUDIO.aktif].sekali && !AUDIO.jedaSendiri) setTimeout(() => { if (a.paused && !a.ended && AUDIO.aktif >= 0 && !AUDIO.berhenti && !AUDIO.diblok) audioPutar(); }, 300);
+    if (AUDIO.daftar[AUDIO.aktif].sekali && !AUDIO.jedaSendiri) setTimeout(() => { if (a.paused && !a.ended && AUDIO.aktif >= 0 && !AUDIO.berhenti && !AUDIO.diblok && !AUDIO.info) audioPutar(); }, 300);
     gambarAudio();
   });
-  $('cbAudioPutar').onclick = () => { audioPutar(); };
+  // pengawas: macet > 12 detik → muat ulang dari posisi terakhir; berhenti di ujung tanpa peristiwa "ended" → dianggap selesai
+  setInterval(() => {
+    if (AUDIO.aktif < 0 || AUDIO.berhenti || AUDIO.info || AUDIO.diblok || cb.kirim || REKAM.aktif || /^data:/.test(a.currentSrc || a.src || '')) return;
+    const x = AUDIO.daftar[AUDIO.aktif], dur = isFinite(a.duration) && a.duration > 0 ? a.duration : 0, diam = Date.now() - AUDIO.tMaju;
+    if (dur && a.currentTime >= dur - 0.35 && diam > 2500 && (!AUDIO.durasi[x.id] || a.currentTime >= AUDIO.durasi[x.id] - 1.5)) return audioSelesai();
+    if (a.paused && !a.ended && x.sekali && !AUDIO.jedaSendiri && diam > 3000) { AUDIO.tMaju = Date.now(); return audioPutar(); }
+    if (!a.paused && !a.ended && diam > 12000) { AUDIO.tMaju = Date.now(); audioPulihkan('macet ' + Math.round(diam / 1000) + ' detik di ' + mmss(a.currentTime) + ' (koneksi)'); }
+  }, 1000);
+  $('cbAudioPutar').onclick = () => {
+    if (AUDIO.hUlang && AUDIO.aktif >= 0 && /terputus|interrupted/i.test(AUDIO.info)) { clearTimeout(AUDIO.hUlang); AUDIO.hUlang = 0; AUDIO.info = ''; const i = AUDIO.aktif; delete AUDIO.paksaServer[AUDIO.daftar[i].id]; return audioMulai(i, AUDIO.lanjut); }
+    audioPutar();
+  };
   $('cbAudioJeda').onclick = () => { if (a.paused) audioPutar(); else { AUDIO.jedaSendiri = true; a.pause(); setTimeout(() => { AUDIO.jedaSendiri = false; }, 400); } };
   $('cbAudioUlang').onclick = () => {
     const q = cb.soal[cb.idx]; const i = AUDIO.aktif >= 0 ? AUDIO.aktif : AUDIO.peta[q.qid];
@@ -2819,6 +3027,158 @@ function gambarAudio(iTampil) {
     if (AUDIO.aktif === i) { try { a.currentTime = 0; } catch (e) { } audioPutar(); } else audioMulai(i);
   };
 })();
+
+/* =====================================================================
+   ALUR LISTENING IELTS (komputer) — berjalan otomatis tanpa tombol:
+   waktu membaca soal → Part diputar SEKALI (tanpa jeda/ulang) → waktu memeriksa jawaban → Part berikutnya …
+   → waktu mengkaji ulang semua jawaban (2 menit) → subtes Listening berakhir otomatis.
+   Waktu tiap tahap disimpan sebagai jam mutlak sehingga tetap berjalan bila halaman dimuat ulang.
+   ===================================================================== */
+const ALUR = { cfg: null, aktif: false, parts: [], st: null, h: 0 };
+function kunciAlur() { return 'cbt_alur_' + cb.sesi + (cb.subtes ? '_s' + cb.subtes.i : ''); }
+function alurSimpan() { try { localStorage.setItem(kunciAlur(), JSON.stringify(ALUR.st)); } catch (e) { } }
+function alurSiapkan() {
+  const ada = {}; (cb.soal || []).forEach(q => { ada[q.qid] = 1; });
+  ALUR.parts = AUDIO.daftar.map((x, i) => i).filter(i => (AUDIO.daftar[i].qids || []).some(q => ada[q]));
+  if (!ALUR.parts.length) { ALUR.aktif = false; gambarAudio(); return; }
+  ALUR.aktif = true;
+  try { ALUR.st = JSON.parse(localStorage.getItem(kunciAlur()) || 'null'); } catch (e) { ALUR.st = null; }
+  if (!ALUR.st || ALUR.st.k >= ALUR.parts.length) { ALUR.st = { fase: 'baca', k: 0, sampai: Date.now() + ALUR.cfg.baca * 1000 }; alurSimpan(); alurKeSoal(0); }
+  clearInterval(ALUR.h); ALUR.h = setInterval(alurDetak, 250); alurDetak();
+}
+/** Pindah ke soal pertama Part ke-k (saat Part itu mulai). */
+function alurKeSoal(k) {
+  const x = AUDIO.daftar[ALUR.parts[k]]; if (!x) return;
+  const i = cb.soal.findIndex(q => (x.qids || []).indexOf(q.qid) >= 0);
+  if (i >= 0 && i !== cb.idx && typeof pindahCbt === 'function') pindahCbt(i);
+}
+function alurDetak() {
+  if (!ALUR.aktif || !ALUR.st || cb.kirim || AUDIO.berhenti) return;
+  const st = ALUR.st, cfg = ALUR.cfg, kini = Date.now();
+  if (st.fase === 'baca' && kini >= st.sampai) { st.fase = 'dengar'; alurSimpan(); }
+  if (st.fase === 'dengar') {
+    const i = ALUR.parts[st.k], x = AUDIO.daftar[i], sa = AUDIO.status[x.id] || {};
+    if (sa.selesai) { st.fase = 'cek'; st.sampai = kini + cfg.cek * 1000; alurSimpan(); }
+    else if (AUDIO.aktif !== i) audioMulai(i);
+  }
+  if (st.fase === 'cek' && kini >= st.sampai) {
+    if (st.k < ALUR.parts.length - 1) { st.k++; st.fase = 'baca'; st.sampai = kini + cfg.baca * 1000; alurSimpan(); alurKeSoal(st.k); }
+    else { st.fase = 'akhir'; st.sampai = kini + cfg.akhir * 1000; alurSimpan(); }
+  }
+  if (st.fase === 'akhir' && kini >= st.sampai) { st.fase = 'selesai'; alurSimpan(); alurSelesai(); }
+  if (ALUR.tanda !== st.fase + st.k) { ALUR.tanda = st.fase + st.k; gambarAudio(); }
+  gambarAlur();
+}
+function alurSelesai() {
+  clearInterval(ALUR.h);
+  gambarAlur(); gambarAudio();
+  if (cb.subtes && cb.kirimAwal !== false && typeof lanjutSubtes === 'function') lanjutSubtes(true);   // Listening berakhir → subtes berikutnya
+}
+function gambarAlur() {
+  const el = $('cbAudioAlur'); if (!el) return;
+  if (!ALUR.aktif || !ALUR.st) { el.classList.add('sembunyi'); return; }
+  const st = ALUR.st, en = EN(), n = ALUR.parts.length, sisa = Math.max(0, Math.ceil((st.sampai - Date.now()) / 1000));
+  const xa = AUDIO.daftar[ALUR.parts[st.k]] || {}, jb = xa.bagian && xa.bagian.length ? bagianAudio(xa, AUDIO.aktif >= 0 ? $('cbAudio').currentTime : 0) : -1;
+  const part = jb >= 0 ? xa.bagian[jb].judul + ' (' + (jb + 1) + (en ? ' of ' : ' dari ') + xa.bagian.length + ')'
+    : n === 1 && xa.bagian && xa.bagian.length ? (en ? 'Listening' : 'Listening') : (en ? 'Part ' : 'Part ') + (st.k + 1) + (en ? ' of ' : ' dari ') + n;
+  const t = {
+    baca: en ? `${part} · Reading time — read the questions and note word limits: <b>${mmss(sisa)}</b>. The audio starts automatically.` : `${part} · Waktu membaca soal & batas kata: <b>${mmss(sisa)}</b>. Audio diputar otomatis sesudahnya.`,
+    dengar: en ? `${part} · Audio playing (once only, cannot be paused or replayed) — answer as you listen.` : `${part} · Audio sedang diputar (hanya sekali, tanpa jeda/ulang) — jawab sambil mendengarkan.`,
+    cek: en ? `${part} · Check your answers: <b>${mmss(sisa)}</b>` : `${part} · Waktu memeriksa jawaban: <b>${mmss(sisa)}</b>`,
+    akhir: en ? `Listening finished · Review all your answers: <b>${mmss(sisa)}</b>. The section ends automatically.` : `Rekaman selesai · Waktu mengkaji ulang semua jawaban: <b>${mmss(sisa)}</b>. Listening berakhir otomatis.`,
+    selesai: en ? (cb.subtes && cb.kirimAwal === false ? 'Listening finished. The next section starts automatically when the section time is up.' : 'Listening finished.')
+      : (cb.subtes && cb.kirimAwal === false ? 'Listening selesai. Subtes berikutnya dimulai otomatis saat waktu subtes habis.' : 'Listening selesai.')
+  }[st.fase] || '';
+  el.innerHTML = t; el.dataset.fase = st.fase; el.classList.remove('sembunyi');
+  if ($('cbAudioBar')) $('cbAudioBar').classList.remove('sembunyi');
+}
+
+/* =====================================================================
+   SPEAKING DI WEBSITE LAIN — siswa mengerjakan tes Speaking di website yang ditautkan guru,
+   lalu mengisi nilai yang diperoleh dan mengunggah screenshot hasilnya (disimpan privat; diperiksa guru).
+   Selama soal ini terbuka, meninggalkan halaman ujian TIDAK dihitung pelanggaran.
+   ===================================================================== */
+const LUAR = { band: {}, catatan: {}, berkas: {}, kirim: {}, semat: {}, galat: '' };
+function sedangTesLuar() { const q = cb.soal && cb.soal[cb.idx]; return !!(q && q.luar && !cb.kirim); }
+function kompresGambar(file) {
+  return new Promise((res, rej) => {
+    const u = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const sk = Math.min(1, 1600 / Math.max(img.naturalWidth || 1, img.naturalHeight || 1));
+      const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(img.naturalWidth * sk)); c.height = Math.max(1, Math.round(img.naturalHeight * sk));
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(u);
+      const d = c.toDataURL('image/jpeg', 0.82); res({ data: d.split(',')[1], mime: 'image/jpeg', url: d });
+    };
+    img.onerror = () => { URL.revokeObjectURL(u); rej(new Error(EN() ? 'The image cannot be read. Choose a JPG/PNG screenshot.' : 'Gambar tidak terbaca. Pilih screenshot JPG/PNG.')); };
+    img.src = u;
+  });
+}
+function htmlSpeakingLuar(q) {
+  const en = EN(), L = q.luar, ada = cb.rek && cb.rek[q.qid];
+  const pilih = LUAR.band[q.qid] !== undefined ? LUAR.band[q.qid] : (ada && ada.band !== undefined ? String(ada.band) : '');
+  const nilai = []; for (let v = 0; v <= (L.maks || 9) + 1e-9; v += (L.langkah || 0.5)) nilai.push(Math.round(v * 10) / 10);
+  return `<div class="rekam luar" id="cbRekam" data-q="${q.qid}">
+    <ol class="luar-langkah"><li>${en ? 'Open the Speaking test and complete it on the website.' : 'Buka tes Speaking, lalu kerjakan sampai selesai di website tersebut.'}</li>
+      <li>${en ? 'Take a screenshot of the page that shows your result.' : 'Ambil screenshot halaman yang menampilkan hasil/skor Anda.'}</li>
+      <li>${en ? 'Return here, choose your score, upload the screenshot, and press Send.' : 'Kembali ke halaman ini, pilih nilai, unggah screenshot, lalu tekan Kirim.'}</li></ol>
+    <div class="aksi"><a class="tombol" id="cbLuarBuka" href="${teks(L.url)}" target="_blank" rel="noopener">🔗 ${en ? 'Open the Speaking test' : 'Buka tes Speaking'}</a>
+      <button type="button" class="tombol netral" id="cbLuarSemat">${LUAR.semat[q.qid] ? (en ? 'Hide the embedded test' : 'Tutup tampilan tes') : (en ? 'Show the test on this page' : 'Tampilkan tes di halaman ini')}</button></div>
+    ${LUAR.semat[q.qid] ? `<iframe class="luar-frame" src="${teks(L.url)}" allow="microphone; camera; autoplay; fullscreen; clipboard-write" title="Speaking test"></iframe>
+      <p class="ket">${en ? 'If the test does not load or the microphone is blocked here, use "Open the Speaking test".' : 'Bila tes tidak tampil atau mikrofon tidak dapat dipakai di sini, gunakan tombol "Buka tes Speaking".'}</p>` : ''}
+    <p class="ket">ℹ ${en ? 'Leaving this page to take the Speaking test is NOT counted as a violation while this question is open.' : 'Meninggalkan halaman ini untuk mengerjakan tes Speaking TIDAK dihitung pelanggaran selama soal ini yang terbuka.'}</p>
+    <div class="luar-isi">
+      <label for="cbLuarBand">${teks(L.label || 'Band Speaking (0–9)')}</label>
+      <select id="cbLuarBand"><option value="">— ${en ? 'choose your score' : 'pilih nilai'} —</option>${nilai.map(v => `<option value="${v}" ${String(v) === String(pilih) ? 'selected' : ''}>${v.toFixed(1)}</option>`).join('')}</select>
+      <label>${en ? 'Screenshot of your result' : 'Screenshot hasil tes'}</label>
+      <label class="tombol netral luar-pilih">📷 ${LUAR.berkas[q.qid] ? (en ? 'Change screenshot' : 'Ganti screenshot') : (en ? 'Choose screenshot' : 'Pilih screenshot')}<input type="file" id="cbLuarBerkas" accept="image/*" style="display:none"></label>
+      ${LUAR.berkas[q.qid] ? `<img class="luar-pratinjau" src="${LUAR.berkas[q.qid].url}" alt="Screenshot">` : ''}
+      <label for="cbLuarCatatan">${en ? 'Notes (optional, e.g. sub-scores)' : 'Catatan (opsional, mis. rincian skor)'}</label>
+      <input type="text" id="cbLuarCatatan" maxlength="300" value="${teks(LUAR.catatan[q.qid] !== undefined ? LUAR.catatan[q.qid] : ((ada && ada.catatan) || ''))}">
+      <button type="button" class="tombol" id="cbLuarKirim" ${LUAR.kirim[q.qid] ? 'disabled' : ''}>${LUAR.kirim[q.qid] ? (en ? 'Sending…' : 'Mengirim…') : (ada ? (en ? 'Send again (replace)' : 'Kirim ulang (mengganti)') : (en ? 'Send Speaking result' : 'Kirim hasil Speaking'))}</button>
+    </div>
+    ${ada ? `<div class="rekam-status selesai">✓ ${en ? 'Sent' : 'Terkirim'}: ${en ? 'score' : 'nilai'} <b>${teks(String(ada.band))}</b> ${en ? 'with screenshot.' : 'beserta screenshot.'}</div>` : ''}
+    ${LUAR.galat ? `<div class="pesan galat" style="display:block;margin-top:10px">${teks(LUAR.galat)}</div>` : ''}
+  </div>`;
+}
+async function kirimSpeakingLuar(q) {
+  const en = EN(), b = LUAR.band[q.qid] !== undefined ? LUAR.band[q.qid] : (cb.rek && cb.rek[q.qid] ? String(cb.rek[q.qid].band) : '');
+  LUAR.galat = '';
+  if (b === '' || b === undefined) { LUAR.galat = en ? 'Choose the score you obtained on the website.' : 'Pilih nilai yang Anda peroleh di website.'; return gambarRekam(); }
+  const f = LUAR.berkas[q.qid];
+  if (!f) { LUAR.galat = en ? 'Upload a screenshot of your result.' : 'Unggah screenshot hasil tes Anda.'; return gambarRekam(); }
+  LUAR.kirim[q.qid] = true; gambarRekam();
+  const sesi = cb.sesi;
+  try {
+    const d = await api('cbtRekam', { sesiId: sesi, qid: q.qid, mime: f.mime, data: f.data, band: b, catatan: LUAR.catatan[q.qid] || '' }, { coba: 6, batasMs: 120000, diam: true });
+    if (cb.sesi === sesi) cb.rek = Object.assign({}, cb.rek, d.rekaman || {});
+    delete LUAR.berkas[q.qid];
+    kabar(en ? 'Speaking result sent.' : 'Hasil Speaking terkirim.');
+  } catch (e) { LUAR.galat = e.message; }
+  finally { delete LUAR.kirim[q.qid]; gambarRekam(); }
+}
+document.addEventListener('click', e => {
+  const q = cb.soal && cb.soal[cb.idx];
+  if (!q || !q.luar) return;
+  if (e.target.closest('#cbLuarSemat')) { LUAR.semat[q.qid] = !LUAR.semat[q.qid]; gambarRekam(); }
+  else if (e.target.closest('#cbLuarKirim')) kirimSpeakingLuar(q);
+  else if (e.target.closest('#cbLuarBuka')) KUNCI.abaikanSampai = Math.max(KUNCI.abaikanSampai || 0, Date.now() + 3000);
+});
+document.addEventListener('change', async e => {
+  const q = cb.soal && cb.soal[cb.idx];
+  if (!q || !q.luar || !e.target) return;
+  if (e.target.id === 'cbLuarBand') { LUAR.band[q.qid] = e.target.value; return; }
+  if (e.target.id === 'cbLuarBerkas') {
+    const f = e.target.files[0]; if (!f) return;
+    if (f.size > 20 * 1024 * 1024) { LUAR.galat = EN() ? 'The image is larger than 20 MB.' : 'Gambar lebih dari 20 MB.'; return gambarRekam(); }
+    try { LUAR.berkas[q.qid] = await kompresGambar(f); LUAR.galat = ''; } catch (er) { LUAR.galat = er.message; }
+    gambarRekam();
+  }
+});
+document.addEventListener('input', e => {
+  const q = cb.soal && cb.soal[cb.idx];
+  if (q && q.luar && e.target && e.target.id === 'cbLuarCatatan') LUAR.catatan[q.qid] = e.target.value;
+});
 
 /* =====================================================================
    SPEAKING — siswa merekam jawaban lisan di peramban.
@@ -2859,6 +3219,7 @@ function teksRekam(id, en) {
   return (t[id] || ['', ''])[en ? 1 : 0];
 }
 function htmlSpeaking(q) {
+  if (q.luar) return htmlSpeakingLuar(q);
   const en = EN(), ada = cb.rek && cb.rek[q.qid], aktif = REKAM.aktif === q.qid, tunda = REKAM.tertunda[q.qid];
   const maks = q.durasi || 120;
   let isi = `<div class="rekam" id="cbRekam" data-q="${q.qid}">
@@ -3017,6 +3378,96 @@ document.addEventListener('change', e => {
   el.src = URL.createObjectURL(f);
 });
 /* <</AUDIO-SISWA>> */
+/* <<PENJAGA>> */
+/* =====================================================================
+   PENJAGA — pencatat galat otomatis & pemulihan mandiri (portal siswa dan portal guru).
+   · Setiap galat kode di peramban (bug) dikirim diam-diam ke server → admin melihatnya di Akun → Kesehatan sistem
+     lengkap dengan jumlah kejadian dan jenis perangkat; galat yang sama hanya dikirim sekali per halaman.
+   · Data tersimpan di perangkat yang rusak dibersihkan otomatis saat halaman dibuka (server tetap memegang salinannya).
+   · Bila tampilan soal terganggu oleh galat, tampilan digambar ulang otomatis (jawaban tidak hilang).
+   ===================================================================== */
+const PENJAGA = { antre: [], terkirim: {}, n: 0, h: 0, tPulih: 0, nPulih: 0 };
+function portalPenjaga() { return typeof TOKEN !== 'undefined' ? 'guru' : 'siswa'; }
+function laporGalat(jenis, pesan, lokasi, info) {
+  try {
+    pesan = String(pesan || '').replace(/\s+/g, ' ').trim().slice(0, 400);
+    lokasi = String(lokasi || '').trim().slice(0, 200);
+    if (!pesan) return;
+    // derau yang bukan galat aplikasi: ekstensi peramban, skrip lintas-domain tanpa rincian, ResizeObserver
+    if (/ResizeObserver loop|^Script error\.?$|chrome-extension:|moz-extension:|safari-(web-)?extension:|webkit-masked-url|__gCrWeb|instantSearchSDK/i.test(pesan + ' ' + lokasi)) return;
+    const k = jenis + '|' + pesan + '|' + lokasi;
+    if (PENJAGA.terkirim[k] || PENJAGA.n >= 25) return;
+    PENJAGA.terkirim[k] = 1; PENJAGA.n++;
+    PENJAGA.antre.push({ jenis: String(jenis || 'Error').slice(0, 40), pesan: pesan, lokasi: lokasi, info: String(info || '').slice(0, 200) });
+    clearTimeout(PENJAGA.h); PENJAGA.h = setTimeout(kirimLaporanGalat, 2500);
+  } catch (e) { }
+}
+function kirimLaporanGalat() {
+  if (!PENJAGA.antre.length) return;
+  const g = PENJAGA.antre.splice(0, 10);
+  const sesi = typeof cb !== 'undefined' && cb && cb.sesi ? cb.sesi : '';
+  try {
+    const p = api('logKlien', { sumber: portalPenjaga(), sesiId: sesi, build: typeof BUILD_HALAMAN !== 'undefined' ? BUILD_HALAMAN : '', ua: navigator.userAgent, galat: g }, { coba: 2, diam: true });
+    if (p && p.catch) p.catch(() => { });
+  } catch (e) { }
+  if (PENJAGA.antre.length) PENJAGA.h = setTimeout(kirimLaporanGalat, 3000);
+}
+function fungsiGalat(er) {
+  const baris = String(er && er.stack || '').split('\n').map(s => s.trim()).filter(s => /^at |@/.test(s))[0] || '';
+  const m = baris.match(/^at\s+([\w$.<>]+)/) || baris.match(/^([\w$.<>]+)@/);
+  return m ? m[1] : '';
+}
+function layarPenjaga() {
+  const el = [...document.querySelectorAll('[id^=layar]')].find(e => !e.classList.contains('sembunyi') && e.offsetParent !== null);
+  return el ? el.id : '';
+}
+/** Galat saat ujian berjalan → tampilan soal digambar ulang (maks. 3× per halaman, jeda ≥ 5 detik). */
+function pulihkanTampilan() {
+  if (portalPenjaga() !== 'siswa' || PENJAGA.nPulih >= 3 || Date.now() - PENJAGA.tPulih < 5000) return;
+  if (typeof cb === 'undefined' || !cb || !cb.sesi || cb.kirim || typeof gambarCbt !== 'function') return;
+  const l = document.getElementById('layarCbt');
+  if (!l || l.classList.contains('sembunyi')) return;
+  PENJAGA.tPulih = Date.now(); PENJAGA.nPulih++;
+  setTimeout(() => { try { gambarCbt(); } catch (e) { } }, 300);
+}
+function galatKode(er) {
+  const nama = String(er && er.name || ''), pesan = String(er && er.message || er || '');
+  return ['TypeError', 'ReferenceError', 'RangeError', 'SyntaxError', 'URIError'].indexOf(nama) >= 0 ||
+    /is not a function|Cannot read prop|Cannot set prop|of undefined|of null|is not defined|undefined is not|is not iterable|Maximum call stack/i.test(pesan);
+}
+window.addEventListener('error', function (e) {
+  if (!e || (e.target && e.target !== window)) return;                     // gambar/audio gagal dimuat ditangani jalur cadangan masing-masing
+  const er = e.error;
+  laporGalat(er && er.name || 'Error', e.message || (er && er.message), [fungsiGalat(er), e.lineno ? 'baris ' + e.lineno + ':' + (e.colno || 0) : ''].filter(Boolean).join(' · '), layarPenjaga());
+  pulihkanTampilan();
+});
+window.addEventListener('unhandledrejection', function (e) {
+  const r = e && e.reason;
+  if (!r || !galatKode(r)) return;                                         // pesan biasa dari server (validasi, jaringan) bukan bug
+  laporGalat(r.name || 'Promise', r.message || String(r), fungsiGalat(r), layarPenjaga());
+  pulihkanTampilan();
+});
+/** Data tersimpan di perangkat yang rusak (JSON tidak utuh, mis. baterai habis saat menyimpan) dibersihkan sebelum dipakai. */
+(function bersihkanPenyimpanan() {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (!/^(cbt_|kunci|kertas_|to_|tka_)/.test(k || '')) continue;
+      const v = localStorage.getItem(k);
+      if (!v || !/^\s*[[{"]/.test(v)) continue;
+      try { JSON.parse(v); }
+      catch (e) { localStorage.removeItem(k); laporGalat('pemulihan', 'Data tersimpan di perangkat rusak, dibersihkan otomatis', k.replace(/[\w-]{12,}/g, '…')); }
+    }
+  } catch (e) { }
+})();
+/** Audio di dalam soal yang tidak dapat dibuka langsung dari Google Drive → diunduh lewat server per potongan 1 MB → diputar dari memori. */
+async function unduhAudioServer(id, dasar) {
+  const ambil = i => api('mediaAudio', Object.assign({ id: id, i: i }, dasar || {}), { coba: 6, diam: true });
+  const d0 = await ambil(0), bagian = [d0.data];
+  for (let i = 1; i < d0.k; i++) bagian.push((await ambil(i)).data);
+  return URL.createObjectURL(new Blob(bagian.map(b => Uint8Array.from(atob(b), c => c.charCodeAt(0))), { type: d0.mime || 'audio/mpeg' }));
+}
+/* <</PENJAGA>> */
 function cbtMasuk(d) {
   cb.d = d; cb.portal = d.ujian.portal || 'CBT'; cb.maks = typeof d.ujian.maksPelanggaran === 'number' ? d.ujian.maksPelanggaran : 6;
   layar('layarCbtInfo');
@@ -3159,7 +3610,7 @@ function cbtSiapkan(d) {
   $('cbRagu').classList.toggle('sembunyi', !bolehRagu); $('cbLgRaguWadah').classList.toggle('sembunyi', !bolehRagu);
   $('cbPanel').style.pointerEvents = '';
   layar('layarCbt');
-  audioSiapkan(d.audio || []);
+  audioSiapkan(d.audio || [], d.alur || null);
   gambarCbt(); gambarViol();
   kirimRekamanTertunda();
   jalankanJamCbt(); jadwalSimpanCbt(); pasangPengawasCbt(); perbaruiPita();
@@ -3731,8 +4182,9 @@ function pasangPengawasCbt() {
       if ((e.ctrlKey || e.metaKey) && ['c', 'v', 'x', 'a', 'p', 's', 'u'].indexOf(k) >= 0) { e.preventDefault(); laporViol('COPY_PASTE', 'Ctrl+' + k.toUpperCase()); }
       else if (e.key === 'F12') { e.preventDefault(); laporViol('COPY_PASTE', 'F12'); }
     },
-    lepas: e => { if (e.key === 'PrintScreen') laporViol('COPY_PASTE', 'PrintScreen'); },
+    lepas: e => { if (e.key === 'PrintScreen' && !bebasLuar()) laporViol('COPY_PASTE', 'PrintScreen'); },
     ukuran: () => {
+      if (bebasLuar()) return;                                  // website tes Speaking boleh dibuka berdampingan
       // hanya LEBAR yang diperiksa (keyboard layar mengubah tinggi, bukan lebar). Dihitung hanya bila jendela tetap sempit
       // ≥ 1,5 detik — memutar tablet tidak dianggap layar terbagi. Perangkat sentuh: harus < 55% lebar layar DAN < 72% dari lebar
       // normal perangkat itu sendiri pada orientasi yang sama → tampilan yang diperbesar (zoom aksesibilitas) tidak dianggap layar terbagi.
@@ -3744,7 +4196,7 @@ function pasangPengawasCbt() {
       };
       if (Date.now() - tLebar < 5000 || !sempit()) return;
       clearTimeout(pgCbt.hUkuran);
-      pgCbt.hUkuran = setTimeout(() => { if (pgCbt && sempit() && Date.now() - tLebar >= 5000) { tLebar = Date.now(); laporViol('MULTITASK', 'Layar terbagi / jendela diperkecil'); } }, 1500);
+      pgCbt.hUkuran = setTimeout(() => { if (pgCbt && sempit() && !bebasLuar() && Date.now() - tLebar >= 5000) { tLebar = Date.now(); laporViol('MULTITASK', 'Layar terbagi / jendela diperkecil'); } }, 1500);
     },
     layarDua: () => {                                       // layar kedua dihitung sekali per sesi (tidak berulang setiap muat ulang)
       if (!(window.screen && window.screen.isExtended) || !cb.sesi) return;
@@ -3824,4 +4276,4 @@ function lepasPengawasCbt() {
 <script>window.__berkasUtuh = true;</script>
 </body>
 </html>
-<!-- AKHIR BERKAS Index · 300991 -->
+<!-- AKHIR BERKAS Index · 335673 -->
