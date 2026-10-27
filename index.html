@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- AWAL BERKAS Index · CBT & Try Out SMAIT Al-Ittihad v5 · build v5-2026-10-30 · hapus semua isi lama, tempel SATU kali -->
+<!-- AWAL BERKAS Index · CBT & Try Out SMAIT Al-Ittihad v5 · build v5-2026-10-31 · hapus semua isi lama, tempel SATU kali -->
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -570,6 +570,16 @@ img.logo-bar{height:36px;width:auto;flex:none}
 .link-sert .ls-isi{display:flex;flex-direction:column;gap:4px;min-width:0}.link-sert .ls-isi a{word-break:break-all;font-size:13px}
 .link-sert .ls-isi small{color:#6F8196;font-size:12px}.link-sert .ls-isi button{align-self:flex-start}
 /* <</RAPOR-CSS>> */
+.link-sert{display:flex;gap:14px;align-items:center;max-width:640px;margin:14px auto;padding:12px 14px;border:1px solid #DCE3EC;border-radius:12px;background:#fff;text-align:left}
+.link-sert .ls-qr{flex:none;width:96px;height:96px}.link-sert .ls-qr svg,.link-sert .ls-qr img{width:96px;height:96px;display:block}
+.link-sert .ls-isi{display:flex;flex-direction:column;gap:4px;min-width:0}.link-sert .ls-isi a{word-break:break-all;font-size:13px}
+.link-sert .ls-isi small{color:#6F8196;font-size:12px}.link-sert .ls-isi button{align-self:flex-start}
+/* <</RAPOR-CSS>> */
+.link-sert{display:flex;gap:14px;align-items:center;max-width:640px;margin:14px auto;padding:12px 14px;border:1px solid #DCE3EC;border-radius:12px;background:#fff;text-align:left}
+.link-sert .ls-qr{flex:none;width:96px;height:96px}.link-sert .ls-qr svg,.link-sert .ls-qr img{width:96px;height:96px;display:block}
+.link-sert .ls-isi{display:flex;flex-direction:column;gap:4px;min-width:0}.link-sert .ls-isi a{word-break:break-all;font-size:13px}
+.link-sert .ls-isi small{color:#6F8196;font-size:12px}.link-sert .ls-isi button{align-self:flex-start}
+/* <</RAPOR-CSS>> */
 .jeda-subtes{position:fixed;inset:0;z-index:9000;background:rgba(15,32,46,.72);display:flex;align-items:center;justify-content:center;padding:16px}
 .jeda-subtes .kartu-jeda{background:#fff;border-radius:16px;padding:26px 24px;max-width:460px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.25)}
 .jeda-subtes .ok{color:var(--benar);font-weight:700}.jeda-subtes h2{margin:16px 0 4px;font-size:19px}.jeda-subtes .nama{font-size:22px;font-weight:800;color:var(--biru)}
@@ -888,7 +898,7 @@ let BOOT = {};
 try { BOOT = JSON.parse(document.getElementById('dataAwal').textContent); } catch (e) { BOOT = {}; }
 if (!BOOT.url) BOOT.url = URL_GAS;
 const DI_GAS = !!(window.google && google.script && google.script.run);
-const BUILD_HALAMAN = 'v5-2026-10-30';      // diperbarui otomatis saat paket dibuat; harus sama dengan BUILD di Code.gs
+const BUILD_HALAMAN = 'v5-2026-10-31';      // diperbarui otomatis saat paket dibuat; harus sama dengan BUILD di Code.gs
 /** Halaman yang dipasang di hosting luar: beri peringatan bila versinya tidak sama dengan server (Code.gs). */
 if (!DI_GAS) setTimeout(function () {
   fetch((typeof BOOT !== 'undefined' && BOOT.url) || URL_GAS, { method: 'POST', body: JSON.stringify({ action: 'ping' }), headers: { 'Content-Type': 'text/plain;charset=utf-8' }, redirect: 'follow' })
@@ -2618,9 +2628,9 @@ async function _muatQr() {
 function _qrSert(url) {
   if (!url) return '';
   try {
-    if (typeof qrcode !== 'undefined') { const q = qrcode(0, 'M'); q.addData(url); q.make(); return q.createSvgTag({ cellSize: 2, margin: 0, scalable: true, alt: 'Kode QR verifikasi' }); }
+    if (typeof qrcode !== 'undefined') { const q = qrcode(0, 'M'); q.addData(url); q.make(); return q.createSvgTag({ cellSize: 2, margin: 8, scalable: true, alt: 'Kode QR verifikasi' }); }
   } catch (e) { }
-  return `<img alt="Kode QR verifikasi" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=0&data=${encodeURIComponent(url)}">`;
+  return `<img alt="Kode QR verifikasi" src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=${encodeURIComponent(url)}">`;
 }
 let _noSert = 0;
 /** Tanda air pengaman: nama sekolah berulang dalam garis-garis miring bergradasi (hijau–emas–merah marun, warna logo). */
@@ -2672,8 +2682,11 @@ function _bingkaiResmi(o) {
     <footer class="sr-kaki">
       <div class="sr-qr">${c.urlVerifikasi ? _qrSert(c.urlVerifikasi) : ''}<div><b>${en ? 'Verification' : 'Verifikasi'}</b><small>${c.urlVerifikasi
         ? (en ? 'Scan the QR code to verify the authenticity of this ' + o.namaDok + '.' : 'Pindai kode QR untuk memeriksa keaslian ' + o.namaDok + ' ini.') : (en ? 'No. ' : 'Nomor: ') + _eRap(c.nomor)}</small></div></div>
-      ${blokTtd('&nbsp;', _jabatanKiri(c, en), c.penguji, c.nipPenguji, ttd.penguji, uk.penguji, 'kiri')}
-      ${blokTtd(tempat, en ? 'Principal' : 'Kepala Sekolah', c.kepala, c.nip, ttd.kepala, uk.kepala, 'kanan')}
+      ${o.kepalaKiri   // sertifikat: Kepala Sekolah di kiri, penguji/wakasek di kanan (tempat & tanggal tetap di kanan)
+        ? blokTtd('&nbsp;', en ? 'Principal' : 'Kepala Sekolah', c.kepala, c.nip, ttd.kepala, uk.kepala, 'kiri') +
+          blokTtd(tempat, _jabatanKiri(c, en), c.penguji, c.nipPenguji, ttd.penguji, uk.penguji, 'kanan')
+        : blokTtd('&nbsp;', _jabatanKiri(c, en), c.penguji, c.nipPenguji, ttd.penguji, uk.penguji, 'kiri') +
+          blokTtd(tempat, en ? 'Principal' : 'Kepala Sekolah', c.kepala, c.nip, ttd.kepala, uk.kepala, 'kanan')}
     </footer>
     <div class="sr-catatan">${_eRap(o.catatan)}</div>
   </div>
@@ -2711,7 +2724,7 @@ function htmlSertifikat(r, ttd) {
     </div>
     ${ket.length ? `<div class="sr-ket">${ket.map(_eRap).join(' · ')}</div>` : ''}`;
   return _bingkaiResmi({ r: r, c: c, ttd: ttd, en: en, warna: warna, kelas: komp.length > 6 ? 'sr-padat' : '', judul: judul[0], sub: judul[1],
-    labelNomor: en ? 'Certificate No.' : 'Nomor', namaDok: en ? 'certificate' : 'sertifikat', isi: isi,
+    labelNomor: en ? 'Certificate No.' : 'Nomor', namaDok: en ? 'certificate' : 'sertifikat', isi: isi, kepalaKiri: true,
     catatan: en ? 'This simulation test certificate is issued by the school for practice and proficiency mapping purposes only; it is not an official certificate of the international test provider.'
       : 'Sertifikat diterbitkan sekolah berdasarkan hasil tes berbasis komputer.' });
 }
@@ -2757,6 +2770,62 @@ async function cetakSertifikat(daftarR, judul, ttd) {
   await cetakRapor(ada.map(r => htmlSertifikat(r, ttd)), judul || ('Sertifikat ' + ada[0].nama), { orientasi: 'landscape' });
   return ada.length;
 }
+/* <</RAPOR>> */
+/* ---------------- LINK SERTIFIKAT TETAP + KODE QR ---------------- */
+/** Kode QR untuk link (koreksi galat L → modul lebih besar, mudah dipindai dari kertas/layar). */
+function _qrLink(url) {
+  try { const q = qrcode(0, 'L'); q.addData(url); q.make(); return q.createSvgTag({ cellSize: 2, margin: 8, scalable: true, alt: 'Kode QR link sertifikat' }); } catch (e) { return _qrSert(url); }
+}
+/** Kotak link sertifikat (tetap, tidak berubah) + kode QR untuk membukanya — portal siswa & rekap guru. */
+function htmlLinkSertifikat(c, en) {
+  if (!c || !c.urlSertifikat) return '';
+  return `<div class="link-sert"><div class="ls-qr">${_qrLink(c.urlSertifikat)}</div><div class="ls-isi"><b>${en ? 'Certificate link' : 'Link sertifikat / report card'}</b>
+    <a href="${_eRap(c.urlSertifikat)}" target="_blank" rel="noopener">${_eRap(c.urlSertifikat)}</a>
+    <small>${en ? 'Scan the QR code or open the link to view and print the certificate at any time. The link is permanent.'
+      : 'Pindai kode QR atau buka link untuk melihat & mencetak sertifikat kapan saja. Link ini tetap (tidak berubah).'}</small>
+    <button type="button" class="tombol netral kecil" data-salin="${_eRap(c.urlSertifikat)}">📋 ${en ? 'Copy link' : 'Salin link'}</button></div></div>`;
+}
+async function salinTeksRapor(t) {
+  try { await navigator.clipboard.writeText(t); return true; }
+  catch (e) {
+    const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch (x) { } ta.remove(); return ok;
+  }
+}
+document.addEventListener('click', function (e) {
+  const b = e.target && e.target.closest ? e.target.closest('[data-salin]') : null;
+  if (!b) return;
+  const asli = b.textContent;
+  salinTeksRapor(b.getAttribute('data-salin')).then(ok => { b.textContent = ok ? '✓ Tersalin' : '✗ Salin manual'; setTimeout(() => { b.textContent = asli; }, 1800); });
+});
+/* <</RAPOR>> */
+/* ---------------- LINK SERTIFIKAT TETAP + KODE QR ---------------- */
+/** Kode QR untuk link (koreksi galat L → modul lebih besar, mudah dipindai dari kertas/layar). */
+function _qrLink(url) {
+  try { const q = qrcode(0, 'L'); q.addData(url); q.make(); return q.createSvgTag({ cellSize: 2, margin: 2, scalable: true, alt: 'Kode QR link sertifikat' }); } catch (e) { return _qrSert(url); }
+}
+/** Kotak link sertifikat (tetap, tidak berubah) + kode QR untuk membukanya — portal siswa & rekap guru. */
+function htmlLinkSertifikat(c, en) {
+  if (!c || !c.urlSertifikat) return '';
+  return `<div class="link-sert"><div class="ls-qr">${_qrLink(c.urlSertifikat)}</div><div class="ls-isi"><b>${en ? 'Certificate link' : 'Link sertifikat / report card'}</b>
+    <a href="${_eRap(c.urlSertifikat)}" target="_blank" rel="noopener">${_eRap(c.urlSertifikat)}</a>
+    <small>${en ? 'Scan the QR code or open the link to view and print the certificate at any time. The link is permanent.'
+      : 'Pindai kode QR atau buka link untuk melihat & mencetak sertifikat kapan saja. Link ini tetap (tidak berubah).'}</small>
+    <button type="button" class="tombol netral kecil" data-salin="${_eRap(c.urlSertifikat)}">📋 ${en ? 'Copy link' : 'Salin link'}</button></div></div>`;
+}
+async function salinTeksRapor(t) {
+  try { await navigator.clipboard.writeText(t); return true; }
+  catch (e) {
+    const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch (x) { } ta.remove(); return ok;
+  }
+}
+document.addEventListener('click', function (e) {
+  const b = e.target && e.target.closest ? e.target.closest('[data-salin]') : null;
+  if (!b) return;
+  const asli = b.textContent;
+  salinTeksRapor(b.getAttribute('data-salin')).then(ok => { b.textContent = ok ? '✓ Tersalin' : '✗ Salin manual'; setTimeout(() => { b.textContent = asli; }, 1800); });
+});
 /* <</RAPOR>> */
 /* ---------------- LINK SERTIFIKAT TETAP + KODE QR ---------------- */
 /** Kode QR untuk link (koreksi galat L → modul lebih besar, mudah dipindai dari kertas/layar). */
@@ -4384,4 +4453,4 @@ function lepasPengawasCbt() {
 <script>window.__berkasUtuh = true;</script>
 </body>
 </html>
-<!-- AKHIR BERKAS Index · 344458 -->
+<!-- AKHIR BERKAS Index · 349992 -->
