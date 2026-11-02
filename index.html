@@ -824,6 +824,10 @@ sup.rm-sup,sub.rm-sub{font-size:.72em;line-height:0}
       <p id="ciFokusLangkah"></p>
       <label><input type="checkbox" id="ciFokus1"> <span id="ciFokus1T">Mode Jangan Ganggu / Fokus sudah aktif (notifikasi dan panggilan tidak akan muncul)</span></label>
       <label><input type="checkbox" id="ciFokus2"> <span id="ciFokus2T">Aplikasi, tab, dan jendela lain sudah saya tutup</span></label>
+      <div id="ciPin" class="sembunyi" style="margin-top:10px;padding:10px;border:1px solid #F0C36D;background:#FFF8E6;border-radius:10px">
+        <b id="ciPinJudul">📌 Android: sematkan aplikasi (wajib)</b>
+        <p id="ciPinLangkah" class="ket" style="margin:4px 0 6px"></p>
+        <label><input type="checkbox" id="ciFokus3"> <span id="ciFokus3T">Aplikasi sudah saya sematkan (App Pinning) sehingga tidak ada aplikasi/pop-up lain yang bisa muncul</span></label></div>
     </div>
     <div id="ciHasil"></div>
     <div id="pesanCbt" class="pesan"></div>
@@ -1115,12 +1119,15 @@ const SENS = {
   'Rendah': { tabSentuh: 5000, tabMeja: 2000, fokus: 0, fs: false, terbagi: 3000, pintasan: false, f12: false, cetakLayar: false, tempelLuarKotak: false },
   'Sedang': { tabSentuh: 3000, tabMeja: 450, fokus: 1100, fs: true, terbagi: 1500, pintasan: false, f12: false, cetakLayar: true, tempelLuarKotak: false },
   'Tinggi': { tabSentuh: 2000, tabMeja: 450, fokus: 600, fs: true, terbagi: 1000, pintasan: true, f12: true, cetakLayar: true, tempelLuarKotak: true },
-  'Sangat tinggi': { tabSentuh: 1500, tabMeja: 300, fokus: 300, fs: true, terbagi: 700, pintasan: true, f12: true, cetakLayar: true, tempelLuarKotak: true }
+  'Sangat tinggi': { tabSentuh: 1500, tabMeja: 300, fokus: 300, fs: true, terbagi: 700, pintasan: true, f12: true, cetakLayar: true, tempelLuarKotak: true },
+  'Maksimal': { tabSentuh: 1200, tabMeja: 250, fokus: 200, fs: true, terbagi: 500, pintasan: true, f12: true, cetakLayar: true, tempelLuarKotak: true, popupHitung: true, ssFokus: true, notesKetat: true }
 };
 function namaSens() { try { return (cb && SENS[cb.sens] && cb.sens) || 'Sedang'; } catch (e) { return 'Sedang'; } }
 function sens() { return SENS[namaSens()]; }
 /** Catatan kejadian yang TIDAK dihitung pelanggaran (tetap terukur di laporan guru). */
 function catatKunci(detail) { try { if (KUNCI.aktif && KUNCI.cb && KUNCI.cb.catat && !bebasLuar()) KUNCI.cb.catat(detail); } catch (e) { } }
+/** Popup/jendela/tautan/PiP yang diblokir: pada tingkat Maksimal dihitung pelanggaran (notes/Keep/multitasking yang mencuri fokus juga tertangkap lewat blur). */
+function popupLanggar(detail) { try { if (KUNCI.aktif && KUNCI.cb && KUNCI.cb.keluar && !bebasLuar() && sens().popupHitung) { KUNCI.cb.keluar('MULTITASK', detail); return; } } catch (e) { } catatKunci(detail); }
 
 /* ---------- lapisan anti pop-up & notifikasi selama ujian ----------
    Halaman web tidak dapat mematikan notifikasi sistem (WhatsApp, panggilan, dll.) — itu diatur dengan mode Jangan Ganggu/Fokus
@@ -1150,9 +1157,9 @@ function pasangAntiPopup() {
   ANTIPOP.asli = { open: w.open, alert: w.alert, confirm: w.confirm, prompt: w.prompt, print: w.print,
     izin: w.Notification && w.Notification.requestPermission ? w.Notification.requestPermission : null };
   const ganti1 = (k, f) => { try { w[k] = f; } catch (e) { } };
-  ganti1('open', function () { catatKunci('Jendela pop-up diblokir'); return null; });
+  ganti1('open', function () { popupLanggar('Jendela pop-up diblokir'); return null; });
   ganti1('alert', function () { }); ganti1('confirm', function () { return false; }); ganti1('prompt', function () { return null; });
-  ganti1('print', function () { catatKunci('Perintah cetak diblokir'); });
+  ganti1('print', function () { popupLanggar('Perintah cetak diblokir'); });
   try { if (w.Notification && w.Notification.requestPermission) w.Notification.requestPermission = function (k) { if (typeof k === 'function') k('denied'); return Promise.resolve('denied'); }; } catch (e) { }
   ANTIPOP.h = {
     tautan: function (e) {
@@ -1162,7 +1169,7 @@ function pasangAntiPopup() {
       if (!h || h === '#' || h.indexOf('#') === 0 || /^javascript:/i.test(h)) return;
       e.preventDefault(); e.stopPropagation();
       kabar(KUNCI.en ? 'Links are disabled during the test.' : 'Tautan dinonaktifkan selama ujian.');
-      catatKunci('Tautan di halaman ujian diblokir');
+      popupLanggar('Tautan di halaman ujian diblokir');
     },
     pasang: function (e) { e.preventDefault(); },
     pilih: function (e) {
@@ -1170,7 +1177,7 @@ function pasangAntiPopup() {
       if (t && t.closest && t.closest('input,textarea,[contenteditable="true"]')) return;
       e.preventDefault();
     },
-    pip: function () { try { if (document.pictureInPictureElement && document.exitPictureInPicture) document.exitPictureInPicture(); } catch (x) { } catatKunci('Gambar-dalam-gambar diblokir'); },
+    pip: function () { try { if (document.pictureInPictureElement && document.exitPictureInPicture) document.exitPictureInPicture(); } catch (x) { } popupLanggar('Gambar-dalam-gambar diblokir'); },
     fokusKotak: function (e) { bantuanTulisMati(e.target); }
   };
   document.addEventListener('click', ANTIPOP.h.tautan, true);
@@ -1235,9 +1242,9 @@ function pasangTandaAir(identitas) {
 }
 function lepasTandaAir() { const el = document.getElementById('tandaAirUjian'); if (el) el.remove(); }
 /** Layar hitam peringatan: tetap tampil minimal 3 detik sehingga tangkapan layar yang sedang dibuat menangkap layar ini, bukan soal. */
-function tampilTiraiSS(alasan) {
+function tampilTiraiSS(alasan, pesanKhusus) {
   const t = $('tiraiSS'), b = $('ssKembali');
-  $('ssPesan').textContent = (KUNCI.en ? 'Screenshot detected and recorded as a violation' : 'Tangkapan layar terdeteksi dan dicatat sebagai pelanggaran') + (alasan ? ' (' + alasan + ').' : '.');
+  $('ssPesan').textContent = pesanKhusus ? (pesanKhusus + (alasan ? ' (' + alasan + ').' : '.')) : ((KUNCI.en ? 'Screenshot detected and recorded as a violation' : 'Tangkapan layar terdeteksi dan dicatat sebagai pelanggaran') + (alasan ? ' (' + alasan + ').' : '.'));
   $('ssIdentitas').textContent = KUNCI.identitas ? KUNCI.identitas + ' · ' + new Date().toLocaleString('id-ID') : '';
   b.disabled = true; b.textContent = KUNCI.en ? 'Please wait…' : 'Tunggu sebentar…';
   t.classList.remove('sembunyi');
@@ -1456,6 +1463,11 @@ function kunciMulai(opsi) {
       if (!KUNCI.aktif || bebasLuar() || Date.now() < (KUNCI.abaikanSampai || 0)) return;
       const t0 = Date.now();
       if (PERANGKAT.sentuh) {
+        // Android + tingkat Maksimal: aplikasi/pop-up yang muncul di atas ujian (mengambil fokus) dihitung pelanggaran + tirai hitam
+        if (PERANGKAT.jenis === 'android' && sens().popupHitung) {
+          setTimeout(() => { if (KUNCI.aktif && !document.hidden && !document.hasFocus() && !bebasLuar() && Date.now() >= (KUNCI.abaikanSampai || 0)) { kunciTampil('fokus'); lapor('MULTITASK', 'Aplikasi/pop-up muncul di atas ujian (Android)'); } }, 1200);
+          return;
+        }
         setTimeout(() => { if (KUNCI.aktif && !document.hidden && !document.hasFocus() && !bebasLuar() && Date.now() >= (KUNCI.abaikanSampai || 0)) KUNCI.kaburSentuh = t0; }, 3000);
         return;
       }
@@ -4191,10 +4203,19 @@ function aturCekFokus(tampil) {
     : ' Pop-up, tautan, dan notifikasi situs diblokir otomatis selama ujian.');
   $('ciFokus1T').textContent = en ? 'Do Not Disturb / Focus is on (notifications and calls will not appear)' : 'Mode Jangan Ganggu / Fokus sudah aktif (notifikasi dan panggilan tidak akan muncul)';
   $('ciFokus2T').textContent = en ? 'Other apps, tabs, and windows are closed' : 'Aplikasi, tab, dan jendela lain sudah saya tutup';
-  $('ciFokus1').checked = false; $('ciFokus2').checked = false;
+  $('ciFokus1').checked = false; $('ciFokus2').checked = false; $('ciFokus3').checked = false;
+  const ketat = cb.d && cb.d.ujian && (cb.d.ujian.sensitivitas === 'Maksimal' || cb.d.ujian.wajibSeb);
+  const pin = PERANGKAT.jenis === 'android' && ketat;
+  $('ciPin').classList.toggle('sembunyi', !pin);
+  if (pin) {
+    $('ciPinJudul').textContent = en ? '📌 Android: pin the app (required)' : '📌 Android: sematkan aplikasi (wajib)';
+    $('ciPinLangkah').innerHTML = en
+      ? 'Only <b>App Pinning</b> can stop other apps or pop-ups from appearing over the test on Android. Turn it on in <b>Settings › Security › App pinning</b> (ask it to require a PIN), then open <b>Recents</b>, tap the app icon above this exam, and choose <b>Pin</b>. The proctor keeps the PIN. Opening any app/pop-up over the test is recorded as a violation.'
+      : 'Hanya <b>Penyematan Aplikasi</b> yang dapat mencegah aplikasi atau pop-up lain muncul di atas ujian pada Android. Aktifkan di <b>Setelan › Keamanan › Penyematan aplikasi</b> (minta PIN untuk melepas), lalu buka <b>Aplikasi terakhir</b>, ketuk ikon aplikasi di atas kartu ujian ini, pilih <b>Sematkan</b>. PIN dipegang pengawas. Membuka aplikasi/pop-up apa pun di atas ujian dicatat sebagai pelanggaran.';
+  }
 }
-function fokusSiap() { return $('ciFokus').classList.contains('sembunyi') || ($('ciFokus1').checked && $('ciFokus2').checked); }
-['ciFokus1', 'ciFokus2'].forEach(id => $(id).addEventListener('change', () => { if (fokusSiap()) { $('ciFokus').classList.remove('belum'); if (/fokus|focus/i.test($('pesanCbt').textContent)) { $('pesanCbt').className = 'pesan'; $('pesanCbt').textContent = ''; } } }));
+function fokusSiap() { if ($('ciFokus').classList.contains('sembunyi')) return true; if (!$('ciFokus1').checked || !$('ciFokus2').checked) return false; if (!$('ciPin').classList.contains('sembunyi') && !$('ciFokus3').checked) return false; return true; }
+['ciFokus1', 'ciFokus2', 'ciFokus3'].forEach(id => $(id).addEventListener('change', () => { if (fokusSiap()) { $('ciFokus').classList.remove('belum'); if (/fokus|focus/i.test($('pesanCbt').textContent)) { $('pesanCbt').className = 'pesan'; $('pesanCbt').textContent = ''; } } }));
 /* <<BAHASA>> — pilihan bahasa antarmuka: Indonesia (asli) · English · العربية (kanan ke kiri).
    Teks antarmuka diterjemahkan dari kamus (cocok persis + pola berangka); isi soal, nama, data guru, dan dokumen cetak tidak diubah. */
 const BHS = { aktif: 'id', dipilih: null, kamus: { en: {}, ar: {} }, pola: { en: [], ar: [] }, asli: new WeakMap(), obs: null, sibuk: false,
@@ -5023,6 +5044,13 @@ function jalankanJamCbt() {
     $('cbJam').textContent = formatJam(sisa);
     $('cbJam').classList.toggle('mendesak', sisa <= 60);
     if (sisa === 300 || sisa === 60) kabar((EN() ? 'Time remaining: ' : 'Sisa waktu ') + (sisa === 300 ? '5 menit' : '1 menit').replace('menit', EN() ? 'minutes' : 'menit'));
+    // Denyut sinkron ±50 detik (dijitter): menarik sisa waktu terbaru dari server agar perubahan jadwal/durasi oleh guru
+    // langsung berlaku walau siswa sedang diam (tidak mengubah jawaban). Ringan: cbtSimpan memakai cache.
+    if (sisa > 0 && !cb.habis && !cb.kirim && daring() && Date.now() - (cb.terakhir || 0) > (cb.denyutMs || 50000)) {
+      cb.denyutMs = 44000 + Math.floor(Math.random() * 16000);
+      cb.terakhir = Date.now();
+      if (!cb.simpanJalan) simpanCbt();
+    }
     if (sisa <= 0 && !cb.habis) {
       cb.habis = true; clearInterval(cb.timer);
       $('cbPanel').style.pointerEvents = 'none';
@@ -5304,6 +5332,7 @@ function laporViol(jenis, detail, diKunci) {
   cb.violT = kini;
   cb.total = cb.maks > 0 ? Math.min(cb.maks, cb.total + 1) : cb.total + 1;
   gambarViol();
+  try { if (sens().ssFokus && !bebasLuar()) tampilTiraiSS(detail, jenis === 'SCREENSHOT' ? null : (EN() ? 'A blocked action during the exam was recorded as a violation' : 'Tindakan terlarang saat ujian dicatat sebagai pelanggaran')); } catch (e) { }
   if (diKunci) { $('tiraiViol').classList.add('sembunyi'); kunciInfo(infoViolKunci()); } else tampilViol(jenis);
   const kirimJawaban = cb.maks > 0 && cb.total >= cb.maks ? cb.jawaban : undefined;
   const v = { vid: kini.toString(36) + Math.random().toString(36).slice(2, 8), jenis: jenis, detail: detail || '' };
@@ -5503,4 +5532,4 @@ function lepasPengawasCbt() {
 <script>window.__berkasUtuh = true;</script>
 </body>
 </html>
-<!-- AKHIR BERKAS Index · 516098 -->
+<!-- AKHIR BERKAS Index · 519795 -->
